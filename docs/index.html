@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RV32I Congestion Predictor | EDA Silicon Floorplanner</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(-20deg, #e9defa 0%, #fbfcdb 100%);
+      min-height: 100vh;
+      color: #2d3748;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 24px 40px;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(107, 70, 193, 0.15);
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1a202c;
+      letter-spacing: -0.4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chip-badge {
+      background: #7c3aed;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .subtitle { color: #718096; font-size: 13px; font-weight: 500; margin-top: 4px; }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 10px 30px rgba(103, 80, 164, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .btn-3d {
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      color: #ffffff; font-weight: 700; border: none; padding: 10px 20px; border-radius: 8px;
+      cursor: pointer; font-size: 13px; transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+    }
+    .btn-3d:hover { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); transform: translateY(-1px); }
+    
+    .btn-preset {
+      background: rgba(255, 255, 255, 0.9); border: 1px solid #e2e8f0; color: #4a5568;
+      font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 10px; cursor: pointer; transition: 0.2s;
+    }
+    .btn-preset:hover { border-color: #7c3aed; color: #7c3aed; background: #ffffff; }
+    
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
+    .box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; text-transform: uppercase; }
+    .box input[type="number"] { width: 100%; font-size: 18px; font-weight: 800; color: #1a202c; border: none; background: transparent; outline: none; margin-top: 4px; }
+    .box input[type="range"] { width: 100%; margin-top: 8px; accent-color: #7c3aed; }
+    
+    .btn-submit {
+      width: 100%; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff;
+      font-size: 15px; font-weight: 800; letter-spacing: 0.6px; padding: 18px; border: none;
+      border-radius: 12px; cursor: pointer; text-transform: uppercase; margin-top: 20px;
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35); transition: 0.2s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(124, 58, 237, 0.45); }
+    
+    .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
+    .input-box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .input-box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; margin-bottom: 4px; text-transform: uppercase; }
+    .input-box .badge { background: #edf2f7; color: #4a5568; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }
+    .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
+    
+    #viewport3D { width: 100%; height: 520px; border-radius: 8px; background: #0f172a; cursor: grab; position: relative; overflow: hidden; }
+    .grid-heatmaps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 14px; }
+    .heatmap-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
+    .heatmap-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #2d3748; margin-bottom: 8px; }
+    .canvas-sim { width: 100%; height: 120px; border-radius: 6px; image-rendering: pixelated; background: #0f172a; }
+    .btn-fix { background: #ffffff; border: 1px solid #cbd5e1; color: #4a5568; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-fix:hover { color: #7c3aed; border-color: #7c3aed; background: #f5f3ff; }
+    
+    #fixModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
+    .modal-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border-radius: 12px; width: 600px; max-width: 90%; padding: 24px; color: #1a202c; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="brand-title">
+        RV32I CONGESTION PREDICTOR
+        <span class="chip-badge">RISC-V 32-Bit Core</span>
+      </div>
+      <div class="subtitle">Silicon floorplanning routing pressure & thermal risk analysis</div>
+    </div>
+  </div>
+
+  <div id="controlsView">
+    <!-- PRESETS BAR -->
+    <div style="display:flex; gap:10px; margin-bottom:24px;">
+      <span style="font-size: 12px; font-weight: 800; color: #718096; display: flex; align-items: center; margin-right: 6px;">FLOORPLAN PRESETS:</span>
+      <button type="button" class="btn-preset" onclick="applyPreset('default')">⚡ Standard RV32I Core</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('high_density')">🔥 High Density (72% Util)</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('conservative')">🛡️ Safe / Low Congestion</button>
+    </div>
+
+    <!-- GEOMETRY CARD -->
+    <div class="card">
+      <div style="color: #7c3aed; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px;">1. Floorplan Geometry & Density Parameters</div>
+      <h3 style="font-size: 17px; color: #1a202c; font-weight: 800; margin: 4px 0 16px 0;">Set core cell utilization and margin</h3>
+      
+      <div class="grid-5">
+        <div class="box">
+          <label>CORE UTILIZATION <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">%</span></label>
+          <input type="number" id="inpUtil" value="57.0" step="0.5" min="20" max="95" oninput="syncVal('inpUtil', 'rngUtil')">
+          <input type="range" id="rngUtil" value="57.0" step="0.5" min="20" max="95" oninput="syncVal('rngUtil', 'inpUtil')">
+        </div>
+        <div class="box">
+          <label>ASPECT RATIO <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">H:W</span></label>
+          <input type="number" id="inpAspect" value="1.50" step="0.05" min="0.5" max="3.0" oninput="syncVal('inpAspect', 'rngAspect')">
+          <input type="range" id="rngAspect" value="1.50" step="0.05" min="0.5" max="3.0" oninput="syncVal('rngAspect', 'inpAspect')">
+        </div>
+        <div class="box">
+          <label>CORE MARGIN <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">MM</span></label>
+          <input type="number" id="inpMargin" value="3.0" step="0.5" min="0.5" max="10.0" oninput="syncVal('inpMargin', 'rngMargin')">
+          <input type="range" id="rngMargin" value="3.0" step="0.5" min="0.5" max="10.0" oninput="syncVal('rngMargin', 'inpMargin')">
+        </div>
+        <div class="box">
+          <label>TARGET DENSITY <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">RATIO</span></label>
+          <input type="number" id="inpDensity" value="0.56" step="0.01" min="0.1" max="0.95" oninput="syncVal('inpDensity', 'rngDensity')">
+          <input type="range" id="rngDensity" value="0.56" step="0.01" min="0.1" max="0.95" oninput="syncVal('rngDensity', 'inpDensity')">
+        </div>
+        <div class="box">
+          <label>LAYER ADJUSTMENT <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">FACTOR</span></label>
+          <input type="number" id="inpLayerAdj" value="0.60" step="0.05" min="0.1" max="1.0" oninput="syncVal('inpLayerAdj', 'rngLayerAdj')">
+          <input type="range" id="rngLayerAdj" value="0.60" step="0.05" min="0.1" max="1.0" oninput="syncVal('rngLayerAdj', 'inpLayerAdj')">
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACK RESOURCES CARD -->
+    <div class="card">
+      <div style="color: #7c3aed; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px;">2. Interconnect Track Resources (BEOL Stack)</div>
+      <h3 style="font-size: 17px; color: #1a202c; font-weight: 800; margin: 4px 0 16px 0;">Available tracks per metal layer (M1 – M10)</h3>
+      
+      <div class="grid-5">
+        {% set defaults = [('M1', 0), ('M2', 27540), ('M3', 37222), ('M4', 18450), ('M5', 18096), ('M6', 18450), ('M7', 5699), ('M8', 5796), ('M9', 2758), ('M10', 2772)] %}
+        <div class="box"><label>M1 <span style="color:#7c3aed;">FEOL</span></label><input type="number" id="resM1" value="0"></div>
+        <div class="box"><label>M2 <span style="color:#7c3aed;">LOCAL</span></label><input type="number" id="resM2" value="27540"></div>
+        <div class="box"><label>M3 <span style="color:#7c3aed;">LOCAL</span></label><input type="number" id="resM3" value="37222"></div>
+        <div class="box"><label>M4 <span style="color:#7c3aed;">INTERMEDIATE</span></label><input type="number" id="resM4" value="18450"></div>
+        <div class="box"><label>M5 <span style="color:#7c3aed;">INTERMEDIATE</span></label><input type="number" id="resM5" value="18096"></div>
+        <div class="box"><label>M6 <span style="color:#7c3aed;">INTERMEDIATE</span></label><input type="number" id="resM6" value="18450"></div>
+        <div class="box"><label>M7 <span style="color:#7c3aed;">SEMI-GLOBAL</span></label><input type="number" id="resM7" value="5699"></div>
+        <div class="box"><label>M8 <span style="color:#7c3aed;">GLOBAL</span></label><input type="number" id="resM8" value="5796"></div>
+        <div class="box"><label>M9 <span style="color:#7c3aed;">GLOBAL POWER</span></label><input type="number" id="resM9" value="2758"></div>
+        <div class="box"><label>M10 <span style="color:#7c3aed;">TOP RDL</span></label><input type="number" id="resM10" value="2772"></div>
+      </div>
+
+      <button class="btn-submit" onclick="runAnalysis()">Run Congestion Model &amp; 3D Viewer</button>
+    </div>
+  </div>
+
+  <!-- RESULTS DASHBOARD VIEW -->
+  <div id="resultsView" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(107, 70, 193, 0.15); padding-bottom: 18px; margin-bottom: 24px;">
+      <div>
+        <button class="btn-preset" onclick="goBack()">← Edit inputs</button>
+        <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; color: #1a202c;">RV32I CONGESTION PREDICTOR</h2>
+      </div>
+      <button class="btn-3d" onclick="toggle3DView()">🔍 Toggle 3D Inspector</button>
+    </div>
+
+    <div class="dashboard-layout">
+      <!-- LEFT SIDEBAR -->
+      <div>
+        <div style="font-size: 24px; font-weight: 800; color: #1a202c; margin-bottom: 4px;">Predict routing pressure</div>
+        <div style="color: #718096; font-size: 12px; margin-bottom: 20px;">Current run inputs</div>
+        
+        <div class="input-box"><label>UTILIZATION <span class="badge">%</span></label><div class="val" id="dispUtil">57.0</div></div>
+        <div class="input-box"><label>ASPECT RATIO <span class="badge">RATIO</span></label><div class="val" id="dispAspect">1.5</div></div>
+        <div class="input-box"><label>CORE MARGIN <span class="badge">MM</span></label><div class="val" id="dispMargin">3.0</div></div>
+        <div class="input-box"><label>DENSITY</label><div class="val" id="dispDensity">0.56</div></div>
+        <div class="input-box"><label>LAYER ADJUSTMENT</label><div class="val" id="dispLayerAdj">0.60</div></div>
+      </div>
+
+      <!-- MAIN DASHBOARD -->
+      <div>
+        <!-- 3D PANEL -->
+        <div id="panel3D" class="card" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="color: #7c3aed; font-size: 12px; font-weight: 800; text-transform: uppercase;">3D COMMERCIAL SILICON ROUTER VIEWER</div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-preset" id="btnIsolate" onclick="toggleIsolationMode()">Show Full Stack</button>
+              <button class="btn-preset" id="btnExplode" style="display:none;" onclick="toggleExplodeMode()">Explode Layers</button>
+            </div>
+          </div>
+          <div id="viewport3D"></div>
+        </div>
+
+        <!-- 4 KPI CARDS -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+          <div class="card" style="margin-bottom: 0; padding: 18px;">
+            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase;">ROUTING FEASIBILITY</span>
+            <h1 style="margin: 8px 0 0 0; font-size: 30px; font-weight: 800; color: #15803d;" id="kpiProb">99.2%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700;">Feasibility Probability</span>
+          </div>
+          <div class="card" style="margin-bottom: 0; padding: 18px;">
+            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase;">MAX WIRE PRESSURE</span>
+            <h1 style="margin: 8px 0 0 0; font-size: 30px; font-weight: 800; color: #dc2626;" id="kpiPeakPct">50.8%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700;" id="kpiPeakLayer">M2 BOTTLENECK</span>
+          </div>
+          <div class="card" style="margin-bottom: 0; padding: 18px;">
+            <span style="color: #6b21a8; font-size: 10px; font-weight: 800; text-transform: uppercase;">THERMAL RISK INDEX</span>
+            <h1 style="margin: 8px 0 0 0; font-size: 30px; font-weight: 800; color: #1a202c;" id="kpiThermal">32.1</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700;">Est. Temp: <b style="color:#ea580c;" id="kpiTemp">52.1 °C</b></span>
+          </div>
+          <div class="card" style="margin-bottom: 0; padding: 18px;">
+            <span style="color: #7c3aed; font-size: 10px; font-weight: 800; text-transform: uppercase;">CORE CELL UTILIZATION</span>
+            <h1 style="margin: 8px 0 0 0; font-size: 30px; font-weight: 800; color: #7c3aed;" id="kpiUtil">57.0%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700;">Placement Spec</span>
+          </div>
+        </div>
+
+        <!-- PHYSICAL METRICS CARD -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%); border: 1px solid rgba(124, 58, 237, 0.2); margin-bottom: 24px;">
+          <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 800; color: #1a202c;">PHYSICAL SILICON DESIGN METRICS</h3>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 10px; font-weight: 800; color: #718096;">PIN DENSITY INDEX</div>
+              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valPin">58.62 pins/mm²</div>
+            </div>
+            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 10px; font-weight: 800; color: #718096;">HPWL WIRELENGTH</div>
+              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valHpwl">395.4 μm</div>
+            </div>
+            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 10px; font-weight: 800; color: #718096;">MACRO BLOCKAGE</div>
+              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valBlock">25.1 %</div>
+            </div>
+            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="font-size: 10px; font-weight: 800; color: #718096;">VIA PILLAR DENSITY</div>
+              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valVia">0.42 /μm²</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2D CELLULAR HEATMAP VIEWER -->
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase;">PER-LAYER ROUTING DENSITY VIEWER</span>
+            <div style="display:flex; align-items:center; gap: 8px;">
+              <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
+              <div style="width: 100px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0284c7 0%, #16a34a 30%, #d97706 60%, #dc2626 100%);"></div>
+              <span style="color:#718096; font-size:11px; font-weight: 700;">HIGH</span>
+            </div>
+          </div>
+
+          <div class="grid-heatmaps" id="heatmapGrid"></div>
+        </div>
+
+        <!-- RECOMMENDATION SECTION AT BOTTOM -->
+        <div class="card" style="border-left: 5px solid #16a34a;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase;">Recommended Input Changes</span>
+              <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
+              <p style="color: #4a5568; font-size: 12px; margin: 0;">Click to apply calculated design rules and bring wire density below 80%.</p>
+            </div>
+            <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FIX POPUP MODAL -->
+  <div id="fixModal">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
+        <h3 style="margin: 0; color: #15803d; font-size: 16px; font-weight: 800;" id="modalTitle">Calculated Parameters to Eliminate Congestion</h3>
+        <button onclick="closeFixModal()" style="background:transparent; border:none; color:#718096; font-size:18px; cursor:pointer;">✕</button>
+      </div>
+      <p style="color: #4a5568; font-size: 12px; margin-bottom: 16px;">
+        Applying these rules will scale routing resources and lower peak wire demand below 80%:
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;" id="modalFixParams"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn-preset" onclick="closeFixModal()">Cancel</button>
+        <button type="button" class="btn-3d" onclick="applyFixAndRun()">Apply Fixes &amp; Re-run</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function syncVal(srcId, dstId) {
+      document.getElementById(dstId).value = document.getElementById(srcId).value;
+    }
+
+    function applyPreset(preset) {
+      if (preset === 'default') {
+        document.getElementById('inpUtil').value = 57.0; syncVal('inpUtil', 'rngUtil');
+        document.getElementById('inpAspect').value = 1.50; syncVal('inpAspect', 'rngAspect');
+        document.getElementById('inpMargin').value = 3.0; syncVal('inpMargin', 'rngMargin');
+        document.getElementById('inpDensity').value = 0.56; syncVal('inpDensity', 'rngDensity');
+        document.getElementById('inpLayerAdj').value = 0.60; syncVal('inpLayerAdj', 'rngLayerAdj');
+      } else if (preset === 'high_density') {
+        document.getElementById('inpUtil').value = 72.0; syncVal('inpUtil', 'rngUtil');
+        document.getElementById('inpAspect').value = 1.20; syncVal('inpAspect', 'rngAspect');
+        document.getElementById('inpMargin').value = 1.5; syncVal('inpMargin', 'rngMargin');
+        document.getElementById('inpDensity').value = 0.78; syncVal('inpDensity', 'rngDensity');
+        document.getElementById('inpLayerAdj').value = 0.85; syncVal('inpLayerAdj', 'rngLayerAdj');
+      } else if (preset === 'conservative') {
+        document.getElementById('inpUtil').value = 42.0; syncVal('inpUtil', 'rngUtil');
+        document.getElementById('inpAspect').value = 1.00; syncVal('inpAspect', 'rngAspect');
+        document.getElementById('inpMargin').value = 5.0; syncVal('inpMargin', 'rngMargin');
+        document.getElementById('inpDensity').value = 0.40; syncVal('inpDensity', 'rngDensity');
+        document.getElementById('inpLayerAdj').value = 0.35; syncVal('inpLayerAdj', 'rngLayerAdj');
+      }
+    }
+
+    function openFixModal() { document.getElementById('fixModal').style.display = 'flex'; }
+    function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
+
+    let lastUsages = {};
+
+    function runAnalysis() {
+      const util = parseFloat(document.getElementById('inpUtil').value);
+      const aspect = parseFloat(document.getElementById('inpAspect').value);
+      const margin = parseFloat(document.getElementById('inpMargin').value);
+      const density = parseFloat(document.getElementById('inpDensity').value);
+      const layerAdj = parseFloat(document.getElementById('inpLayerAdj').value);
+
+      document.getElementById('dispUtil').innerText = util.toFixed(1);
+      document.getElementById('dispAspect').innerText = aspect.toFixed(2);
+      document.getElementById('dispMargin').innerText = margin.toFixed(1);
+      document.getElementById('dispDensity').innerText = density.toFixed(2);
+      document.getElementById('dispLayerAdj').innerText = layerAdj.toFixed(2);
+
+      // Compute physical VLSI features
+      const pinDensity = (util * density * 1.85).toFixed(2);
+      const hpwl = (Math.sqrt(Math.max(0.1, util * aspect)) * margin * 14.2).toFixed(2);
+      const macroBlk = ((1.0 - density) * (util / 100.0) * 100.0).toFixed(1);
+      const viaDensity = (density * layerAdj * 1.25).toFixed(2);
+
+      document.getElementById('valPin').innerText = pinDensity + ' pins/mm²';
+      document.getElementById('valHpwl').innerText = hpwl + ' μm';
+      document.getElementById('valBlock').innerText = macroBlk + ' %';
+      document.getElementById('valVia').innerText = viaDensity + ' /μm²';
+
+      const resources = {
+        M1: parseFloat(document.getElementById('resM1').value),
+        M2: parseFloat(document.getElementById('resM2').value),
+        M3: parseFloat(document.getElementById('resM3').value),
+        M4: parseFloat(document.getElementById('resM4').value),
+        M5: parseFloat(document.getElementById('resM5').value),
+        M6: parseFloat(document.getElementById('resM6').value),
+        M7: parseFloat(document.getElementById('resM7').value),
+        M8: parseFloat(document.getElementById('resM8').value),
+        M9: parseFloat(document.getElementById('resM9').value),
+        M10: parseFloat(document.getElementById('resM10').value)
+      };
+
+      const stress = (util / 57.0) * (density / 0.56) * (3.0 / Math.max(0.5, margin));
+      const baseDemands = { M1: 0, M2: 14186, M3: 16986, M4: 6621, M5: 4580, M6: 4547, M7: 860, M8: 783, M9: 470, M10: 410 };
+      
+      let maxPct = 0; let peakLayer = 'M2';
+      const usages = {};
+
+      Object.keys(baseDemands).forEach(k => {
+        const d = baseDemands[k] * stress;
+        const cap = resources[k] || 1;
+        const pct = cap > 0 ? (d / cap) * 100.0 : 0;
+        usages[k] = Math.min(100.0, Math.max(0.0, pct));
+        if (pct > maxPct) { maxPct = pct; peakLayer = k; }
+      });
+      lastUsages = usages;
+
+      const thermalIndex = Math.min(100.0, (density * 30.0) + (maxPct * 0.40)).toFixed(1);
+      const tempC = (38.0 + (thermalIndex * 0.44)).toFixed(1);
+
+      document.getElementById('kpiUtil').innerText = util.toFixed(1) + '%';
+      document.getElementById('kpiPeakPct').innerText = maxPct.toFixed(1) + '%';
+      document.getElementById('kpiPeakLayer').innerText = peakLayer + ' BOTTLENECK';
+      document.getElementById('kpiThermal').innerText = thermalIndex;
+      document.getElementById('kpiTemp').innerText = tempC + ' °C';
+
+      renderHeatmaps(usages);
+
+      document.getElementById('controlsView').style.display = 'none';
+      document.getElementById('resultsView').style.display = 'block';
+
+      if (!sceneInit) init3DScene();
+    }
+
+    function renderHeatmaps(usages) {
+      const grid = document.getElementById('heatmapGrid');
+      grid.innerHTML = '';
+      const layers = ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10"];
+      
+      layers.forEach(layer => {
+        const val = usages[layer] || 0;
+        const card = document.createElement('div');
+        card.className = 'heatmap-card';
+        card.innerHTML = `
+          <div class="heatmap-header">
+            <span>${layer} • ROUTING</span>
+            <span style="color: ${val >= 85 ? '#dc2626' : '#15803d'}; font-weight: 800;">${val.toFixed(1)}%</span>
+          </div>
+          <canvas id="cvs-${layer}" class="canvas-sim" width="50" height="50"></canvas>
+          <div style="color: #718096; font-size: 10px; margin: 8px 0; font-weight: 600;">derived pressure distribution</div>
+          <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('${layer}')">Fix this layer</button>
+        `;
+        grid.appendChild(card);
+
+        setTimeout(() => {
+          const cvs = document.getElementById('cvs-' + layer);
+          if (cvs) {
+            const ctx = cvs.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(generateHeatmapCanvas(val), 0, 0, cvs.width, cvs.height);
+          }
+        }, 50);
+      });
+    }
+
+    function generateHeatmapCanvas(val) {
+      const cvs = document.createElement("canvas");
+      cvs.width = 50; cvs.height = 50;
+      const ctx = cvs.getContext("2d");
+      const imgData = ctx.createImageData(50, 50);
+      for (let y = 0; y < 50; y++) {
+        for (let x = 0; x < 50; x++) {
+          const dx = (x - 25) / 25.0; const dy = (y - 25) / 25.0;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          let int = (val / 100.0) - (dist * 0.9) + (Math.random() * 0.8 - 0.4);
+          let r=13, g=56, b=120;
+          if (int > 0.7) { r=220; g=40; b=40; }
+          else if (int > 0.4) { r=240; g=120; b=30; }
+          else if (int > 0.1) { r=220; g=200; b=40; }
+          else if (int > -0.2) { r=80; g=200; b=80; }
+          const idx = (y * 50 + x) * 4;
+          imgData.data[idx] = r; imgData.data[idx+1] = g; imgData.data[idx+2] = b; imgData.data[idx+3] = 255;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return cvs;
+    }
+
+    function openSingleLayerFix(layer) {
+      document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer;
+      document.getElementById('modalFixParams').innerHTML = `
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px;">CORE MARGIN</span>
+          <div style="font-size:14px; font-weight:800; color:#15803d;">4.5 MM (+1.5)</div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px;">TARGET DENSITY</span>
+          <div style="font-size:14px; font-weight:800; color:#15803d;">0.45 (-0.11)</div>
+        </div>
+      `;
+      openFixModal();
+    }
+
+    function applyFixAndRun() {
+      closeFixModal();
+      document.getElementById('inpMargin').value = 4.5; syncVal('inpMargin', 'rngMargin');
+      document.getElementById('inpDensity').value = 0.45; syncVal('inpDensity', 'rngDensity');
+      runAnalysis();
+    }
+
+    function goBack() {
+      document.getElementById('resultsView').style.display = 'none';
+      document.getElementById('controlsView').style.display = 'block';
+    }
+
+    let sceneInit = false; let globalCamera, globalRenderer, globalControls;
+    function init3DScene() {
+      sceneInit = true;
+      const container = document.getElementById("viewport3D");
+      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0f172a);
+      globalCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      globalCamera.position.set(7.5, 6.2, 7.5);
+      globalRenderer = new THREE.WebGLRenderer({ antialias: true });
+      globalRenderer.setSize(container.clientWidth, container.clientHeight);
+      container.appendChild(globalRenderer.domElement);
+      globalControls = new THREE.OrbitControls(globalCamera, globalRenderer.domElement);
+      
+      const ambLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambLight);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); dirLight.position.set(10, 20, 10); scene.add(dirLight);
+
+      // Stack Representation
+      for (let i = 0; i < 10; i++) {
+        const geo = new THREE.BoxGeometry(4, 0.15, 4);
+        const mat = new THREE.MeshPhongMaterial({ color: i > 6 ? 0x7c3aed : (i > 3 ? 0x0284c7 : 0x16a34a), transparent: true, opacity: 0.8 });
+        const mesh = new THREE.Mesh(geo, mat); mesh.position.y = i * 0.35;
+        scene.add(mesh);
+      }
+      function animate() { requestAnimationFrame(animate); globalControls.update(); globalRenderer.render(scene, globalCamera); }
+      animate();
+    }
+    function toggle3DView() {
+      const p = document.getElementById("panel3D");
+      p.style.display = (p.style.display === "none") ? "block" : "none";
+    }
+  </script>
+</body>
+</html>
