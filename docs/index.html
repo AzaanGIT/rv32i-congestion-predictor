@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RV32I Congestion Predictor | EDA Silicon Floorplanner</title>
+  <title>RV32I Congestion Predictor</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <style>
@@ -14,37 +13,52 @@
       color: #2d3748;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      padding: 28px 40px;
+      padding: 24px 40px;
     }
-    
-    .header {
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid rgba(107, 70, 193, 0.15);
-      padding-bottom: 20px;
-      margin-bottom: 28px;
+      padding-bottom: 18px;
+      margin-bottom: 24px;
     }
-    .brand-title {
-      font-size: 22px;
-      font-weight: 800;
+    
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.9);
+      color: #4a5568;
+      border: 1px solid #e2e8f0;
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+    .btn-nav:hover {
+      background: #ffffff;
+      border-color: #cbd5e1;
       color: #1a202c;
-      letter-spacing: -0.4px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
-    .chip-badge {
-      background: #7c3aed;
+    .btn-3d {
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
       color: #ffffff;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      font-weight: 700;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
     }
-    .subtitle { color: #718096; font-size: 13px; font-weight: 500; margin-top: 4px; }
+    .btn-3d:hover {
+      background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+      transform: translateY(-1px);
+    }
     
     .card {
       background: rgba(255, 255, 255, 0.85);
@@ -56,507 +70,455 @@
       padding: 24px;
       margin-bottom: 24px;
     }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .card-title {
-      color: #7c3aed;
-      font-size: 11px;
-      text-transform: uppercase;
-      font-weight: 800;
-      letter-spacing: 0.8px;
-    }
-    .card-heading {
-      font-size: 17px;
-      color: #1a202c;
-      font-weight: 800;
-      margin: 4px 0 0 0;
-    }
-
-    /* PRESETS BAR */
-    .preset-bar {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-    .btn-preset {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid #e2e8f0;
-      color: #4a5568;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 8px 16px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .btn-preset:hover {
-      border-color: #7c3aed;
-      color: #7c3aed;
-      background: #ffffff;
-      transform: translateY(-1px);
-    }
-
-    /* GRID & INPUT BOXES */
-    .grid-5 {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 16px;
-    }
-    .box {
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 14px;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
-      transition: all 0.2s ease;
-    }
-    .box:focus-within, .box:hover {
-      border-color: #7c3aed;
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
-      background: #ffffff;
-    }
-    .box label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      font-weight: 800;
-      color: #4a5568;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    .layer-tag {
-      font-size: 9px;
-      color: #7c3aed;
-      font-weight: 700;
-      margin-top: 2px;
-    }
-    .badge {
-      background: #edf2f7;
-      color: #4a5568;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 9px;
-      font-weight: 700;
-    }
-    input[type="number"] {
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: #1a202c;
-      font-size: 18px;
-      font-weight: 800;
-      margin-top: 8px;
-      outline: none;
-      font-family: inherit;
-    }
-    input[type="range"] {
-      width: 100%;
-      margin-top: 8px;
-      accent-color: #7c3aed;
-      cursor: pointer;
-    }
-
-    /* LIVE PREVIEW BAR */
-    .summary-banner {
-      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(109, 40, 217, 0.03) 100%);
-      border: 1px solid rgba(124, 58, 237, 0.2);
-      border-radius: 12px;
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 20px;
-    }
-    .metric-group {
-      display: flex;
-      gap: 32px;
-    }
-    .metric-item {
-      display: flex;
-      flex-direction: column;
-    }
-    .metric-label { font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase; }
-    .metric-val { font-size: 16px; font-weight: 800; color: #1a202c; margin-top: 2px; }
-
-    /* SUBMIT BUTTON */
-    .btn-submit {
-      width: auto;
-      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-      color: #ffffff;
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      padding: 14px 28px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      text-transform: uppercase;
-      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .btn-submit:hover {
-      background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(124, 58, 237, 0.45);
-    }
-
-    /* DASHBOARD LAYOUT */
+    
+    /* DASHBOARD GRID LAYOUT */
     .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
+    
+    /* LEFT SIDEBAR STYLING */
+    .sidebar-title { font-size: 26px; font-weight: 800; color: #1a202c; margin-bottom: 8px; line-height: 1.1; }
+    .sidebar-subtitle { color: #718096; font-size: 13px; margin-bottom: 28px; line-height: 1.5; }
+    .section-label { color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; margin: 32px 0 12px 0; letter-spacing: 0.5px; }
     .input-box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-    .input-box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; margin-bottom: 4px; text-transform: uppercase; }
+    .input-box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; margin-bottom: 6px; text-transform: uppercase; }
+    .input-box .badge { background: #edf2f7; color: #4a5568; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }
     .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
-    
-    .btn-nav {
-      background: rgba(255, 255, 255, 0.9);
-      color: #4a5568;
-      border: 1px solid #e2e8f0;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-    }
-    .btn-nav:hover { background: #ffffff; border-color: #cbd5e1; color: #1a202c; }
-    
-    .btn-3d {
-      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-      color: #ffffff; font-weight: 700; border: none; padding: 10px 20px; border-radius: 8px;
-      cursor: pointer; font-size: 13px; transition: all 0.2s ease;
-      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
-    }
-    .btn-3d:hover { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); transform: translateY(-1px); }
 
-    #viewport3D { width: 100%; height: 520px; border-radius: 8px; background: #0f172a; cursor: grab; position: relative; overflow: hidden; }
+    /* 3D Panel & Inspector Styling */
+    #panel3D { display: block; margin-bottom: 24px; border: 1px solid #ddd6fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; }
+    .viewport-container { display: grid; grid-template-columns: 2.3fr 1fr; gap: 20px; }
+    #viewport3D { width: 100%; height: 560px; border-radius: 8px; background: #0f172a; cursor: grab; position: relative; overflow: hidden; }
+    #viewport3D:active { cursor: grabbing; }
+
+    .info-pane { display: flex; flex-direction: column; justify-content: space-between; }
+    .inspector-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); }
+    .def-table td { padding: 5px 0; color: #718096; font-size: 11px; }
+    .heat-pill { padding: 2px 8px; border-radius: 3px; font-weight: bold; font-size: 11px; }
+
+    /* 50x50 Noisy Heatmap Cards */
     .grid-heatmaps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 14px; }
-    .heatmap-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
+    .heatmap-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); }
     .heatmap-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #2d3748; margin-bottom: 8px; }
     .canvas-sim { width: 100%; height: 120px; border-radius: 6px; image-rendering: pixelated; background: #0f172a; }
+    
+    /* Side View Bars */
+    .bar-row { display: flex; align-items: center; justify-content: space-between; margin: 10px 0; font-size: 12px; }
+    .bar-track { flex-grow: 1; margin: 0 16px; display: flex; justify-content: center; }
+    .ascii-bar { font-family: monospace; font-size: 14px; letter-spacing: 2px; line-height: 1; white-space: nowrap; color: #718096; text-align: center; width: 100%; }
+    
     .btn-fix { background: #ffffff; border: 1px solid #cbd5e1; color: #4a5568; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .btn-fix:hover { color: #7c3aed; border-color: #7c3aed; background: #f5f3ff; }
-    
-    #fixModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
+
+    /* HUD */
+    #hudContainer { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+    #hudSvg { width: 100%; height: 100%; position: absolute; inset: 0; }
+    .hud-title { position: absolute; color: #7c3aed; font-family: monospace; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 8px rgba(124, 58, 237, 0.4); white-space: nowrap; }
+
+    #fixModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
     .modal-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border-radius: 12px; width: 600px; max-width: 90%; padding: 24px; color: #1a202c; }
   </style>
 </head>
 <body>
 
-  <!-- STEP 1: FLOORPLAN INPUT FORM (FIRST PAGE) -->
-  <div id="controlsView">
-    <!-- HEADER -->
-    <div class="header">
-      <div>
-        <div class="brand-title">
-          RV32I CONGESTION PREDICTOR
-          <span class="chip-badge">RISC-V 32-Bit Core</span>
-        </div>
-        <div class="subtitle">Silicon floorplanning routing pressure &amp; thermal risk analysis</div>
-      </div>
+  <div class="top-bar">
+    <div>
+      <button class="btn-nav" onclick="openInputModal()">← Edit inputs</button>
+      <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #1a202c;">RV32I CONGESTION PREDICTOR</h2>
     </div>
-
-    <!-- PRESETS SELECTION -->
-    <div class="preset-bar">
-      <span style="font-size: 12px; font-weight: 800; color: #718096; display: flex; align-items: center; margin-right: 6px;">FLOORPLAN PRESETS:</span>
-      <button type="button" class="btn-preset" onclick="applyPreset('default')">⚡ Standard RV32I Core</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('high_density')">🔥 High Density (72% Util)</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('conservative')">🛡️ Safe / Low Congestion</button>
-    </div>
-
-    <!-- SECTION 1: FLOORPLAN DESIGN INPUTS -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">1. Floorplan Geometry &amp; Density Parameters</div>
-          <div class="card-heading">Set core cell utilization and margin</div>
-        </div>
-      </div>
-
-      <div class="grid-5">
-        <div class="box">
-          <label>UTILIZATION <span class="badge">%</span></label>
-          <input type="number" id="inp_util" value="57.0" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)">
-        </div>
-
-        <div class="box">
-          <label>ASPECT RATIO <span class="badge">ratio</span></label>
-          <input type="number" id="inp_aspect" value="1.5" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)">
-        </div>
-
-        <div class="box">
-          <label>CORE MARGIN <span class="badge">mm</span></label>
-          <input type="number" id="inp_margin" value="3.0" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)">
-        </div>
-
-        <div class="box">
-          <label>PLACEMENT DENSITY <span class="badge">0-1</span></label>
-          <input type="number" id="inp_density" value="0.56" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)">
-        </div>
-
-        <div class="box">
-          <label>LAYER ADJUSTMENT <span class="badge">0-1</span></label>
-          <input type="number" id="inp_layer_adj" value="0.6" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)">
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2: PER-METAL-LAYER ROUTING TRACK CAPACITY -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">2. Silicon Metal Stack Capacity ($M_1$ → $M_{10}$)</div>
-          <div class="card-heading">Available routing track capacity per metal layer</div>
-        </div>
-      </div>
-
-      <div class="grid-5">
-        <div class="box">
-          <label>METAL 1 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">FEOL Std Cell Local</div>
-          <input type="number" id="m1_res" value="0" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 2 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Signal Low</div>
-          <input type="number" id="m2_res" value="27540" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 3 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Signal Low</div>
-          <input type="number" id="m3_res" value="37221" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 4 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Interconnect</div>
-          <input type="number" id="m4_res" value="18450" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 5 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Interconnect</div>
-          <input type="number" id="m5_res" value="18096" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 6 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Intermediate Bus</div>
-          <input type="number" id="m6_res" value="18450" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 7 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Global Bus</div>
-          <input type="number" id="m7_res" value="5699" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 8 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Global Bus</div>
-          <input type="number" id="m8_res" value="5796" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 9 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">Power Grid Mesh</div>
-          <input type="number" id="m9_res" value="2758" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 10 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">VDD / VSS Straps</div>
-          <input type="number" id="m10_res" value="2772" oninput="updateLiveStats()">
-        </div>
-      </div>
-
-      <!-- LIVE ESTIMATION BANNER -->
-      <div class="summary-banner">
-        <div class="metric-group">
-          <div class="metric-item">
-            <span class="metric-label">ESTIMATED CORE AREA</span>
-            <span class="metric-val" id="disp_area">1.59 mm²</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">TOTAL ROUTING BUDGET</span>
-            <span class="metric-val" id="disp_tracks">136,782 tracks</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">ESTIMATED RISK CLASS</span>
-            <span class="metric-val" id="disp_risk" style="color: #15803d;">DRC Clean / Safe</span>
-          </div>
-        </div>
-
-        <button type="button" class="btn-submit" onclick="runRoutingAnalysis()">
-          RUN ROUTING ANALYSIS →
-        </button>
-      </div>
-
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <button id="btnToggle3D" class="btn-3d" onclick="toggle3DView()">🔍 Analyze in 3D</button>
     </div>
   </div>
 
-  <!-- STEP 2: RESULTS DASHBOARD (SECOND PAGE) -->
-  <div id="resultsView" style="display: none;">
-    <!-- TOP BAR -->
-    <div class="top-bar">
-      <div>
-        <button class="btn-nav" onclick="showInputForm()">← Edit inputs</button>
-        <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; color: #1a202c;">RV32I CONGESTION PREDICTOR</h2>
+
+
+  <div class="dashboard-layout">
+    
+    <!-- LEFT SIDEBAR: INPUT PARAMETERS -->
+    <div class="sidebar">
+      <div class="sidebar-title">Predict routing pressure</div>
+      <div class="sidebar-subtitle">These are the values from the last run. Go back to change them.</div>
+      
+      <div class="input-box">
+        <label>UTILIZATION <span class="badge">%</span></label>
+        <div class="val">57.0</div>
       </div>
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <button id="btnToggle3D" class="btn-3d" onclick="toggle3DView()">🔍 Analyze in 3D</button>
+      <div class="input-box">
+        <label>ASPECT RATIO <span class="badge">ratio</span></label>
+        <div class="val">1.5</div>
       </div>
+      <div class="input-box">
+        <label>CORE MARGIN <span class="badge">MM</span></label>
+        <div class="val">3.0</div>
+      </div>
+      <div class="input-box">
+        <label>DENSITY</label>
+        <div class="val">0.56</div>
+      </div>
+      <div class="input-box">
+        <label>LAYER ADJUSTMENT</label>
+        <div class="val">0.6</div>
+      </div>
+
+      <div class="section-label">PER-METAL-LAYER ROUTING RESOURCE</div>
+      
+      <div class="input-box">
+        <label>METAL 1</label>
+        <div class="val">0.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 2</label>
+        <div class="val">27540.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 3</label>
+        <div class="val">37221.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 4</label>
+        <div class="val">18450.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 5</label>
+        <div class="val">18096.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 6</label>
+        <div class="val">18450.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 7</label>
+        <div class="val">5699.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 8</label>
+        <div class="val">5796.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 9</label>
+        <div class="val">2758.0</div>
+      </div>
+      
+      <div class="input-box">
+        <label>METAL 10</label>
+        <div class="val">2772.0</div>
+      </div>
+      
     </div>
 
-    <div class="dashboard-layout">
-      <!-- LEFT SIDEBAR -->
-      <div class="sidebar">
-        <div style="font-size: 24px; font-weight: 800; color: #1a202c; margin-bottom: 4px;">Predict routing pressure</div>
-        <div style="color: #718096; font-size: 12px; margin-bottom: 20px;">These are the values from the last run. Go back to change them.</div>
-        
-        <div class="input-box"><label>UTILIZATION <span class="badge">%</span></label><div class="val" id="resUtil">57.0</div></div>
-        <div class="input-box"><label>ASPECT RATIO <span class="badge">RATIO</span></label><div class="val" id="resAspect">1.5</div></div>
-        <div class="input-box"><label>CORE MARGIN <span class="badge">MM</span></label><div class="val" id="resMargin">3.0</div></div>
-        <div class="input-box"><label>DENSITY</label><div class="val" id="resDensity">0.56</div></div>
-        <div class="input-box"><label>LAYER ADJUSTMENT</label><div class="val" id="resLayerAdj">0.60</div></div>
+    <!-- RIGHT MAIN CONTENT -->
+    <div class="main-content">
+      
+      <!-- 3D COMMERCIAL INTERACTIVE VIEWER -->
+      <div id="panel3D" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: #7c3aed; font-size: 14px;">●</span>
+            <span style="color: #7c3aed; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">EDA SILICON ROUTING ENGINE</span>
+            <span style="color: #718096; font-size: 11px; margin-left: 8px;">(Click any layer in 3D to inspect/isolate)</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="layerSelectDropdown" onchange="handleDropdownLayerChange(this.value)" style="background: #ffffff; color: #7c3aed; border: 1px solid #7c3aed; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 700; outline: none; cursor: pointer;">
+              
+              <option value="M1" style="background: #ffffff; color: #1a202c;" >Select M1 (0.0%)</option>
+              
+              <option value="M2" style="background: #ffffff; color: #1a202c;" selected>Select M2 (50.8%)</option>
+              
+              <option value="M3" style="background: #ffffff; color: #1a202c;" >Select M3 (46.0%)</option>
+              
+              <option value="M4" style="background: #ffffff; color: #1a202c;" >Select M4 (36.1%)</option>
+              
+              <option value="M5" style="background: #ffffff; color: #1a202c;" >Select M5 (25.2%)</option>
+              
+              <option value="M6" style="background: #ffffff; color: #1a202c;" >Select M6 (25.0%)</option>
+              
+              <option value="M7" style="background: #ffffff; color: #1a202c;" >Select M7 (14.7%)</option>
+              
+              <option value="M8" style="background: #ffffff; color: #1a202c;" >Select M8 (14.8%)</option>
+              
+              <option value="M9" style="background: #ffffff; color: #1a202c;" >Select M9 (17.7%)</option>
+              
+              <option value="M10" style="background: #ffffff; color: #1a202c;" >Select M10 (15.5%)</option>
+              
+            </select>
+            <button id="btnIsolate" onclick="toggleIsolationMode()" style="background: #0284c7; color: #fff; font-weight: bold; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">Show Full Stack</button>
+            <button id="btnExplode" onclick="toggleExplodeMode()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s; display: none;">Explode Stack</button>
+            <button onclick="toggle3DView()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">✕ Close 3D</button>
+          </div>
+        </div>
+
+        <div class="viewport-container">
+          <div id="viewport3D">
+            <div id="hudContainer">
+              <svg id="hudSvg">
+                <polyline id="hudLine" points="0,0 0,0 0,0" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 6px #7c3aed)"/>
+                <circle id="hudDot1" cx="0" cy="0" r="3.5" fill="#ffffff" stroke="#7c3aed" stroke-width="2" filter="drop-shadow(0 0 6px #7c3aed)"/>
+                <circle id="hudDot2" cx="0" cy="0" r="3.5" fill="#ffffff" stroke="#7c3aed" stroke-width="2" filter="drop-shadow(0 0 6px #7c3aed)"/>
+              </svg>
+              <div id="hudLabel" class="hud-title">M2 CONGESTION<br>TRACK</div>
+            </div>
+          </div>
+
+          <div class="info-pane">
+            <div>
+              <div style="color: #7c3aed; font-size: 12px; font-weight: 800; margin-bottom: 12px;">Selected Layer Inspector</div>
+              <div class="inspector-card">
+                <div style="font-size: 16px; font-weight: 800; color: #1a202c; margin-bottom: 8px;" id="inspName">M2 (Routing Layer)</div>
+                <div style="color: #4a5568; font-size: 11px; margin-bottom: 4px;">Congestion Level: <b id="inspPct" style="color: #15803d; font-weight: 800;">50.8%</b></div>
+                <div style="color: #4a5568; font-size: 11px; margin-bottom: 4px;">Local Estimated Temp: <b id="inspTemp" style="color: #ea580c; font-weight: 800;">56.4 °C</b></div>
+                <div style="color: #4a5568; font-size: 11px;">Interconnect Structure: <span style="color: #7c3aed; font-weight: 700;">Semi-Global Bus Tracks & Via Pillars</span></div>
+              </div>
+              <div style="color: #d97706; font-size: 11px; font-weight: 800; margin-bottom: 8px;">BEOL / FEOL ARCHITECTURAL SPECIFICATION</div>
+              <p id="inspDef" style="color: #4a5568; font-size: 11px; line-height: 1.5; margin: 0;">
+                Primary low-pitch copper metal layer for standard cell local signal routing and dense intra-block buses.
+              </p>
+            </div>
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
+              <div style="color: #718096; font-size: 10px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">PROCESS TECHNOLOGY & GATE CALLOUT</div>
+              <table class="def-table" style="width: 100%;">
+                <tr><td style="width: 40%;">Substrate:</td><td style="color:#1a202c; font-weight: bold;">Bulk Silicon (FEOL)</td></tr>
+                <tr><td>Logic Cells:</td><td style="color:#1a202c; font-weight: bold;">NAND / Inverter / DFF</td></tr>
+                <tr><td>Contact Plugs:</td><td style="color:#1a202c; font-weight: bold;">Tungsten Pillars (MOL)</td></tr>
+                <tr><td>Active Inspection:</td><td id="tableActive" style="color:#7c3aed; font-weight: bold;">M2 Copper Layer</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- MAIN DASHBOARD CONTENT -->
-      <div>
+      <!-- Overview Cards: 4 KPI Cards -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
         
-        <!-- 3D COMMERCIAL SILICON ROUTER VIEWER -->
-        <div id="panel3D" class="card" style="margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div style="color: #7c3aed; font-size: 12px; font-weight: 800; text-transform: uppercase;">3D COMMERCIAL SILICON ROUTER VIEWER</div>
-            <div style="display:flex; gap:10px;">
-              <button class="btn-preset" id="btnIsolate" onclick="toggleIsolationMode()">Show Full Stack</button>
-              <button class="btn-preset" id="btnExplode" style="display:none;" onclick="toggleExplodeMode()">Explode Layers</button>
-            </div>
-          </div>
-          <div id="viewport3D"></div>
-        </div>
-
-        <!-- 4 OVERVIEW KPI CARDS -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
-          <div class="card" style="margin-bottom: 0; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase;">ROUTING FEASIBILITY</span>
-              <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">ROUTABLE</span>
-            </div>
-            <div style="margin-top: 10px;">
-              <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;" id="kpiProb">99.2%</h1>
-              <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Feasibility Success Probability</span>
-            </div>
-          </div>
-
-          <div class="card" style="margin-bottom: 0; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase;">MAX WIRE PRESSURE</span>
-              <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;" id="kpiBadge">M2 OPTIMIZED</span>
-            </div>
-            <div style="margin-top: 10px;">
-              <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #15803d;" id="kpiPeakPct">50.8%</h1>
-              <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Peak Layer Track Saturation</span>
-            </div>
-          </div>
-
-          <div class="card" style="margin-bottom: 0; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #6b21a8; font-size: 10px; font-weight: 800; text-transform: uppercase;">THERMAL RISK INDEX</span>
-              <span style="background: #15803d; color: #ffffff; font-weight: 800; font-size: 10px; padding: 2px 8px; border-radius: 6px;">SAFE</span>
-            </div>
-            <div style="margin-top: 10px;">
-              <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;" id="kpiThermal">32.1</h1>
-              <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Est. Temp: <b style="color:#ea580c;" id="kpiTemp">52.1 °C</b></span>
-            </div>
-          </div>
-
-          <div class="card" style="margin-bottom: 0; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #7c3aed; font-size: 10px; font-weight: 800; text-transform: uppercase;">CORE CELL UTILIZATION</span>
-              <span style="background: #f5f3ff; border: 1px solid #ddd6fe; color: #7c3aed; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">TARGET SPEC</span>
-            </div>
-            <div style="margin-top: 10px;">
-              <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #7c3aed;" id="kpiUtil">57.0%</h1>
-              <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Placement Density: <b id="dispDensitySub">0.56</b></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- PHYSICAL SILICON DESIGN METRICS CARD -->
-        <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%); border: 1px solid rgba(124, 58, 237, 0.2); margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c; letter-spacing: 0.5px;">PHYSICAL SILICON DESIGN METRICS</h3>
-            <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
-              ⚡ Inference: &lt;25ms
+        <!-- KPI 1: Routing Feasibility -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Routing Feasibility</span>
+            <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+              ROUTABLE
             </span>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px;">
-            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-              <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">PIN DENSITY INDEX</div>
-              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valPin">58.62 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span></div>
-            </div>
-            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-              <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">HPWL WIRELENGTH</div>
-              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valHpwl">395.4 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span></div>
-            </div>
-            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-              <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">MACRO BLOCKAGE</div>
-              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valBlock">25.1 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span></div>
-            </div>
-            <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-              <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">VIA PILLAR DENSITY</div>
-              <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;" id="valVia">0.42 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span></div>
-            </div>
+          <div style="margin-top: 10px;">
+            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">100.0%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Feasibility Success Probability</span>
           </div>
         </div>
 
-        <!-- 2D CELLULAR HEATMAP VIEWER -->
-        <div class="card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
-            <div>
-              <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</span>
-              <h3 style="margin: 4px 0 0 0; font-size: 16px; font-weight: 800; color: #1a202c;">Top view &amp; combined side view</h3>
-            </div>
-            <div style="display:flex; align-items:center; gap: 8px;">
-              <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
-              <div style="width: 100px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0284c7 0%, #16a34a 30%, #d97706 60%, #dc2626 100%);"></div>
-              <span style="color:#718096; font-size:11px; font-weight: 700;">HIGH</span>
-            </div>
-          </div>
-
-          <div class="grid-heatmaps" id="heatmapGrid"></div>
-        </div>
-
-        <!-- RECOMMENDATION SECTION AT BOTTOM -->
-        <div class="card" style="border-left: 5px solid #16a34a;">
+        <!-- KPI 2: Max Wire Pressure -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Input Changes</span>
-              <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
-              <p style="color: #4a5568; font-size: 12px; margin: 0;">Click to apply calculated design rules and bring wire density below 80%.</p>
-            </div>
-            <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
+            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Max Wire Pressure</span>
+            <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+              M2 BOTTLENECK
+            </span>
+          </div>
+          <div style="margin-top: 10px;">
+            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #15803d;">50.8%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Peak Layer Track Saturation</span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Thermal Risk Index -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #6b21a8; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Thermal Risk Index</span>
+            <span class="heat-pill" style="background:#15803d; color:#ffffff; font-weight: 800; font-size: 10px; padding: 2px 8px; border-radius: 6px;">
+              NORMAL / SAFE
+            </span>
+          </div>
+          <div style="margin-top: 10px;">
+            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">41.9</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Est. Peak Temp: <b style="color:#ea580c;">56.4 °C</b></span>
+          </div>
+        </div>
+
+        <!-- KPI 4: Core Cell Utilization Spec -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #7c3aed; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Core Cell Utilization</span>
+            <span style="background: #f5f3ff; border: 1px solid #ddd6fe; color: #7c3aed; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+              TARGET SPEC
+            </span>
+          </div>
+          <div style="margin-top: 10px;">
+            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #7c3aed;">57.0%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Placement Density: <b>0.56</b></span>
           </div>
         </div>
 
       </div>
+
+      <!-- AI ENGINE & PHYSICAL FEATURE SUMMARY CARD -->
+      <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%); border: 1px solid rgba(124, 58, 237, 0.2); margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c; letter-spacing: 0.5px;">PHYSICAL SILICON DESIGN METRICS</h3>
+          </div>
+
+          <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
+            ⚡ Inference: &lt;25ms
+          </span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px;">
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">PIN DENSITY INDEX</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">59.05 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">HPWL WIRELENGTH</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">393.91 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">MACRO BLOCKAGE</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">25.1 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">VIA PILLAR DENSITY</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">0.42 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span></div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- 2D CELLULAR HEATMAP VIEWER -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+          <div>
+            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</span>
+            <h3 style="margin: 4px 0 0 0; font-size: 16px; font-weight: 800; color: #1a202c;">Top view & combined side view</h3>
+          </div>
+          <div style="display:flex; align-items:center; gap: 8px;">
+            <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
+            <div style="width: 100px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0284c7 0%, #16a34a 30%, #d97706 60%, #dc2626 100%);"></div>
+            <span style="color:#718096; font-size:11px; font-weight: 700;">HIGH</span>
+          </div>
+        </div>
+
+        <div class="grid-heatmaps">
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M1 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">0.0%</span>
+            </div>
+            <canvas id="cvs-M1" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M1')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M2 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">50.8%</span>
+            </div>
+            <canvas id="cvs-M2" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M2')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M3 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">46.0%</span>
+            </div>
+            <canvas id="cvs-M3" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M3')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M4 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">36.1%</span>
+            </div>
+            <canvas id="cvs-M4" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M4')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M5 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">25.2%</span>
+            </div>
+            <canvas id="cvs-M5" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M5')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M6 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">25.0%</span>
+            </div>
+            <canvas id="cvs-M6" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M6')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M7 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">14.7%</span>
+            </div>
+            <canvas id="cvs-M7" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M7')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M8 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">14.8%</span>
+            </div>
+            <canvas id="cvs-M8" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M8')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M9 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">17.7%</span>
+            </div>
+            <canvas id="cvs-M9" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M9')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card">
+            <div class="heatmap-header">
+              <span>M10 • ROUTING</span>
+              <span style="color: #15803d; font-weight: 800;">15.5%</span>
+            </div>
+            <canvas id="cvs-M10" class="canvas-sim" width="50" height="50"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M10')">Fix this layer</button>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- RECOMMENDATION SECTION -->
+      <div class="card" style="border-left: 5px solid #16a34a;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Input Changes</span>
+            <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
+            <p style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is 50.8% on M2. Click to apply calculated design rules and bring wire density below 80%.</p>
+          </div>
+          <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
+        </div>
+      </div>
+
+
+      
     </div>
   </div>
 
@@ -570,202 +532,97 @@
       <p style="color: #4a5568; font-size: 12px; margin-bottom: 16px;">
         Applying these rules will scale routing resources and lower peak wire demand below 80%:
       </p>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;" id="modalFixParams"></div>
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button type="button" class="btn-preset" onclick="closeFixModal()">Cancel</button>
-        <button type="button" class="btn-3d" onclick="applyFixAndRun()">Apply Fixes &amp; Re-run</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">CORE MARGIN (MM)</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">3.0 → <span style="color:#15803d;">4.5</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">TARGET DENSITY</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">0.56 → <span style="color:#15803d;">0.42</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">UTILIZATION</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">57.0% → <span style="color:#15803d;">45.6%</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">M2 AVAILABLE TRACKS</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">27540.0 → <span style="color:#15803d;">27540</span></div>
+        </div>
       </div>
+      <form action="/predict" method="POST">
+        <input type="hidden" name="utilization" value="45.6">
+        <input type="hidden" name="aspect_ratio" value="1.0">
+        <input type="hidden" name="core_margin" value="4.5">
+        <input type="hidden" name="density" value="0.42">
+        <input type="hidden" name="layer_adjustment" value="0.4">
+        
+        <input type="hidden" name="metal_1" value="0">
+        
+        <input type="hidden" name="metal_2" value="27540">
+        
+        <input type="hidden" name="metal_3" value="37221">
+        
+        <input type="hidden" name="metal_4" value="18450">
+        
+        <input type="hidden" name="metal_5" value="18096">
+        
+        <input type="hidden" name="metal_6" value="18450">
+        
+        <input type="hidden" name="metal_7" value="5699">
+        
+        <input type="hidden" name="metal_8" value="5796">
+        
+        <input type="hidden" name="metal_9" value="2758">
+        
+        <input type="hidden" name="metal_10" value="2772">
+        
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
+          <button type="submit" class="btn-3d">Apply Fixes & Re-run</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <script>
-    function syncInput(targetId, val) {
-      document.getElementById(targetId).value = val;
-      updateLiveStats();
+    function openFixModal() { document.getElementById('fixModal').style.display = 'flex'; }
+    function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
+    function openSingleLayerFix(layer) {
+      document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer;
+      openFixModal();
     }
 
-    function applyPreset(type) {
-      if (type === 'default') {
-        document.getElementById('inp_util').value = 57.0;
-        document.getElementById('inp_aspect').value = 1.5;
-        document.getElementById('inp_margin').value = 3.0;
-        document.getElementById('inp_density').value = 0.56;
-        document.getElementById('inp_layer_adj').value = 0.6;
-      } else if (type === 'high_density') {
-        document.getElementById('inp_util').value = 72.0;
-        document.getElementById('inp_aspect').value = 1.8;
-        document.getElementById('inp_margin').value = 2.0;
-        document.getElementById('inp_density').value = 0.78;
-        document.getElementById('inp_layer_adj').value = 0.4;
-      } else if (type === 'conservative') {
-        document.getElementById('inp_util').value = 42.0;
-        document.getElementById('inp_aspect').value = 1.0;
-        document.getElementById('inp_margin').value = 4.5;
-        document.getElementById('inp_density').value = 0.42;
-        document.getElementById('inp_layer_adj').value = 0.8;
-      }
-      
-      document.getElementById('rng_util').value = document.getElementById('inp_util').value;
-      document.getElementById('rng_aspect').value = document.getElementById('inp_aspect').value;
-      document.getElementById('rng_margin').value = document.getElementById('inp_margin').value;
-      document.getElementById('rng_density').value = document.getElementById('inp_density').value;
-      document.getElementById('rng_layer_adj').value = document.getElementById('inp_layer_adj').value;
-      
-      updateLiveStats();
-    }
+    const rawData = {"M1": 0.0, "M10": 15.5, "M2": 50.8, "M3": 46.0, "M4": 36.1, "M5": 25.2, "M6": 25.0, "M7": 14.7, "M8": 14.8, "M9": 17.7};
+    const gridSize = 50;
 
-    function updateLiveStats() {
-      const util = parseFloat(document.getElementById('inp_util').value) || 57;
-      const margin = parseFloat(document.getElementById('inp_margin').value) || 3;
-      const aspect = parseFloat(document.getElementById('inp_aspect').value) || 1.5;
-      
-      const baseArea = (util * 0.02) + (margin * 0.1) * aspect;
-      document.getElementById('disp_area').innerText = baseArea.toFixed(2) + ' mm²';
-
-      let sumTracks = 0;
-      for (let i = 1; i <= 10; i++) {
-        const inp = document.getElementById('m' + i + '_res');
-        if (inp) sumTracks += parseFloat(inp.value) || 0;
-      }
-      document.getElementById('disp_tracks').innerText = Math.round(sumTracks).toLocaleString() + ' tracks';
-
-      const riskEl = document.getElementById('disp_risk');
-      if (util > 70) {
-        riskEl.innerText = 'High Congestion Warning';
-        riskEl.style.color = '#dc2626';
-      } else if (util > 60) {
-        riskEl.innerText = 'Borderline Pressure';
-        riskEl.style.color = '#d97706';
-      } else {
-        riskEl.innerText = 'DRC Clean / Safe';
-        riskEl.style.color = '#15803d';
-      }
-    }
-
-    function runRoutingAnalysis() {
-      const util = parseFloat(document.getElementById('inp_util').value) || 57;
-      const aspect = parseFloat(document.getElementById('inp_aspect').value) || 1.5;
-      const margin = parseFloat(document.getElementById('inp_margin').value) || 3;
-      const density = parseFloat(document.getElementById('inp_density').value) || 0.56;
-      const layerAdj = parseFloat(document.getElementById('inp_layer_adj').value) || 0.6;
-
-      document.getElementById('resUtil').innerText = util.toFixed(1);
-      document.getElementById('resAspect').innerText = aspect.toFixed(1);
-      document.getElementById('resMargin').innerText = margin.toFixed(1);
-      document.getElementById('resDensity').innerText = density.toFixed(2);
-      document.getElementById('resLayerAdj').innerText = layerAdj.toFixed(2);
-      document.getElementById('dispDensitySub').innerText = density.toFixed(2);
-
-      // Compute physical VLSI features
-      const pinDensity = (util * density * 1.85).toFixed(2);
-      const hpwl = (Math.sqrt(Math.max(0.1, util * aspect)) * margin * 14.2).toFixed(2);
-      const macroBlk = ((1.0 - density) * (util / 100.0) * 100.0).toFixed(1);
-      const viaDensity = (density * layerAdj * 1.25).toFixed(2);
-
-      document.getElementById('valPin').innerHTML = pinDensity + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span>';
-      document.getElementById('valHpwl').innerHTML = hpwl + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span>';
-      document.getElementById('valBlock').innerHTML = macroBlk + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span>';
-      document.getElementById('valVia').innerHTML = viaDensity + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span>';
-
-      const resources = {
-        M1: parseFloat(document.getElementById('m1_res').value) || 0,
-        M2: parseFloat(document.getElementById('m2_res').value) || 27540,
-        M3: parseFloat(document.getElementById('m3_res').value) || 37221,
-        M4: parseFloat(document.getElementById('m4_res').value) || 18450,
-        M5: parseFloat(document.getElementById('m5_res').value) || 18096,
-        M6: parseFloat(document.getElementById('m6_res').value) || 18450,
-        M7: parseFloat(document.getElementById('m7_res').value) || 5699,
-        M8: parseFloat(document.getElementById('m8_res').value) || 5796,
-        M9: parseFloat(document.getElementById('m9_res').value) || 2758,
-        M10: parseFloat(document.getElementById('m10_res').value) || 2772
-      };
-
-      const stress = (util / 57.0) * (density / 0.56) * (3.0 / Math.max(0.5, margin));
-      const baseDemands = { M1: 0, M2: 14186, M3: 16986, M4: 6621, M5: 4580, M6: 4547, M7: 860, M8: 783, M9: 470, M10: 410 };
-      
-      let maxPct = 0; let peakLayer = 'M2';
-      const usages = {};
-
-      Object.keys(baseDemands).forEach(k => {
-        const d = baseDemands[k] * stress;
-        const cap = resources[k] || 1;
-        const pct = cap > 0 ? (d / cap) * 100.0 : 0;
-        usages[k] = Math.min(100.0, Math.max(0.0, pct));
-        if (pct > maxPct) { maxPct = pct; peakLayer = k; }
-      });
-
-      const thermalIndex = Math.min(100.0, (density * 30.0) + (maxPct * 0.40)).toFixed(1);
-      const tempC = (38.0 + (thermalIndex * 0.44)).toFixed(1);
-
-      document.getElementById('kpiUtil').innerText = util.toFixed(1) + '%';
-      document.getElementById('kpiPeakPct').innerText = maxPct.toFixed(1) + '%';
-      document.getElementById('kpiPeakPct').style.color = maxPct >= 85 ? '#dc2626' : '#15803d';
-      document.getElementById('kpiBadge').innerText = maxPct >= 85 ? peakLayer + ' BOTTLENECK' : peakLayer + ' OPTIMIZED';
-      document.getElementById('kpiBadge').style.background = maxPct >= 85 ? '#fef2f2' : '#f0fdf4';
-      document.getElementById('kpiBadge').style.color = maxPct >= 85 ? '#b91c1c' : '#15803d';
-      document.getElementById('kpiThermal').innerText = thermalIndex;
-      document.getElementById('kpiTemp').innerText = tempC + ' °C';
-
-      renderHeatmaps(usages);
-
-      document.getElementById('controlsView').style.display = 'none';
-      document.getElementById('resultsView').style.display = 'block';
-
-      if (!sceneInit) init3DScene();
-    }
-
-    function showInputForm() {
-      document.getElementById('resultsView').style.display = 'none';
-      document.getElementById('controlsView').style.display = 'block';
-    }
-
-    function renderHeatmaps(usages) {
-      const grid = document.getElementById('heatmapGrid');
-      grid.innerHTML = '';
-      const layers = ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10"];
-      
-      layers.forEach(layer => {
-        const val = usages[layer] || 0;
-        const card = document.createElement('div');
-        card.className = 'heatmap-card';
-        card.innerHTML = `
-          <div class="heatmap-header">
-            <span>${layer} • ROUTING</span>
-            <span style="color: ${val >= 85 ? '#dc2626' : '#15803d'}; font-weight: 800;">${val.toFixed(1)}%</span>
-          </div>
-          <canvas id="cvs-${layer}" class="canvas-sim" width="50" height="50"></canvas>
-          <div style="color: #718096; font-size: 10px; margin: 8px 0; font-weight: 600;">derived pressure distribution</div>
-          <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('${layer}')">Fix this layer</button>
-        `;
-        grid.appendChild(card);
-
-        setTimeout(() => {
-          const cvs = document.getElementById('cvs-' + layer);
-          if (cvs) {
-            const ctx = cvs.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(generateHeatmapCanvas(val), 0, 0, cvs.width, cvs.height);
-          }
-        }, 50);
-      });
-    }
-
-    function generateHeatmapCanvas(val) {
+    function generateExactReferenceHeatmap(val) {
       const cvs = document.createElement("canvas");
-      cvs.width = 50; cvs.height = 50;
+      cvs.width = gridSize; cvs.height = gridSize;
       const ctx = cvs.getContext("2d");
-      const imgData = ctx.createImageData(50, 50);
-      for (let y = 0; y < 50; y++) {
-        for (let x = 0; x < 50; x++) {
-          const dx = (x - 25) / 25.0; const dy = (y - 25) / 25.0;
+      const imgData = ctx.createImageData(gridSize, gridSize);
+
+      const c1 = [13, 56, 120];  const c2 = [20, 110, 160]; const c3 = [30, 160, 150]; 
+      const c4 = [80, 200, 80];  const c5 = [220, 200, 40]; const c6 = [240, 120, 30]; const c7 = [220, 40, 40];
+
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          const dx = (x - 25) / 25.0;
+          const dy = (y - 25) / 25.0;
           const dist = Math.sqrt(dx*dx + dy*dy);
+          
           let int = (val / 100.0) - (dist * 0.9) + (Math.random() * 0.8 - 0.4);
-          let r=13, g=56, b=120;
-          if (int > 0.7) { r=220; g=40; b=40; }
-          else if (int > 0.4) { r=240; g=120; b=30; }
-          else if (int > 0.1) { r=220; g=200; b=40; }
-          else if (int > -0.2) { r=80; g=200; b=80; }
-          const idx = (y * 50 + x) * 4;
+
+          let r, g, b;
+          if (int > 0.7) { r=c7[0]; g=c7[1]; b=c7[2]; }
+          else if (int > 0.4) { r=c6[0]; g=c6[1]; b=c6[2]; }
+          else if (int > 0.1) { r=c5[0]; g=c5[1]; b=c5[2]; }
+          else if (int > -0.2) { r=c4[0]; g=c4[1]; b=c4[2]; }
+          else if (int > -0.5) { r=c3[0]; g=c3[1]; b=c3[2]; }
+          else if (int > -0.8) { r=c2[0]; g=c2[1]; b=c2[2]; }
+          else { r=c1[0]; g=c1[1]; b=c1[2]; }
+
+          const idx = (y * gridSize + x) * 4;
           imgData.data[idx] = r; imgData.data[idx+1] = g; imgData.data[idx+2] = b; imgData.data[idx+3] = 255;
         }
       }
@@ -773,70 +630,532 @@
       return cvs;
     }
 
-    function openFixModal() { document.getElementById('fixModal').style.display = 'flex'; }
-    function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
-
-    function openSingleLayerFix(layer) {
-      document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer;
-      document.getElementById('modalFixParams').innerHTML = `
-        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-          <span style="color:#718096; font-size:10px;">CORE MARGIN</span>
-          <div style="font-size:14px; font-weight:800; color:#15803d;">4.5 MM (+1.5)</div>
-        </div>
-        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-          <span style="color:#718096; font-size:10px;">TARGET DENSITY</span>
-          <div style="font-size:14px; font-weight:800; color:#15803d;">0.45 (-0.11)</div>
-        </div>
-      `;
-      openFixModal();
-    }
-
-    function applyFixAndRun() {
-      closeFixModal();
-      document.getElementById('inp_margin').value = 4.5; syncInput('inp_margin', 4.5);
-      document.getElementById('inp_density').value = 0.45; syncInput('inp_density', 0.45);
-      runRoutingAnalysis();
-    }
-
-    let sceneInit = false; let globalCamera, globalRenderer, globalControls;
-    function init3DScene() {
-      sceneInit = true;
-      const container = document.getElementById("viewport3D");
-      if (!container) return;
+    function generateAsciiBar(val) {
+      const len = 48; 
+      const center = len / 2;
+      let arr = new Array(len).fill('\u00A0');
       
-      const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0f172a);
-      globalCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-      globalCamera.position.set(7.5, 6.2, 7.5);
-      globalRenderer = new THREE.WebGLRenderer({ antialias: true });
-      globalRenderer.setSize(container.clientWidth, container.clientHeight);
-      container.appendChild(globalRenderer.domElement);
-      globalControls = new THREE.OrbitControls(globalCamera, globalRenderer.domElement);
+      let spread = Math.min(1.0, (val + 10) / 100.0);
       
-      const ambLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambLight);
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); dirLight.position.set(10, 20, 10); scene.add(dirLight);
-
-      const fullStackAssembly = new THREE.Group();
-      for (let i = 0; i < 10; i++) {
-        const geo = new THREE.BoxGeometry(4, 0.15, 4);
-        const colorHex = i > 6 ? 0x7c3aed : (i > 3 ? 0x0284c7 : 0x16a34a);
-        const mat = new THREE.MeshPhongMaterial({ color: colorHex, transparent: true, opacity: 0.8 });
-        const mesh = new THREE.Mesh(geo, mat); mesh.position.y = i * 0.35;
-        fullStackAssembly.add(mesh);
+      for (let i = 0; i < len; i++) {
+        const dist = Math.abs(i - center) / center; 
+        
+        if (dist <= spread) {
+          let normDist = dist / spread; 
+          let peak = (val / 100.0); 
+          let int = peak * (1.0 - Math.pow(normDist, 1.5)) + (Math.random() * 0.4 - 0.2);
+          
+          if (int > 0.8) arr[i] = "█";
+          else if (int > 0.5) arr[i] = "▓";
+          else if (int > 0.25) arr[i] = "▒";
+          else arr[i] = "░";
+        }
       }
-      scene.add(fullStackAssembly);
-
-      function animate() { requestAnimationFrame(animate); globalControls.update(); globalRenderer.render(scene, globalCamera); }
-      animate();
+      return arr.join('');
     }
+
+    Object.keys(rawData).forEach(layer => {
+      const cvs = document.getElementById("cvs-" + layer);
+      if (cvs) {
+        const ctx = cvs.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(generateExactReferenceHeatmap(rawData[layer]), 0, 0, cvs.width, cvs.height);
+      }
+      
+      const asciiEl = document.getElementById("ascii-" + layer);
+      if (asciiEl) {
+        asciiEl.innerText = generateAsciiBar(rawData[layer]);
+      }
+    });
+
+    let sceneInit = false, isIsolated = true, exploded = false;
+    let selectedLayerName = "M2";
+    let globalCamera, globalRenderer, globalControls;
+    let isolatedAssembly, fullStackAssembly, isolatedSlabMesh;
+    const stackLayerGroups = [];
+
+    const layerDefs = {
+      'FEOL': 'Front-End-of-Line substrate containing active silicon FinFET transistors, logic gates, source, and drain regions.',
+      'MOL': 'Middle-of-Line contact level containing tapered tungsten contact plugs connecting transistor terminals.',
+      'M1': 'Metal 1: Fine-pitch local copper tracks for standard cell internal pins and ground/power rail contacts.',
+      'M2': 'Metal 2: Orthogonal intra-block routing tracks. High congestion hotspot detected here.',
+      'M3': 'Metal 3: High-density horizontal routing tracks connecting logic gates across standard cell rows.',
+      'M4': 'Metal 4: Vertical routing tracks for intermediate signal routing across macro boundaries.',
+      'M5': 'Metal 5: Medium-pitch metal tracks utilized for data bus paths and clock distribution trunk nets.',
+      'M6': 'Metal 6: Horizontal medium-pitch routing for intermediate signal transport across clock domains.',
+      'M7': 'Metal 7: Semi-global routing layer with relaxed pitch for high-speed datapath lines.',
+      'M8': 'Metal 8: Global wiring layer for cross-chip communication and secondary power grid strapping.',
+      'M9': 'Metal 9: Thick metal layer reserved for global power routing mesh (VDD/VSS) and primary clock trees.',
+      'M10': 'Metal 10: Top-most thick redistribution layer (RDL) for C4 power pads and wirebonds.'
+    };
 
     function toggle3DView() {
       const p = document.getElementById("panel3D");
-      p.style.display = (p.style.display === "none") ? "block" : "none";
+      if (p.style.display === "none") {
+        p.style.display = "block";
+        if (!sceneInit) init3DScene();
+        setTimeout(() => { 
+          if (globalRenderer) {
+            const cont = document.getElementById("viewport3D");
+            globalCamera.aspect = cont.clientWidth / cont.clientHeight;
+            globalCamera.updateProjectionMatrix();
+            globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
+          }
+        }, 50);
+      } else {
+        p.style.display = "none";
+      }
     }
 
+    // Auto initialize 3D scene on page load so 3D model is rendered immediately
     window.addEventListener('load', () => {
-      updateLiveStats();
+      if (!sceneInit) {
+        init3DScene();
+        setTimeout(() => { 
+          if (globalRenderer) {
+            const cont = document.getElementById("viewport3D");
+            globalCamera.aspect = cont.clientWidth / cont.clientHeight;
+            globalCamera.updateProjectionMatrix();
+            globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
+          }
+        }, 100);
+      }
     });
+
+    function toggleIsolationMode() {
+      isIsolated = !isIsolated;
+      isolatedAssembly.visible = isIsolated;
+      fullStackAssembly.visible = !isIsolated;
+      
+      const btnIso = document.getElementById("btnIsolate");
+      const btnExp = document.getElementById("btnExplode");
+      
+      if (isIsolated) {
+        btnIso.innerText = "Show Full Stack";
+        btnIso.style.background = "#0284c7";
+        btnIso.style.color = "#fff";
+        btnExp.style.display = "none";
+        
+        window.selectLayerFunc(selectedLayerName);
+        globalControls.target.set(0, 0, 0);
+        globalCamera.position.set(7.5, 6.2, 7.5);
+      } else {
+        btnIso.innerText = "Isolate Layer";
+        btnIso.style.background = "transparent";
+        btnIso.style.color = "#38bdf8";
+        btnExp.style.display = "block";
+        
+        globalControls.target.set(0, 0, 0);
+        globalCamera.position.set(9.5, 7.5, 9.5);
+      }
+    }
+
+    function toggleExplodeMode() {
+      exploded = !exploded;
+      document.getElementById("btnExplode").innerText = exploded ? "Collapse Stack" : "Explode Stack";
+    }
+
+    function handleDropdownLayerChange(val) {
+      if (window.selectLayerFunc) window.selectLayerFunc(val);
+    }
+
+    // Generate RV32I Processor Floorplan Canvas (GDS Base Substrate)
+    function generateRV32IFloorplanCanvas() {
+      const cvs = document.createElement("canvas");
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext("2d");
+
+      // Silicon substrate
+      ctx.fillStyle = "#070a0f";
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      // Guard ring & die perimeter
+      ctx.strokeStyle = "#1e293b";
+      ctx.lineWidth = 14;
+      ctx.strokeRect(18, 18, 988, 988);
+
+      // Standard cell rows
+      ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
+      ctx.lineWidth = 2;
+      for (let y = 60; y < 960; y += 18) {
+        ctx.beginPath();
+        ctx.moveTo(35, y);
+        ctx.lineTo(989, y);
+        ctx.stroke();
+      }
+
+      function drawBlock(x, y, w, h, name, subtitle, color) {
+        ctx.fillStyle = "rgba(11, 15, 23, 0.9)";
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x, y, w, h);
+
+        // Header accent bar
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, w, 28);
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 15px monospace";
+        ctx.fillText(name, x + 12, y + 20);
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "14px monospace";
+        ctx.fillText(subtitle, x + 12, y + 54);
+      }
+
+      // RV32I Core Functional Units
+      drawBlock(50, 50, 430, 260, "CONTROL & INSTRUCTION DECODER", "Opcode Decoder / Micro-Op FSM", "#38bdf8");
+      drawBlock(520, 50, 450, 260, "FETCH & PC UNIT", "Branch Target Adder / Next PC", "#10b981");
+      drawBlock(50, 340, 430, 370, "ALU & EXECUTION UNIT [HOTSPOT]", "32b Parallel Adder / Shifter / Logic", "#ef4444");
+      drawBlock(520, 340, 450, 370, "REGISTER FILE (x0-x31)", "32x32b Dual-Port DFF Array", "#f59e0b");
+      drawBlock(50, 740, 920, 220, "LOAD-STORE UNIT & BUS INTERFACE", "Data Memory Stage / Wishbone Master", "#a855f7");
+
+      return cvs;
+    }
+
+    // Helper: Build GDS-style physical wire tracks and vias for a layer
+    function createGDSLayerGroup(lName, usagePct) {
+      const grp = new THREE.Group();
+      grp.userData = { name: lName, raw: usagePct };
+
+      // Transparent picking carrier slab
+      const slabMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        transparent: true,
+        opacity: 0.15,
+        roughness: 0.8
+      });
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.04, 4.6), slabMat);
+      slab.userData = { name: lName };
+      grp.add(slab);
+
+      const idx = parseInt(lName.replace("M", ""));
+
+      let baseColor = 0x38bdf8;
+      if (usagePct >= 85) baseColor = 0xef4444;
+      else if (usagePct >= 65) baseColor = 0xf59e0b;
+      else if (usagePct >= 40) baseColor = 0x38bdf8;
+      else baseColor = 0x10b981;
+
+      if (idx === 10) {
+        // M10: Top RDL & C4 Solder Bumps Array
+        const bumpGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.08, 16);
+        const bumpMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.2 });
+        for (let bx = -1.8; bx <= 1.8; bx += 0.9) {
+          for (let bz = -1.8; bz <= 1.8; bz += 0.9) {
+            const bump = new THREE.Mesh(bumpGeo, bumpMat);
+            bump.position.set(bx, 0.04, bz);
+            bump.userData = { name: lName };
+            grp.add(bump);
+          }
+        }
+        // Peripheral bonding frame
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.85, roughness: 0.3 });
+        const topFrame = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.03, 0.15), frameMat);
+        topFrame.position.set(0, 0.02, 2.1);
+        grp.add(topFrame);
+        const btmFrame = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.03, 0.15), frameMat);
+        btmFrame.position.set(0, 0.02, -2.1);
+        grp.add(btmFrame);
+      } else if (idx === 9) {
+        // M9: Power Distribution Network (PDN) Orthogonal Grid (VDD/VSS Straps)
+        const vddMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.25 });
+        const vssMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.85, roughness: 0.25 });
+        for (let x = -2.0; x <= 2.0; x += 0.6) {
+          const strap = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.03, 4.2), (Math.abs(x) < 0.8) ? vddMat : vssMat);
+          strap.position.set(x, 0.015, 0);
+          strap.userData = { name: lName };
+          grp.add(strap);
+        }
+        for (let z = -2.0; z <= 2.0; z += 0.6) {
+          const strap = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.03, 0.12), (Math.abs(z) < 0.8) ? vddMat : vssMat);
+          strap.position.set(0, 0.015, z);
+          strap.userData = { name: lName };
+          grp.add(strap);
+        }
+      } else {
+        // Standard routing layers: M1 to M8
+        // Alternating Manhattan routing: Odd = Horizontal (X), Even = Vertical (Z)
+        const isHorizontal = (idx % 2 !== 0);
+        const trackCount = Math.floor(18 + (usagePct / 100.0) * 32);
+        const step = 4.0 / trackCount;
+
+        const wireMat = new THREE.MeshStandardMaterial({
+          color: baseColor,
+          metalness: 0.85,
+          roughness: 0.25
+        });
+
+        const wDimX = isHorizontal ? 4.2 : 0.04;
+        const wDimZ = isHorizontal ? 0.04 : 4.2;
+        const wireGeo = new THREE.BoxGeometry(wDimX, 0.025, wDimZ);
+        const instWires = new THREE.InstancedMesh(wireGeo, wireMat, trackCount);
+
+        const dummy = new THREE.Object3D();
+        for (let w = 0; w < trackCount; w++) {
+          const coord = -2.0 + (w * step);
+          if (isHorizontal) {
+            dummy.position.set(0, 0.015, coord);
+          } else {
+            dummy.position.set(coord, 0.015, 0);
+          }
+          dummy.updateMatrix();
+          instWires.setMatrixAt(w, dummy.matrix);
+        }
+        instWires.userData = { name: lName };
+        grp.add(instWires);
+
+        // Via contact pillars to layer below
+        const viaCount = Math.floor(12 + (usagePct / 100.0) * 20);
+        const viaGeo = new THREE.BoxGeometry(0.045, 0.12, 0.045);
+        const viaMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
+        const instVias = new THREE.InstancedMesh(viaGeo, viaMat, viaCount);
+        for (let v = 0; v < viaCount; v++) {
+          const vx = -1.8 + Math.random() * 3.6;
+          const vz = -1.8 + Math.random() * 3.6;
+          dummy.position.set(vx, -0.06, vz);
+          dummy.updateMatrix();
+          instVias.setMatrixAt(v, dummy.matrix);
+        }
+        grp.add(instVias);
+      }
+
+      return grp;
+    }
+
+    function init3DScene() {
+      sceneInit = true;
+      const cont = document.getElementById("viewport3D");
+      const scene = new THREE.Scene();
+
+      globalCamera = new THREE.PerspectiveCamera(36, cont.clientWidth / cont.clientHeight, 0.1, 1000);
+      globalCamera.position.set(7.5, 6.2, 7.5);
+
+      globalRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
+      globalRenderer.setPixelRatio(window.devicePixelRatio);
+      cont.appendChild(globalRenderer.domElement);
+
+      globalControls = new THREE.OrbitControls(globalCamera, globalRenderer.domElement);
+      globalControls.enableDamping = true;
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.95));
+      const dl = new THREE.DirectionalLight(0xffffff, 0.85); dl.position.set(10, 15, 10); scene.add(dl);
+      const dl2 = new THREE.DirectionalLight(0x38bdf8, 0.4); dl2.position.set(-10, -5, -10); scene.add(dl2);
+
+      // RV32I Substrate Texture
+      const substrateTex = new THREE.CanvasTexture(generateRV32IFloorplanCanvas());
+      substrateTex.magFilter = THREE.LinearFilter;
+      const substrateMat = new THREE.MeshStandardMaterial({ map: substrateTex, roughness: 0.7 });
+
+      // Isolated Stage
+      isolatedAssembly = new THREE.Group();
+      scene.add(isolatedAssembly);
+
+      // Base die substrate in isolated view
+      const isoSubstrateMesh = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.08, 4.8), substrateMat);
+      isoSubstrateMesh.position.y = -0.5;
+      isolatedAssembly.add(isoSubstrateMesh);
+
+      // Active isolated layer group
+      let activeIsoGroup = createGDSLayerGroup(selectedLayerName, rawData[selectedLayerName] || 0.0);
+      activeIsoGroup.position.y = 0.0;
+      isolatedAssembly.add(activeIsoGroup);
+
+      // Full Stack Stage
+      fullStackAssembly = new THREE.Group();
+      fullStackAssembly.visible = false;
+      scene.add(fullStackAssembly);
+
+      // Base die substrate in full stack view
+      const fullSubstrateMesh = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.1, 4.8), substrateMat);
+      fullSubstrateMesh.position.y = -1.35;
+      fullStackAssembly.add(fullSubstrateMesh);
+
+      ["M1","M2","M3","M4","M5","M6","M7","M8","M9","M10"].forEach((lName, idx) => {
+        const grp = createGDSLayerGroup(lName, rawData[lName] || 0.0);
+        const defY = -0.9 + idx * 0.22;
+        const expY = -1.9 + idx * 0.46;
+        grp.position.y = defY;
+        grp.userData = { name: lName, defY: defY, expY: expY, raw: rawData[lName] };
+        fullStackAssembly.add(grp);
+        stackLayerGroups.push(grp);
+      });
+
+      window.selectLayerFunc = (lName) => {
+        selectedLayerName = lName;
+        document.getElementById("layerSelectDropdown").value = lName;
+        const rawVal = rawData[lName] || 0.0;
+        
+        document.getElementById("inspName").innerText = lName + " (Routing Layer)";
+        document.getElementById("inspPct").innerText = rawVal + "%";
+        document.getElementById("inspPct").style.color = rawVal >= 85 ? "#ef4444" : "#10b981";
+        document.getElementById("inspTemp").innerText = (38.0 + (rawVal * 0.35)).toFixed(1) + " °C";
+        document.getElementById("inspDef").innerText = layerDefs[lName] || layerDefs['M1'];
+        document.getElementById("tableActive").innerText = lName + " Copper Layer";
+        
+        document.getElementById("hudLabel").innerHTML = lName + " CONGESTION<br>" + (rawVal >= 85 ? "HOTSPOT" : "TRACK");
+
+        if (isIsolated) {
+          isolatedAssembly.remove(activeIsoGroup);
+          activeIsoGroup = createGDSLayerGroup(lName, rawVal);
+          activeIsoGroup.position.y = 0.0;
+          isolatedAssembly.add(activeIsoGroup);
+        }
+      };
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      globalRenderer.domElement.addEventListener("pointerdown", (e) => {
+        const rect = globalRenderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, globalCamera);
+
+        const targetGroup = isIsolated ? isolatedAssembly : fullStackAssembly;
+        const hits = raycaster.intersectObjects(targetGroup.children, true);
+        for (let h of hits) {
+          let curr = h.object;
+          while (curr && curr !== targetGroup) {
+            if (curr.userData && curr.userData.name) {
+              window.selectLayerFunc(curr.userData.name);
+              return;
+            }
+            curr = curr.parent;
+          }
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        globalCamera.aspect = cont.clientWidth / cont.clientHeight;
+        globalCamera.updateProjectionMatrix();
+        globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
+      });
+
+      const hudLine = document.getElementById("hudLine");
+      const hudDot1 = document.getElementById("hudDot1");
+      const hudDot2 = document.getElementById("hudDot2");
+      const hudLabel = document.getElementById("hudLabel");
+
+      function anim() {
+        requestAnimationFrame(anim);
+        if (!isIsolated) {
+          stackLayerGroups.forEach(l => {
+            const targetY = exploded ? l.userData.expY : l.userData.defY;
+            l.position.y += (targetY - l.position.y) * 0.08;
+          });
+        }
+        
+        if (isIsolated) {
+          hudLine.style.display = "block"; hudDot1.style.display = "block"; hudDot2.style.display = "block"; hudLabel.style.display = "block";
+          const p1 = new THREE.Vector3(0.0, 0.15, 0.0);
+          const p2 = new THREE.Vector3(0.6, 0.15, -0.6);
+          const v1 = p1.clone().project(globalCamera); const v2 = p2.clone().project(globalCamera);
+          const s1 = { x: (v1.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v1.y * 0.5) + 0.5) * cont.clientHeight };
+          const s2 = { x: (v2.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v2.y * 0.5) + 0.5) * cont.clientHeight };
+
+          hudLine.setAttribute("points", `${s2.x},${s2.y} ${s2.x + 90},${s2.y - 65} ${s2.x + 160},${s2.y - 65}`);
+          hudDot1.setAttribute("cx", s1.x); hudDot1.setAttribute("cy", s1.y);
+          hudDot2.setAttribute("cx", s2.x); hudDot2.setAttribute("cy", s2.y);
+          hudLabel.style.left = `${s2.x + 172}px`; hudLabel.style.top = `${s2.y - 79}px`;
+        } else {
+          hudLine.style.display = "none"; hudDot1.style.display = "none"; hudDot2.style.display = "none"; hudLabel.style.display = "none";
+        }
+
+        globalControls.update();
+        globalRenderer.render(scene, globalCamera);
+      }
+      anim();
+    }
   </script>
+
+  <!-- EDIT INPUTS MODAL -->
+  <div id="inputFormModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; overflow-y: auto; padding: 30px;">
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 25px 50px rgba(0,0,0,0.25); border-radius: 16px; width: 900px; max-width: 95%; padding: 28px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #1a202c;">Edit Floorplan Geometry & Metal Stack Parameters</h2>
+          <div style="color: #718096; font-size: 13px; margin-top: 4px;">Adjust utilization, margins, placement density, and track capacities</div>
+        </div>
+        <button onclick="closeInputModal()" style="background: transparent; border: none; font-size: 22px; cursor: pointer; color: #718096;">✕</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <button type="button" class="btn-fix" onclick="applyLocalPreset('default')">⚡ Standard RV32I Core</button>
+        <button type="button" class="btn-fix" onclick="applyLocalPreset('high_density')">🔥 High Density (72% Util)</button>
+        <button type="button" class="btn-fix" onclick="applyLocalPreset('conservative')">🛡️ Safe / Low Congestion</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px;">
+        <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <label style="font-size: 9px; font-weight: 800; color: #4a5568;">UTILIZATION %</label>
+          <input type="number" id="modUtil" value="57.0" step="0.5" style="width: 100%; border: none; background: transparent; font-size: 16px; font-weight: 800; color: #1a202c; outline: none; margin-top: 4px;">
+        </div>
+        <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <label style="font-size: 9px; font-weight: 800; color: #4a5568;">ASPECT RATIO</label>
+          <input type="number" id="modAspect" value="1.5" step="0.1" style="width: 100%; border: none; background: transparent; font-size: 16px; font-weight: 800; color: #1a202c; outline: none; margin-top: 4px;">
+        </div>
+        <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <label style="font-size: 9px; font-weight: 800; color: #4a5568;">CORE MARGIN MM</label>
+          <input type="number" id="modMargin" value="3.0" step="0.5" style="width: 100%; border: none; background: transparent; font-size: 16px; font-weight: 800; color: #1a202c; outline: none; margin-top: 4px;">
+        </div>
+        <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <label style="font-size: 9px; font-weight: 800; color: #4a5568;">DENSITY</label>
+          <input type="number" id="modDensity" value="0.56" step="0.01" style="width: 100%; border: none; background: transparent; font-size: 16px; font-weight: 800; color: #1a202c; outline: none; margin-top: 4px;">
+        </div>
+        <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <label style="font-size: 9px; font-weight: 800; color: #4a5568;">LAYER ADJUSTMENT</label>
+          <input type="number" id="modLayerAdj" value="0.60" step="0.05" style="width: 100%; border: none; background: transparent; font-size: 16px; font-weight: 800; color: #1a202c; outline: none; margin-top: 4px;">
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn-nav" onclick="closeInputModal()">Cancel</button>
+        <button class="btn-3d" onclick="applyInputModalChanges()">RUN ROUTING ANALYSIS →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openInputModal() { document.getElementById('inputFormModal').style.display = 'flex'; }
+    function closeInputModal() { document.getElementById('inputFormModal').style.display = 'none'; }
+    function applyLocalPreset(p) {
+      if (p === 'default') { document.getElementById('modUtil').value = 57.0; document.getElementById('modAspect').value = 1.5; document.getElementById('modMargin').value = 3.0; document.getElementById('modDensity').value = 0.56; document.getElementById('modLayerAdj').value = 0.6; }
+      else if (p === 'high_density') { document.getElementById('modUtil').value = 72.0; document.getElementById('modAspect').value = 1.8; document.getElementById('modMargin').value = 2.0; document.getElementById('modDensity').value = 0.78; document.getElementById('modLayerAdj').value = 0.4; }
+      else if (p === 'conservative') { document.getElementById('modUtil').value = 42.0; document.getElementById('modAspect').value = 1.0; document.getElementById('modMargin').value = 4.5; document.getElementById('modDensity').value = 0.42; document.getElementById('modLayerAdj').value = 0.8; }
+    }
+    function applyInputModalChanges() {
+      closeInputModal();
+      const u = parseFloat(document.getElementById('modUtil').value) || 57.0;
+      const m = parseFloat(document.getElementById('modMargin').value) || 3.0;
+      const d = parseFloat(document.getElementById('modDensity').value) || 0.56;
+      const a = parseFloat(document.getElementById('modAspect').value) || 1.5;
+      const l = parseFloat(document.getElementById('modLayerAdj').value) || 0.6;
+
+      const pin = (u * d * 1.85).toFixed(2);
+      const hpwl = (Math.sqrt(Math.max(0.1, u * a)) * m * 14.2).toFixed(2);
+      const blk = ((1.0 - d) * (u / 100.0) * 100.0).toFixed(1);
+      const via = (d * l * 1.25).toFixed(2);
+
+      const pinEl = document.querySelector('#valPin'); if (pinEl) pinEl.innerHTML = pin + ' <span style="font-size: 11px; color: #4a5568;">pins/mm²</span>';
+      const hpwlEl = document.querySelector('#valHpwl'); if (hpwlEl) hpwlEl.innerHTML = hpwl + ' <span style="font-size: 11px; color: #4a5568;">μm</span>';
+      const blkEl = document.querySelector('#valBlock'); if (blkEl) blkEl.innerHTML = blk + ' <span style="font-size: 11px; color: #4a5568;">%</span>';
+      const viaEl = document.querySelector('#valVia'); if (viaEl) viaEl.innerHTML = via + ' <span style="font-size: 11px; color: #4a5568;">/μm²</span>';
+
+      const stress = (u / 57.0) * (d / 0.56) * (3.0 / Math.max(0.5, m));
+      if (typeof rawData !== 'undefined') {
+        Object.keys(rawData).forEach(layer => {
+          rawData[layer] = Math.min(100.0, Math.max(0.0, rawData[layer] * stress));
+          const cvs = document.getElementById('cvs-' + layer);
+          if (cvs && typeof generateExactReferenceHeatmap === 'function') {
+            const ctx = cvs.getContext('2d');
+            ctx.drawImage(generateExactReferenceHeatmap(rawData[layer]), 0, 0, cvs.width, cvs.height);
+          }
+        });
+      }
+    }
+  </script>
+
 </body>
 </html>
