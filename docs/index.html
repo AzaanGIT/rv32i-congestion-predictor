@@ -14,23 +14,23 @@
       color: #2d3748;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      padding: 24px 40px;
+      padding: 28px 40px;
     }
     
-    .top-bar {
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid rgba(107, 70, 193, 0.15);
-      padding-bottom: 18px;
-      margin-bottom: 24px;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
     }
     .brand-title {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 800;
       color: #1a202c;
-      letter-spacing: -0.3px;
-      display: inline-flex;
+      letter-spacing: -0.4px;
+      display: flex;
       align-items: center;
       gap: 10px;
     }
@@ -44,6 +44,7 @@
       letter-spacing: 0.5px;
       text-transform: uppercase;
     }
+    .subtitle { color: #718096; font-size: 13px; font-weight: 500; margin-top: 4px; }
     
     .card {
       background: rgba(255, 255, 255, 0.85);
@@ -55,6 +56,164 @@
       padding: 24px;
       margin-bottom: 24px;
     }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      color: #7c3aed;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+    }
+    .card-heading {
+      font-size: 17px;
+      color: #1a202c;
+      font-weight: 800;
+      margin: 4px 0 0 0;
+    }
+
+    /* PRESETS BAR */
+    .preset-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .btn-preset {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #e2e8f0;
+      color: #4a5568;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-preset:hover {
+      border-color: #7c3aed;
+      color: #7c3aed;
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    /* GRID & INPUT BOXES */
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+    .box {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
+    }
+    .box:focus-within, .box:hover {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+      background: #ffffff;
+    }
+    .box label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .layer-tag {
+      font-size: 9px;
+      color: #7c3aed;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .badge {
+      background: #edf2f7;
+      color: #4a5568;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+    input[type="number"] {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #1a202c;
+      font-size: 18px;
+      font-weight: 800;
+      margin-top: 8px;
+      outline: none;
+      font-family: inherit;
+    }
+    input[type="range"] {
+      width: 100%;
+      margin-top: 8px;
+      accent-color: #7c3aed;
+      cursor: pointer;
+    }
+
+    /* LIVE PREVIEW BAR */
+    .summary-banner {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(109, 40, 217, 0.03) 100%);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .metric-group {
+      display: flex;
+      gap: 32px;
+    }
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-label { font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase; }
+    .metric-val { font-size: 16px; font-weight: 800; color: #1a202c; margin-top: 2px; }
+
+    /* SUBMIT BUTTON */
+    .btn-submit {
+      width: auto;
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(124, 58, 237, 0.45);
+    }
+
+    /* DASHBOARD LAYOUT */
+    .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
+    .input-box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .input-box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; margin-bottom: 4px; text-transform: uppercase; }
+    .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
     
     .btn-nav {
       background: rgba(255, 255, 255, 0.9);
@@ -69,11 +228,7 @@
       transition: all 0.2s ease;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
     }
-    .btn-nav:hover {
-      background: #ffffff;
-      border-color: #cbd5e1;
-      color: #1a202c;
-    }
+    .btn-nav:hover { background: #ffffff; border-color: #cbd5e1; color: #1a202c; }
     
     .btn-3d {
       background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
@@ -82,33 +237,7 @@
       box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
     }
     .btn-3d:hover { background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); transform: translateY(-1px); }
-    
-    .btn-preset {
-      background: rgba(255, 255, 255, 0.9); border: 1px solid #e2e8f0; color: #4a5568;
-      font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 10px; cursor: pointer; transition: 0.2s;
-    }
-    .btn-preset:hover { border-color: #7c3aed; color: #7c3aed; background: #ffffff; }
-    
-    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-    .box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
-    .box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; text-transform: uppercase; }
-    .box input[type="number"] { width: 100%; font-size: 18px; font-weight: 800; color: #1a202c; border: none; background: transparent; outline: none; margin-top: 4px; }
-    .box input[type="range"] { width: 100%; margin-top: 8px; accent-color: #7c3aed; cursor: pointer; }
-    
-    .btn-submit {
-      width: 100%; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: #ffffff;
-      font-size: 15px; font-weight: 800; letter-spacing: 0.6px; padding: 18px; border: none;
-      border-radius: 12px; cursor: pointer; text-transform: uppercase; margin-top: 20px;
-      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35); transition: 0.2s;
-    }
-    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(124, 58, 237, 0.45); }
-    
-    .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start; }
-    .input-box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-    .input-box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; margin-bottom: 4px; text-transform: uppercase; }
-    .input-box .badge { background: #edf2f7; color: #4a5568; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }
-    .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
-    
+
     #viewport3D { width: 100%; height: 520px; border-radius: 8px; background: #0f172a; cursor: grab; position: relative; overflow: hidden; }
     .grid-heatmaps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 14px; }
     .heatmap-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
@@ -123,109 +252,195 @@
 </head>
 <body>
 
-  <!-- TOP BAR / HEADER -->
-  <div class="top-bar">
-    <div>
-      <button class="btn-nav" id="btnNavToggle" onclick="toggleView()">← Edit inputs</button>
-      <h2 class="brand-title" style="margin-left: 14px;">
-        RV32I CONGESTION PREDICTOR
-        <span class="chip-badge">RISC-V 32-Bit Core</span>
-      </h2>
+  <!-- STEP 1: FLOORPLAN INPUT FORM (FIRST PAGE) -->
+  <div id="controlsView">
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <div class="brand-title">
+          RV32I CONGESTION PREDICTOR
+          <span class="chip-badge">RISC-V 32-Bit Core</span>
+        </div>
+        <div class="subtitle">Silicon floorplanning routing pressure &amp; thermal risk analysis</div>
+      </div>
     </div>
-    <div style="display: flex; gap: 12px; align-items: center;">
-      <button id="btnToggle3D" class="btn-3d" onclick="toggle3DView()">🔍 Analyze in 3D</button>
-    </div>
-  </div>
 
-  <!-- INPUT CONTROLS VIEW (EDIT INPUTS FORM) -->
-  <div id="controlsView" style="display: none;">
-    <!-- PRESETS BAR -->
-    <div style="display:flex; gap:10px; margin-bottom:24px;">
+    <!-- PRESETS SELECTION -->
+    <div class="preset-bar">
       <span style="font-size: 12px; font-weight: 800; color: #718096; display: flex; align-items: center; margin-right: 6px;">FLOORPLAN PRESETS:</span>
       <button type="button" class="btn-preset" onclick="applyPreset('default')">⚡ Standard RV32I Core</button>
       <button type="button" class="btn-preset" onclick="applyPreset('high_density')">🔥 High Density (72% Util)</button>
       <button type="button" class="btn-preset" onclick="applyPreset('conservative')">🛡️ Safe / Low Congestion</button>
     </div>
 
-    <!-- GEOMETRY CARD -->
+    <!-- SECTION 1: FLOORPLAN DESIGN INPUTS -->
     <div class="card">
-      <div style="color: #7c3aed; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px;">1. Floorplan Geometry & Density Parameters</div>
-      <h3 style="font-size: 17px; color: #1a202c; font-weight: 800; margin: 4px 0 16px 0;">Set core cell utilization and margin</h3>
-      
+      <div class="card-header">
+        <div>
+          <div class="card-title">1. Floorplan Geometry &amp; Density Parameters</div>
+          <div class="card-heading">Set core cell utilization and margin</div>
+        </div>
+      </div>
+
       <div class="grid-5">
         <div class="box">
-          <label>CORE UTILIZATION <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">%</span></label>
-          <input type="number" id="inpUtil" value="57.0" step="0.5" min="20" max="95" oninput="syncVal('inpUtil', 'rngUtil')">
-          <input type="range" id="rngUtil" value="57.0" step="0.5" min="20" max="95" oninput="syncVal('rngUtil', 'inpUtil')">
+          <label>UTILIZATION <span class="badge">%</span></label>
+          <input type="number" id="inp_util" value="57.0" step="any" oninput="updateLiveStats()">
+          <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)">
         </div>
+
         <div class="box">
-          <label>ASPECT RATIO <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">H:W</span></label>
-          <input type="number" id="inpAspect" value="1.50" step="0.05" min="0.5" max="3.0" oninput="syncVal('inpAspect', 'rngAspect')">
-          <input type="range" id="rngAspect" value="1.50" step="0.05" min="0.5" max="3.0" oninput="syncVal('rngAspect', 'inpAspect')">
+          <label>ASPECT RATIO <span class="badge">ratio</span></label>
+          <input type="number" id="inp_aspect" value="1.5" step="any" oninput="updateLiveStats()">
+          <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)">
         </div>
+
         <div class="box">
-          <label>CORE MARGIN <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">MM</span></label>
-          <input type="number" id="inpMargin" value="3.0" step="0.5" min="0.5" max="10.0" oninput="syncVal('inpMargin', 'rngMargin')">
-          <input type="range" id="rngMargin" value="3.0" step="0.5" min="0.5" max="10.0" oninput="syncVal('rngMargin', 'inpMargin')">
+          <label>CORE MARGIN <span class="badge">mm</span></label>
+          <input type="number" id="inp_margin" value="3.0" step="any" oninput="updateLiveStats()">
+          <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)">
         </div>
+
         <div class="box">
-          <label>TARGET DENSITY <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">RATIO</span></label>
-          <input type="number" id="inpDensity" value="0.56" step="0.01" min="0.1" max="0.95" oninput="syncVal('inpDensity', 'rngDensity')">
-          <input type="range" id="rngDensity" value="0.56" step="0.01" min="0.1" max="0.95" oninput="syncVal('rngDensity', 'inpDensity')">
+          <label>PLACEMENT DENSITY <span class="badge">0-1</span></label>
+          <input type="number" id="inp_density" value="0.56" step="any" oninput="updateLiveStats()">
+          <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)">
         </div>
+
         <div class="box">
-          <label>LAYER ADJUSTMENT <span style="background: #edf2f7; padding:2px 6px; border-radius:4px;">FACTOR</span></label>
-          <input type="number" id="inpLayerAdj" value="0.60" step="0.05" min="0.1" max="1.0" oninput="syncVal('inpLayerAdj', 'rngLayerAdj')">
-          <input type="range" id="rngLayerAdj" value="0.60" step="0.05" min="0.1" max="1.0" oninput="syncVal('rngLayerAdj', 'inpLayerAdj')">
+          <label>LAYER ADJUSTMENT <span class="badge">0-1</span></label>
+          <input type="number" id="inp_layer_adj" value="0.6" step="any" oninput="updateLiveStats()">
+          <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)">
         </div>
       </div>
     </div>
 
-    <!-- TRACK RESOURCES CARD -->
+    <!-- SECTION 2: PER-METAL-LAYER ROUTING TRACK CAPACITY -->
     <div class="card">
-      <div style="color: #7c3aed; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.8px;">2. Interconnect Track Resources (BEOL Stack)</div>
-      <h3 style="font-size: 17px; color: #1a202c; font-weight: 800; margin: 4px 0 16px 0;">Available tracks per metal layer (M1 – M10)</h3>
-      
-      <div class="grid-5">
-        <div class="box"><label>M1 <span style="color:#7c3aed;">FEOL</span></label><input type="number" id="resM1" value="0"></div>
-        <div class="box"><label>M2 <span style="color:#7c3aed;">LOCAL</span></label><input type="number" id="resM2" value="27540"></div>
-        <div class="box"><label>M3 <span style="color:#7c3aed;">LOCAL</span></label><input type="number" id="resM3" value="37222"></div>
-        <div class="box"><label>M4 <span style="color:#7c3aed;">INTERMEDIATE</span></label><input type="number" id="resM4" value="18450"></div>
-        <div class="box"><label>M5 <span style="color:#7c3aed;">INTERMEDIATE</span></label><input type="number" id="resM5" value="18096"></div>
-        <div class="box"><label>M6 <span style="color:#7c3aed;">INTERMEDIATE</span></label><input type="number" id="resM6" value="18450"></div>
-        <div class="box"><label>M7 <span style="color:#7c3aed;">SEMI-GLOBAL</span></label><input type="number" id="resM7" value="5699"></div>
-        <div class="box"><label>M8 <span style="color:#7c3aed;">GLOBAL</span></label><input type="number" id="resM8" value="5796"></div>
-        <div class="box"><label>M9 <span style="color:#7c3aed;">GLOBAL POWER</span></label><input type="number" id="resM9" value="2758"></div>
-        <div class="box"><label>M10 <span style="color:#7c3aed;">TOP RDL</span></label><input type="number" id="resM10" value="2772"></div>
+      <div class="card-header">
+        <div>
+          <div class="card-title">2. Silicon Metal Stack Capacity ($M_1$ → $M_{10}$)</div>
+          <div class="card-heading">Available routing track capacity per metal layer</div>
+        </div>
       </div>
 
-      <button class="btn-submit" onclick="runAnalysis()">Run Congestion Model &amp; 3D Viewer</button>
+      <div class="grid-5">
+        <div class="box">
+          <label>METAL 1 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">FEOL Std Cell Local</div>
+          <input type="number" id="m1_res" value="0" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 2 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">BEOL Signal Low</div>
+          <input type="number" id="m2_res" value="27540" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 3 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">BEOL Signal Low</div>
+          <input type="number" id="m3_res" value="37221" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 4 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">BEOL Interconnect</div>
+          <input type="number" id="m4_res" value="18450" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 5 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">BEOL Interconnect</div>
+          <input type="number" id="m5_res" value="18096" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 6 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">BEOL Intermediate Bus</div>
+          <input type="number" id="m6_res" value="18450" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 7 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">BEOL Global Bus</div>
+          <input type="number" id="m7_res" value="5699" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 8 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">BEOL Global Bus</div>
+          <input type="number" id="m8_res" value="5796" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 9 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">Power Grid Mesh</div>
+          <input type="number" id="m9_res" value="2758" oninput="updateLiveStats()">
+        </div>
+
+        <div class="box">
+          <label>METAL 10 <span class="badge">TRACKS</span></label>
+          <div class="layer-tag">VDD / VSS Straps</div>
+          <input type="number" id="m10_res" value="2772" oninput="updateLiveStats()">
+        </div>
+      </div>
+
+      <!-- LIVE ESTIMATION BANNER -->
+      <div class="summary-banner">
+        <div class="metric-group">
+          <div class="metric-item">
+            <span class="metric-label">ESTIMATED CORE AREA</span>
+            <span class="metric-val" id="disp_area">1.59 mm²</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">TOTAL ROUTING BUDGET</span>
+            <span class="metric-val" id="disp_tracks">136,782 tracks</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">ESTIMATED RISK CLASS</span>
+            <span class="metric-val" id="disp_risk" style="color: #15803d;">DRC Clean / Safe</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="runRoutingAnalysis()">
+          RUN ROUTING ANALYSIS →
+        </button>
+      </div>
+
     </div>
   </div>
 
-  <!-- RESULTS DASHBOARD VIEW -->
-  <div id="resultsView">
+  <!-- STEP 2: RESULTS DASHBOARD (SECOND PAGE) -->
+  <div id="resultsView" style="display: none;">
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div>
+        <button class="btn-nav" onclick="showInputForm()">← Edit inputs</button>
+        <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; color: #1a202c;">RV32I CONGESTION PREDICTOR</h2>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button id="btnToggle3D" class="btn-3d" onclick="toggle3DView()">🔍 Analyze in 3D</button>
+      </div>
+    </div>
+
     <div class="dashboard-layout">
-      
-      <!-- LEFT SIDEBAR: INPUT PARAMETERS SUMMARY -->
+      <!-- LEFT SIDEBAR -->
       <div class="sidebar">
         <div style="font-size: 24px; font-weight: 800; color: #1a202c; margin-bottom: 4px;">Predict routing pressure</div>
-        <div style="color: #718096; font-size: 12px; margin-bottom: 20px;">Current floorplan parameters</div>
+        <div style="color: #718096; font-size: 12px; margin-bottom: 20px;">These are the values from the last run. Go back to change them.</div>
         
-        <div class="input-box"><label>UTILIZATION <span class="badge">%</span></label><div class="val" id="dispUtil">57.0</div></div>
-        <div class="input-box"><label>ASPECT RATIO <span class="badge">RATIO</span></label><div class="val" id="dispAspect">1.5</div></div>
-        <div class="input-box"><label>CORE MARGIN <span class="badge">MM</span></label><div class="val" id="dispMargin">3.0</div></div>
-        <div class="input-box"><label>DENSITY</label><div class="val" id="dispDensity">0.56</div></div>
-        <div class="input-box"><label>LAYER ADJUSTMENT</label><div class="val" id="dispLayerAdj">0.60</div></div>
-
-        <div style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; margin: 24px 0 10px 0;">BEOL METAL LAYER RESOURCES</div>
-        <div id="sideResources"></div>
+        <div class="input-box"><label>UTILIZATION <span class="badge">%</span></label><div class="val" id="resUtil">57.0</div></div>
+        <div class="input-box"><label>ASPECT RATIO <span class="badge">RATIO</span></label><div class="val" id="resAspect">1.5</div></div>
+        <div class="input-box"><label>CORE MARGIN <span class="badge">MM</span></label><div class="val" id="resMargin">3.0</div></div>
+        <div class="input-box"><label>DENSITY</label><div class="val" id="resDensity">0.56</div></div>
+        <div class="input-box"><label>LAYER ADJUSTMENT</label><div class="val" id="resLayerAdj">0.60</div></div>
       </div>
 
       <!-- MAIN DASHBOARD CONTENT -->
       <div>
         
-        <!-- 3D COMMERCIAL SILICON ROUTER VIEWER PANEL -->
+        <!-- 3D COMMERCIAL SILICON ROUTER VIEWER -->
         <div id="panel3D" class="card" style="margin-bottom: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div style="color: #7c3aed; font-size: 12px; font-weight: 800; text-transform: uppercase;">3D COMMERCIAL SILICON ROUTER VIEWER</div>
@@ -364,65 +579,81 @@
   </div>
 
   <script>
-    let currentView = 'results'; // 'results' or 'controls'
+    function syncInput(targetId, val) {
+      document.getElementById(targetId).value = val;
+      updateLiveStats();
+    }
 
-    function toggleView() {
-      const controls = document.getElementById('controlsView');
-      const results = document.getElementById('resultsView');
-      const btn = document.getElementById('btnNavToggle');
+    function applyPreset(type) {
+      if (type === 'default') {
+        document.getElementById('inp_util').value = 57.0;
+        document.getElementById('inp_aspect').value = 1.5;
+        document.getElementById('inp_margin').value = 3.0;
+        document.getElementById('inp_density').value = 0.56;
+        document.getElementById('inp_layer_adj').value = 0.6;
+      } else if (type === 'high_density') {
+        document.getElementById('inp_util').value = 72.0;
+        document.getElementById('inp_aspect').value = 1.8;
+        document.getElementById('inp_margin').value = 2.0;
+        document.getElementById('inp_density').value = 0.78;
+        document.getElementById('inp_layer_adj').value = 0.4;
+      } else if (type === 'conservative') {
+        document.getElementById('inp_util').value = 42.0;
+        document.getElementById('inp_aspect').value = 1.0;
+        document.getElementById('inp_margin').value = 4.5;
+        document.getElementById('inp_density').value = 0.42;
+        document.getElementById('inp_layer_adj').value = 0.8;
+      }
+      
+      document.getElementById('rng_util').value = document.getElementById('inp_util').value;
+      document.getElementById('rng_aspect').value = document.getElementById('inp_aspect').value;
+      document.getElementById('rng_margin').value = document.getElementById('inp_margin').value;
+      document.getElementById('rng_density').value = document.getElementById('inp_density').value;
+      document.getElementById('rng_layer_adj').value = document.getElementById('inp_layer_adj').value;
+      
+      updateLiveStats();
+    }
 
-      if (controls.style.display === 'none') {
-        controls.style.display = 'block';
-        results.style.display = 'none';
-        btn.innerText = '→ Show Results';
+    function updateLiveStats() {
+      const util = parseFloat(document.getElementById('inp_util').value) || 57;
+      const margin = parseFloat(document.getElementById('inp_margin').value) || 3;
+      const aspect = parseFloat(document.getElementById('inp_aspect').value) || 1.5;
+      
+      const baseArea = (util * 0.02) + (margin * 0.1) * aspect;
+      document.getElementById('disp_area').innerText = baseArea.toFixed(2) + ' mm²';
+
+      let sumTracks = 0;
+      for (let i = 1; i <= 10; i++) {
+        const inp = document.getElementById('m' + i + '_res');
+        if (inp) sumTracks += parseFloat(inp.value) || 0;
+      }
+      document.getElementById('disp_tracks').innerText = Math.round(sumTracks).toLocaleString() + ' tracks';
+
+      const riskEl = document.getElementById('disp_risk');
+      if (util > 70) {
+        riskEl.innerText = 'High Congestion Warning';
+        riskEl.style.color = '#dc2626';
+      } else if (util > 60) {
+        riskEl.innerText = 'Borderline Pressure';
+        riskEl.style.color = '#d97706';
       } else {
-        controls.style.display = 'none';
-        results.style.display = 'block';
-        btn.innerText = '← Edit inputs';
+        riskEl.innerText = 'DRC Clean / Safe';
+        riskEl.style.color = '#15803d';
       }
     }
 
-    function syncVal(srcId, dstId) {
-      document.getElementById(dstId).value = document.getElementById(srcId).value;
-    }
+    function runRoutingAnalysis() {
+      const util = parseFloat(document.getElementById('inp_util').value) || 57;
+      const aspect = parseFloat(document.getElementById('inp_aspect').value) || 1.5;
+      const margin = parseFloat(document.getElementById('inp_margin').value) || 3;
+      const density = parseFloat(document.getElementById('inp_density').value) || 0.56;
+      const layerAdj = parseFloat(document.getElementById('inp_layer_adj').value) || 0.6;
 
-    function applyPreset(preset) {
-      if (preset === 'default') {
-        document.getElementById('inpUtil').value = 57.0; syncVal('inpUtil', 'rngUtil');
-        document.getElementById('inpAspect').value = 1.50; syncVal('inpAspect', 'rngAspect');
-        document.getElementById('inpMargin').value = 3.0; syncVal('inpMargin', 'rngMargin');
-        document.getElementById('inpDensity').value = 0.56; syncVal('inpDensity', 'rngDensity');
-        document.getElementById('inpLayerAdj').value = 0.60; syncVal('inpLayerAdj', 'rngLayerAdj');
-      } else if (preset === 'high_density') {
-        document.getElementById('inpUtil').value = 72.0; syncVal('inpUtil', 'rngUtil');
-        document.getElementById('inpAspect').value = 1.20; syncVal('inpAspect', 'rngAspect');
-        document.getElementById('inpMargin').value = 1.5; syncVal('inpMargin', 'rngMargin');
-        document.getElementById('inpDensity').value = 0.78; syncVal('inpDensity', 'rngDensity');
-        document.getElementById('inpLayerAdj').value = 0.85; syncVal('inpLayerAdj', 'rngLayerAdj');
-      } else if (preset === 'conservative') {
-        document.getElementById('inpUtil').value = 42.0; syncVal('inpUtil', 'rngUtil');
-        document.getElementById('inpAspect').value = 1.00; syncVal('inpAspect', 'rngAspect');
-        document.getElementById('inpMargin').value = 5.0; syncVal('inpMargin', 'rngMargin');
-        document.getElementById('inpDensity').value = 0.40; syncVal('inpDensity', 'rngDensity');
-        document.getElementById('inpLayerAdj').value = 0.35; syncVal('inpLayerAdj', 'rngLayerAdj');
-      }
-    }
-
-    function openFixModal() { document.getElementById('fixModal').style.display = 'flex'; }
-    function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
-
-    function runAnalysis() {
-      const util = parseFloat(document.getElementById('inpUtil').value);
-      const aspect = parseFloat(document.getElementById('inpAspect').value);
-      const margin = parseFloat(document.getElementById('inpMargin').value);
-      const density = parseFloat(document.getElementById('inpDensity').value);
-      const layerAdj = parseFloat(document.getElementById('inpLayerAdj').value);
-
-      document.getElementById('dispUtil').innerText = util.toFixed(1);
-      document.getElementById('dispAspect').innerText = aspect.toFixed(2);
-      document.getElementById('dispMargin').innerText = margin.toFixed(1);
-      document.getElementById('dispDensity').innerText = density.toFixed(2);
-      document.getElementById('dispLayerAdj').innerText = layerAdj.toFixed(2);
+      document.getElementById('resUtil').innerText = util.toFixed(1);
+      document.getElementById('resAspect').innerText = aspect.toFixed(1);
+      document.getElementById('resMargin').innerText = margin.toFixed(1);
+      document.getElementById('resDensity').innerText = density.toFixed(2);
+      document.getElementById('resLayerAdj').innerText = layerAdj.toFixed(2);
       document.getElementById('dispDensitySub').innerText = density.toFixed(2);
 
       // Compute physical VLSI features
@@ -437,28 +668,17 @@
       document.getElementById('valVia').innerHTML = viaDensity + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span>';
 
       const resources = {
-        M1: parseFloat(document.getElementById('resM1').value),
-        M2: parseFloat(document.getElementById('resM2').value),
-        M3: parseFloat(document.getElementById('resM3').value),
-        M4: parseFloat(document.getElementById('resM4').value),
-        M5: parseFloat(document.getElementById('resM5').value),
-        M6: parseFloat(document.getElementById('resM6').value),
-        M7: parseFloat(document.getElementById('resM7').value),
-        M8: parseFloat(document.getElementById('resM8').value),
-        M9: parseFloat(document.getElementById('resM9').value),
-        M10: parseFloat(document.getElementById('resM10').value)
+        M1: parseFloat(document.getElementById('m1_res').value) || 0,
+        M2: parseFloat(document.getElementById('m2_res').value) || 27540,
+        M3: parseFloat(document.getElementById('m3_res').value) || 37221,
+        M4: parseFloat(document.getElementById('m4_res').value) || 18450,
+        M5: parseFloat(document.getElementById('m5_res').value) || 18096,
+        M6: parseFloat(document.getElementById('m6_res').value) || 18450,
+        M7: parseFloat(document.getElementById('m7_res').value) || 5699,
+        M8: parseFloat(document.getElementById('m8_res').value) || 5796,
+        M9: parseFloat(document.getElementById('m9_res').value) || 2758,
+        M10: parseFloat(document.getElementById('m10_res').value) || 2772
       };
-
-      const sideResContainer = document.getElementById('sideResources');
-      sideResContainer.innerHTML = '';
-      Object.keys(resources).forEach(k => {
-        sideResContainer.innerHTML += `
-          <div class="input-box" style="padding: 8px 12px; margin-bottom: 8px;">
-            <label>${k} TRACK RESOURCE</label>
-            <div class="val" style="font-size: 14px;">${resources[k].toLocaleString()}</div>
-          </div>
-        `;
-      });
 
       const stress = (util / 57.0) * (density / 0.56) * (3.0 / Math.max(0.5, margin));
       const baseDemands = { M1: 0, M2: 14186, M3: 16986, M4: 6621, M5: 4580, M6: 4547, M7: 860, M8: 783, M9: 470, M10: 410 };
@@ -490,9 +710,13 @@
 
       document.getElementById('controlsView').style.display = 'none';
       document.getElementById('resultsView').style.display = 'block';
-      document.getElementById('btnNavToggle').innerText = '← Edit inputs';
 
       if (!sceneInit) init3DScene();
+    }
+
+    function showInputForm() {
+      document.getElementById('resultsView').style.display = 'none';
+      document.getElementById('controlsView').style.display = 'block';
     }
 
     function renderHeatmaps(usages) {
@@ -549,6 +773,9 @@
       return cvs;
     }
 
+    function openFixModal() { document.getElementById('fixModal').style.display = 'flex'; }
+    function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
+
     function openSingleLayerFix(layer) {
       document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer;
       document.getElementById('modalFixParams').innerHTML = `
@@ -566,15 +793,12 @@
 
     function applyFixAndRun() {
       closeFixModal();
-      document.getElementById('inpMargin').value = 4.5; syncVal('inpMargin', 'rngMargin');
-      document.getElementById('inpDensity').value = 0.45; syncVal('inpDensity', 'rngDensity');
-      runAnalysis();
+      document.getElementById('inp_margin').value = 4.5; syncInput('inp_margin', 4.5);
+      document.getElementById('inp_density').value = 0.45; syncInput('inp_density', 0.45);
+      runRoutingAnalysis();
     }
 
     let sceneInit = false; let globalCamera, globalRenderer, globalControls;
-    let isolatedAssembly, fullStackAssembly;
-    let isIsolated = false, exploded = false;
-
     function init3DScene() {
       sceneInit = true;
       const container = document.getElementById("viewport3D");
@@ -591,7 +815,7 @@
       const ambLight = new THREE.AmbientLight(0xffffff, 0.7); scene.add(ambLight);
       const dirLight = new THREE.DirectionalLight(0xffffff, 0.8); dirLight.position.set(10, 20, 10); scene.add(dirLight);
 
-      fullStackAssembly = new THREE.Group();
+      const fullStackAssembly = new THREE.Group();
       for (let i = 0; i < 10; i++) {
         const geo = new THREE.BoxGeometry(4, 0.15, 4);
         const colorHex = i > 6 ? 0x7c3aed : (i > 3 ? 0x0284c7 : 0x16a34a);
@@ -607,26 +831,11 @@
 
     function toggle3DView() {
       const p = document.getElementById("panel3D");
-      if (p.style.display === "none") {
-        p.style.display = "block";
-        if (!sceneInit) init3DScene();
-      } else {
-        p.style.display = "none";
-      }
+      p.style.display = (p.style.display === "none") ? "block" : "none";
     }
 
-    function toggleIsolationMode() {
-      isIsolated = !isIsolated;
-      document.getElementById('btnIsolate').innerText = isIsolated ? 'Show Full Stack' : 'Isolate Layer';
-    }
-
-    function toggleExplodeMode() {
-      exploded = !exploded;
-    }
-
-    // Auto initialize on load
     window.addEventListener('load', () => {
-      runAnalysis();
+      updateLiveStats();
     });
   </script>
 </body>
