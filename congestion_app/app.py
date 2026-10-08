@@ -193,17 +193,27 @@ def predict():
         else:
             suggested_resources[k] = int(res)
 
-    # Accuracy / Metric numbers
+    # Physical VLSI Feature Metrics
+    pin_density = round(float(features_df["pin_density"].iloc[0]), 2)
+    hpwl_wirelength = round(float(features_df["hpwl_wirelength"].iloc[0]), 2)
+    macro_blockage = round(float(features_df["macro_blockage"].iloc[0]) * 100.0, 1)
+    via_pillar_density = round(float(features_df["via_pillar_density"].iloc[0]), 2)
+
     xgb_acc = meta_info.get("xgboost_accuracy", 0.9915) * 100.0
     avg_r2 = meta_info.get("xgboost_avg_r2", 0.9886)
 
     return render_template(
+
         "results.html",
         utilization=util,
         aspect_ratio=aspect,
         core_margin=margin,
         density=density,
         layer_adjustment=layer_adj,
+        pin_density=pin_density,
+        hpwl_wirelength=hpwl_wirelength,
+        macro_blockage=macro_blockage,
+        via_pillar_density=via_pillar_density,
         resources=resources,
         demands=demands,
         layer_usage_pct=layer_usage_pct,
@@ -226,6 +236,7 @@ def predict():
         avg_r2=avg_r2,
         meta_info=meta_info
     )
+
 
 
 if __name__ == "__main__":

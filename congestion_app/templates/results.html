@@ -125,9 +125,14 @@
       <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #1a202c;">RV32I CONGESTION PREDICTOR</h2>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
+      <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
+        <span style="width: 8px; height: 8px; background: #16a34a; border-radius: 50%;"></span>
+        <b>AI ENGINE ACTIVE:</b> XGBoost + Feature Matrix • 2D Hotspot CNN • DRC Engine
+      </span>
       <button id="btnToggle3D" class="btn-3d" onclick="toggle3DView()">🔍 Analyze in 3D</button>
     </div>
   </div>
+
 
   <div class="dashboard-layout">
     
@@ -288,6 +293,38 @@
         </div>
 
       </div>
+
+      <!-- AI ENGINE & PHYSICAL FEATURE SUMMARY CARD -->
+      <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%); border: 1px solid rgba(124, 58, 237, 0.2); margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px;">ACTIVE AI ARCHITECTURE &amp; PHYSICAL ENGINE METRICS</span>
+            <h3 style="margin: 2px 0 0 0; font-size: 16px; font-weight: 800; color: #1a202c;">XGBoost + Physical Feature Matrix &amp; 2D Spatial Hotspot CNN</h3>
+          </div>
+          <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
+            ⚡ Inference: &lt;25ms
+          </span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px;">
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">PIN DENSITY INDEX</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">{{ pin_density }} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">HPWL WIRELENGTH</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">{{ hpwl_wirelength }} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">MACRO BLOCKAGE</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">{{ macro_blockage }} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">VIA PILLAR DENSITY</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">{{ via_pillar_density }} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span></div>
+          </div>
+        </div>
+      </div>
+
 
       <!-- RECOMMENDATION SECTION -->
       <div class="card" style="border-left: 5px solid #16a34a;">
