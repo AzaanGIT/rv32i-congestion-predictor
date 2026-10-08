@@ -324,18 +324,6 @@
       </div>
 
 
-      <!-- RECOMMENDATION SECTION -->
-      <div class="card" style="border-left: 5px solid #16a34a;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Input Changes</span>
-            <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
-            <p style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is {{ peak_val_pct }}% on {{ peak_layer }}. Click to apply calculated design rules and bring wire density below 80%.</p>
-          </div>
-          <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
-        </div>
-      </div>
-
       <!-- 2D CELLULAR HEATMAP VIEWER -->
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
@@ -364,6 +352,19 @@
           {% endfor %}
         </div>
       </div>
+
+      <!-- RECOMMENDATION SECTION -->
+      <div class="card" style="border-left: 5px solid #16a34a;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Input Changes</span>
+            <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
+            <p style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is {{ peak_val_pct }}% on {{ peak_layer }}. Click to apply calculated design rules and bring wire density below 80%.</p>
+          </div>
+          <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
+        </div>
+      </div>
+
 
       
     </div>
