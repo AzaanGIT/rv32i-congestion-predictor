@@ -1,0 +1,24 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Backup directories and zip archives
+congestion_app/app_*
+congestion_app/congestion_app_*
+congestion_app/running_app
+*.zip
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Scratch and temp files
+scratch/
+.venv/
+env/
+venv/

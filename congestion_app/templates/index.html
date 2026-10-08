@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>RV32I Congestion Predictor</title>
+  <style>
+    body { background: #0c0f12; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; margin: 0; padding: 24px 40px; }
+    .header { display: flex; justify-content: space-between; border-bottom: 1px solid #1e252e; padding-bottom: 16px; margin-bottom: 24px; }
+    .card { background: #12161b; border: 1px solid #1e252e; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .title { color: #eab308; font-size: 11px; text-transform: uppercase; font-weight: bold; }
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 12px; }
+    .box { background: #07090b; border: 1px solid #232a35; border-radius: 6px; padding: 10px; }
+    .box label { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+    .badge { background: #1e293b; color: #e2e8f0; padding: 1px 6px; border-radius: 3px; font-size: 9px; }
+    input { width: 100%; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: bold; margin-top: 8px; outline: none; }
+    .btn { width: 100%; background: #bef264; color: #000; font-size: 14px; font-weight: bold; padding: 14px; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; margin-top: 12px; }
+    .btn:hover { background: #a3e635; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h2 style="margin: 0; font-size: 18px;">RV32I CONGESTION PREDICTOR</h2>
+      <span style="color:#64748b; font-size: 12px;">dataset-driven routing risk analysis</span>
+    </div>
+    <div style="color: #10b981; font-size: 11px;">● LOCAL MODEL ONLINE</div>
+  </div>
+
+  <form action="/predict" method="POST">
+    <div class="card">
+      <div class="title">Per-Metal-Layer Routing Resource</div>
+      <h3 style="margin: 4px 0 10px 0; font-size: 15px;">Set each layer routing resource</h3>
+      <div class="grid">
+        <div class="box"><label>METAL 1 <span class="badge">NUMBER</span></label><input type="number" name="metal_1" value="{{ resources.M1 if resources else 0 }}" step="any"></div>
+        <div class="box"><label>METAL 2 <span class="badge">NUMBER</span></label><input type="number" name="metal_2" value="{{ resources.M2 if resources else 27540 }}" step="any"></div>
+        <div class="box"><label>METAL 3 <span class="badge">NUMBER</span></label><input type="number" name="metal_3" value="{{ resources.M3 if resources else 37222 }}" step="any"></div>
+        <div class="box"><label>METAL 4 <span class="badge">NUMBER</span></label><input type="number" name="metal_4" value="{{ resources.M4 if resources else 18450 }}" step="any"></div>
+        <div class="box"><label>METAL 5 <span class="badge">NUMBER</span></label><input type="number" name="metal_5" value="{{ resources.M5 if resources else 18096 }}" step="any"></div>
+        <div class="box"><label>METAL 6 <span class="badge">NUMBER</span></label><input type="number" name="metal_6" value="{{ resources.M6 if resources else 18450 }}" step="any"></div>
+        <div class="box"><label>METAL 7 <span class="badge">NUMBER</span></label><input type="number" name="metal_7" value="{{ resources.M7 if resources else 5699 }}" step="any"></div>
+        <div class="box"><label>METAL 8 <span class="badge">NUMBER</span></label><input type="number" name="metal_8" value="{{ resources.M8 if resources else 5796 }}" step="any"></div>
+        <div class="box"><label>METAL 9 <span class="badge">NUMBER</span></label><input type="number" name="metal_9" value="{{ resources.M9 if resources else 2758 }}" step="any"></div>
+        <div class="box"><label>METAL 10 <span class="badge">NUMBER</span></label><input type="number" name="metal_10" value="{{ resources.M10 if resources else 2772 }}" step="any"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Design Input</div>
+      <h3 style="margin: 4px 0 10px 0; font-size: 15px;">Predict routing pressure</h3>
+      <div class="grid">
+        <div class="box"><label>UTILIZATION <span class="badge">%</span></label><input type="number" name="utilization" value="{{ utilization or 57 }}" step="any"></div>
+        <div class="box"><label>ASPECT RATIO <span class="badge">ratio</span></label><input type="number" name="aspect_ratio" value="{{ aspect_ratio or 1.5 }}" step="any"></div>
+        <div class="box"><label>CORE MARGIN <span class="badge">mm</span></label><input type="number" name="core_margin" value="{{ core_margin or 3 }}" step="any"></div>
+        <div class="box"><label>DENSITY <span class="badge">0-1</span></label><input type="number" name="density" value="{{ density or 0.56 }}" step="any"></div>
+        <div class="box"><label>LAYER ADJUSTMENT <span class="badge">0-1</span></label><input type="number" name="layer_adjustment" value="{{ layer_adjustment or 0.6 }}" step="any"></div>
+      </div>
+      <button type="submit" class="btn">RUN CONGESTION MODEL →</button>
+    </div>
+  </form>
+</body>
+</html>
