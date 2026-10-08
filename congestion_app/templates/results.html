@@ -357,31 +357,13 @@
               <span style="color: {% if layer_usage_pct[layer] >= 85 %}#dc2626{% else %}#15803d{% endif %}; font-weight: 800;">{{ layer_usage_pct[layer] }}%</span>
             </div>
             <canvas id="cvs-{{ layer }}" class="canvas-sim" width="50" height="50"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; font-weight: 600;">derived pressure distribution</div>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('{{ layer }}')">Fix this layer</button>
           </div>
           {% endfor %}
         </div>
       </div>
 
-      <!-- SIDE VIEW BARS -->
-      <div class="card">
-        <div style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 16px; letter-spacing: 0.5px;">SIDE VIEW • ALL LAYERS • M10 → M1</div>
-        <div>
-          {% for layer in ["M10", "M9", "M8", "M7", "M6", "M5", "M4", "M3", "M2", "M1"] %}
-          <div class="bar-row">
-            <span style="width: 40px; color:#1a202c; font-weight:800;">{{ layer }}</span>
-            <div class="bar-track">
-              <!-- Dithered ASCII Format injected here - NO GRADIENT -->
-              <div id="ascii-{{ layer }}" class="ascii-bar"></div>
-            </div>
-            <span style="width: 60px; text-align:right; font-weight:800; color: {% if layer_usage_pct[layer] >= 85 %}#dc2626{% else %}#1a202c{% endif %}; margin-right: 14px;">
-              {{ layer_usage_pct[layer] }}%
-            </span>
-            <button class="btn-fix" onclick="openSingleLayerFix('{{ layer }}')">Fix this layer</button>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
       
     </div>
   </div>
