@@ -4,32 +4,125 @@
   <meta charset="UTF-8">
   <title>RV32I Congestion Predictor</title>
   <style>
-    body { background: #0c0f12; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; margin: 0; padding: 24px 40px; }
-    .header { display: flex; justify-content: space-between; border-bottom: 1px solid #1e252e; padding-bottom: 16px; margin-bottom: 24px; }
-    .card { background: #12161b; border: 1px solid #1e252e; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
-    .title { color: #eab308; font-size: 11px; text-transform: uppercase; font-weight: bold; }
-    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 12px; }
-    .box { background: #07090b; border: 1px solid #232a35; border-radius: 6px; padding: 10px; }
-    .box label { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
-    .badge { background: #1e293b; color: #e2e8f0; padding: 1px 6px; border-radius: 3px; font-size: 9px; }
-    input { width: 100%; background: transparent; border: none; color: #fff; font-size: 16px; font-weight: bold; margin-top: 8px; outline: none; }
-    .btn { width: 100%; background: #bef264; color: #000; font-size: 14px; font-weight: bold; padding: 14px; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; margin-top: 12px; }
-    .btn:hover { background: #a3e635; }
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(-20deg, #e9defa 0%, #fbfcdb 100%);
+      min-height: 100vh;
+      color: #2d3748;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 28px 40px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(107, 70, 193, 0.15);
+      padding-bottom: 18px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 10px 30px rgba(103, 80, 164, 0.08);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .title {
+      color: #7c3aed;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .box {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
+    }
+    .box:focus-within {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      background: #ffffff;
+    }
+    .box label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #4a5568;
+    }
+    .badge {
+      background: #edf2f7;
+      color: #4a5568;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+    input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #1a202c;
+      font-size: 17px;
+      font-weight: 700;
+      margin-top: 8px;
+      outline: none;
+      font-family: inherit;
+    }
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      margin-top: 16px;
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <div>
-      <h2 style="margin: 0; font-size: 18px;">RV32I CONGESTION PREDICTOR</h2>
-      <span style="color:#64748b; font-size: 12px;">dataset-driven routing risk analysis</span>
+      <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #1a202c; letter-spacing: -0.3px;">RV32I CONGESTION PREDICTOR</h2>
+      <span style="color: #718096; font-size: 13px; font-weight: 500;">Dataset-driven routing risk analysis</span>
     </div>
-    <div style="color: #10b981; font-size: 11px;">● LOCAL MODEL ONLINE</div>
+    <div style="background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 20px; display: flex; align-items: center; gap: 6px;">
+      <span style="display: inline-block; width: 7px; height: 7px; background: #15803d; border-radius: 50%;"></span>
+      LOCAL MODEL ONLINE
+    </div>
   </div>
 
   <form action="/predict" method="POST">
     <div class="card">
       <div class="title">Per-Metal-Layer Routing Resource</div>
-      <h3 style="margin: 4px 0 10px 0; font-size: 15px;">Set each layer routing resource</h3>
+      <h3 style="margin: 6px 0 14px 0; font-size: 16px; color: #1a202c; font-weight: 700;">Set each layer routing resource</h3>
       <div class="grid">
         <div class="box"><label>METAL 1 <span class="badge">NUMBER</span></label><input type="number" name="metal_1" value="{{ resources.M1 if resources else 0 }}" step="any"></div>
         <div class="box"><label>METAL 2 <span class="badge">NUMBER</span></label><input type="number" name="metal_2" value="{{ resources.M2 if resources else 27540 }}" step="any"></div>
@@ -46,7 +139,7 @@
 
     <div class="card">
       <div class="title">Design Input</div>
-      <h3 style="margin: 4px 0 10px 0; font-size: 15px;">Predict routing pressure</h3>
+      <h3 style="margin: 6px 0 14px 0; font-size: 16px; color: #1a202c; font-weight: 700;">Predict routing pressure</h3>
       <div class="grid">
         <div class="box"><label>UTILIZATION <span class="badge">%</span></label><input type="number" name="utilization" value="{{ utilization or 57 }}" step="any"></div>
         <div class="box"><label>ASPECT RATIO <span class="badge">ratio</span></label><input type="number" name="aspect_ratio" value="{{ aspect_ratio or 1.5 }}" step="any"></div>
