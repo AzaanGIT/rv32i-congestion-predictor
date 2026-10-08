@@ -84,7 +84,7 @@
     .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
 
     /* 3D Panel & Inspector Styling */
-    #panel3D { display: none; margin-bottom: 24px; border: 1px solid #ddd6fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; }
+    #panel3D { display: block; margin-bottom: 24px; border: 1px solid #ddd6fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; }
     .viewport-container { display: grid; grid-template-columns: 2.3fr 1fr; gap: 20px; }
     #viewport3D { width: 100%; height: 560px; border-radius: 8px; background: #0f172a; cursor: grab; position: relative; overflow: hidden; }
     #viewport3D:active { cursor: grabbing; }
@@ -507,9 +507,7 @@
 
     function toggle3DView() {
       const p = document.getElementById("panel3D");
-      if (p.style.display === "block") {
-        p.style.display = "none";
-      } else {
+      if (p.style.display === "none") {
         p.style.display = "block";
         if (!sceneInit) init3DScene();
         setTimeout(() => { 
@@ -520,8 +518,25 @@
             globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
           }
         }, 50);
+      } else {
+        p.style.display = "none";
       }
     }
+
+    // Auto initialize 3D scene on page load so 3D model is rendered immediately
+    window.addEventListener('load', () => {
+      if (!sceneInit) {
+        init3DScene();
+        setTimeout(() => { 
+          if (globalRenderer) {
+            const cont = document.getElementById("viewport3D");
+            globalCamera.aspect = cont.clientWidth / cont.clientHeight;
+            globalCamera.updateProjectionMatrix();
+            globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
+          }
+        }, 100);
+      }
+    });
 
     function toggleIsolationMode() {
       isIsolated = !isIsolated;
