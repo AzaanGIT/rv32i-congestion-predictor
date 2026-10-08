@@ -210,7 +210,7 @@
                 <div style="font-size: 16px; font-weight: 800; color: #1a202c; margin-bottom: 8px;" id="inspName">{{ peak_layer }} (Routing Layer)</div>
                 <div style="color: #4a5568; font-size: 11px; margin-bottom: 4px;">Congestion Level: <b id="inspPct" style="color: {% if peak_val_pct >= 85 %}#dc2626{% else %}#15803d{% endif %}; font-weight: 800;">{{ peak_val_pct }}%</b></div>
                 <div style="color: #4a5568; font-size: 11px; margin-bottom: 4px;">Local Estimated Temp: <b id="inspTemp" style="color: #ea580c; font-weight: 800;">{{ peak_temp_c }} °C</b></div>
-                <div style="color: #4a5568; font-size: 11px;">Interconnect Structure: <span style="color: #7c3aed; font-weight: 700;">Semi-Global Bus Tracks & Via Pillars</span></div>
+                <div style="color: #4a5568; font-size: 11px;">Interconnect Structure: <span id="inspStruct" style="color: #7c3aed; font-weight: 700;">Semi-Global Bus Tracks & Via Pillars</span></div>
               </div>
               <div style="color: #d97706; font-size: 11px; font-weight: 800; margin-bottom: 8px;">BEOL / FEOL ARCHITECTURAL SPECIFICATION</div>
               <p id="inspDef" style="color: #4a5568; font-size: 11px; line-height: 1.5; margin: 0;">
@@ -218,12 +218,14 @@
               </p>
             </div>
             <div style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
-              <div style="color: #718096; font-size: 10px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">PROCESS TECHNOLOGY & GATE CALLOUT</div>
+              <div style="color: #718096; font-size: 10px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">SKY130HD PDK TECH INSPECTOR</div>
               <table class="def-table" style="width: 100%;">
-                <tr><td style="width: 40%;">Substrate:</td><td style="color:#1a202c; font-weight: bold;">Bulk Silicon (FEOL)</td></tr>
-                <tr><td>Logic Cells:</td><td style="color:#1a202c; font-weight: bold;">NAND / Inverter / DFF</td></tr>
-                <tr><td>Contact Plugs:</td><td style="color:#1a202c; font-weight: bold;">Tungsten Pillars (MOL)</td></tr>
-                <tr><td>Active Inspection:</td><td id="tableActive" style="color:#7c3aed; font-weight: bold;">{{ peak_layer }} Copper Layer</td></tr>
+                <tr><td style="width: 48%;">PDK Technology:</td><td style="color:#1a202c; font-weight: bold;">SkyWater sky130hd</td></tr>
+                <tr><td>Preferred Direction:</td><td id="tableDir" style="color:#7c3aed; font-weight: bold;">HORIZONTAL</td></tr>
+                <tr><td>Track Pitch:</td><td id="tablePitch" style="color:#1a202c; font-weight: bold;">0.68 μm</td></tr>
+                <tr><td>Width / Spacing:</td><td id="tableWdSp" style="color:#1a202c; font-weight: bold;">0.30 μm / 0.30 μm</td></tr>
+                <tr><td>Sheet Resistance:</td><td id="tableRes" style="color:#ea580c; font-weight: bold;">47.01 mΩ/sq</td></tr>
+                <tr><td>Area Capacitance:</td><td id="tableCap" style="color:#0284c7; font-weight: bold;">0.717 fF/μm²</td></tr>
               </table>
             </div>
           </div>
@@ -503,19 +505,30 @@
     let isolatedAssembly, fullStackAssembly, isolatedSlabMesh;
     const stackLayerGroups = [];
 
+    const pdkSpecs = {
+      'M1': { pitch: '0.34 μm', width: '0.14 μm', space: '0.14 μm', res: '125 mΩ/sq', cap: '0.94 fF/μm²', dir: 'HORIZONTAL', struct: 'Local Cell Rails & Standard Cell Power Grid', color: 0xb87333 },
+      'M2': { pitch: '0.46 μm', width: '0.14 μm', space: '0.14 μm', res: '125 mΩ/sq', cap: '0.82 fF/μm²', dir: 'VERTICAL', struct: 'Intra-Block Signal Routing Tracks', color: 0x9d4edd },
+      'M3': { pitch: '0.68 μm', width: '0.30 μm', space: '0.30 μm', res: '47.01 mΩ/sq', cap: '0.717 fF/μm²', dir: 'HORIZONTAL', struct: 'High-Density Signal Bus Tracks', color: 0x00b4d8 },
+      'M4': { pitch: '0.92 μm', width: '0.30 μm', space: '0.30 μm', res: '47.01 mΩ/sq', cap: '0.65 fF/μm²', dir: 'VERTICAL', struct: 'Intermediate Inter-Block Bus Nets', color: 0xe76f51 },
+      'M5': { pitch: '1.40 μm', width: '0.60 μm', space: '0.60 μm', res: '28.50 mΩ/sq', cap: '0.52 fF/μm²', dir: 'HORIZONTAL', struct: 'Clock Trunk Nets & High-Speed Buses', color: 0x2a9d8f },
+      'M6': { pitch: '1.40 μm', width: '0.60 μm', space: '0.60 μm', res: '28.50 mΩ/sq', cap: '0.50 fF/μm²', dir: 'VERTICAL', struct: 'Semi-Global Data Highways', color: 0xe0a96d },
+      'M7': { pitch: '3.00 μm', width: '1.20 μm', space: '1.20 μm', res: '18.20 mΩ/sq', cap: '0.41 fF/μm²', dir: 'HORIZONTAL', struct: 'Global Datapath Bus Lines', color: 0x4361ee },
+      'M8': { pitch: '3.00 μm', width: '1.20 μm', space: '1.20 μm', res: '18.20 mΩ/sq', cap: '0.39 fF/μm²', dir: 'VERTICAL', struct: 'Secondary Power Grid Straps', color: 0x7209b7 },
+      'M9': { pitch: '5.60 μm', width: '2.40 μm', space: '2.40 μm', res: '8.40 mΩ/sq', cap: '0.28 fF/μm²', dir: 'HORIZONTAL (PDN)', struct: 'Primary VDD/VSS Power Distribution Mesh', color: 0xf59e0b },
+      'M10': { pitch: '10.0 μm', width: '5.00 μm', space: '5.00 μm', res: '4.20 mΩ/sq', cap: '0.15 fF/μm²', dir: 'PAD RING / RDL', struct: 'Top Redistribution Layer & C4 I/O Pad Ring', color: 0xb45309 }
+    };
+
     const layerDefs = {
-      'FEOL': 'Front-End-of-Line substrate containing active silicon FinFET transistors, logic gates, source, and drain regions.',
-      'MOL': 'Middle-of-Line contact level containing tapered tungsten contact plugs connecting transistor terminals.',
-      'M1': 'Metal 1: Fine-pitch local copper tracks for standard cell internal pins and ground/power rail contacts.',
-      'M2': 'Metal 2: Orthogonal intra-block routing tracks. High congestion hotspot detected here.',
-      'M3': 'Metal 3: High-density horizontal routing tracks connecting logic gates across standard cell rows.',
-      'M4': 'Metal 4: Vertical routing tracks for intermediate signal routing across macro boundaries.',
-      'M5': 'Metal 5: Medium-pitch metal tracks utilized for data bus paths and clock distribution trunk nets.',
-      'M6': 'Metal 6: Horizontal medium-pitch routing for intermediate signal transport across clock domains.',
-      'M7': 'Metal 7: Semi-global routing layer with relaxed pitch for high-speed datapath lines.',
-      'M8': 'Metal 8: Global wiring layer for cross-chip communication and secondary power grid strapping.',
-      'M9': 'Metal 9: Thick metal layer reserved for global power routing mesh (VDD/VSS) and primary clock trees.',
-      'M10': 'Metal 10: Top-most thick redistribution layer (RDL) for C4 power pads and wirebonds.'
+      'M1': 'Metal 1 (met1): 0.34 μm pitch horizontal routing layer for SkyWater sky130hd standard cell local pins & rail connections.',
+      'M2': 'Metal 2 (met2): 0.46 μm pitch vertical routing layer for intra-block signal interconnects.',
+      'M3': 'Metal 3 (met3): 0.68 μm pitch horizontal routing layer with 47.01 mΩ/sq sheet resistance & 0.717 fF/μm² capacitance.',
+      'M4': 'Metal 4 (met4): 0.92 μm pitch vertical routing layer for intermediate signal routing across macro boundaries.',
+      'M5': 'Metal 5 (met5): 1.40 μm pitch horizontal medium-thick metal for clock distribution trunk lines.',
+      'M6': 'Metal 6 (met6): 1.40 μm pitch vertical medium-thick metal for semi-global routing across clock domains.',
+      'M7': 'Metal 7 (met7): 3.00 μm pitch horizontal thick metal layer reserved for high-speed datapath lines.',
+      'M8': 'Metal 8 (met8): 3.00 μm pitch vertical thick metal layer for global wiring and secondary power straps.',
+      'M9': 'Metal 9 (met9): 5.60 μm pitch thick copper layer for the main VDD/VSS power distribution network (PDN) mesh.',
+      'M10': 'Metal 10 (met10): Top thick Redistribution Layer (RDL) featuring C4 solder bumps and IO Pad Ring (DOUT, CLK_REF, VDD, VSS).'
     };
 
     function toggle3DView() {
@@ -660,11 +673,8 @@
 
       const idx = parseInt(lName.replace("M", ""));
 
-      let baseColor = 0x38bdf8;
+      let baseColor = (pdkSpecs[lName] && pdkSpecs[lName].color) ? pdkSpecs[lName].color : 0x38bdf8;
       if (usagePct >= 85) baseColor = 0xef4444;
-      else if (usagePct >= 65) baseColor = 0xf59e0b;
-      else if (usagePct >= 40) baseColor = 0x38bdf8;
-      else baseColor = 0x10b981;
 
       if (idx === 10) {
         // M10: Top RDL & C4 Solder Bumps Array
@@ -815,13 +825,20 @@
         selectedLayerName = lName;
         document.getElementById("layerSelectDropdown").value = lName;
         const rawVal = rawData[lName] || 0.0;
+        const spec = pdkSpecs[lName] || pdkSpecs['M1'];
         
-        document.getElementById("inspName").innerText = lName + " (Routing Layer)";
+        document.getElementById("inspName").innerText = lName + " (" + spec.dir.split(' ')[0] + " Layer)";
         document.getElementById("inspPct").innerText = rawVal + "%";
         document.getElementById("inspPct").style.color = rawVal >= 85 ? "#ef4444" : "#10b981";
         document.getElementById("inspTemp").innerText = (38.0 + (rawVal * 0.35)).toFixed(1) + " °C";
+        document.getElementById("inspStruct").innerText = spec.struct;
         document.getElementById("inspDef").innerText = layerDefs[lName] || layerDefs['M1'];
-        document.getElementById("tableActive").innerText = lName + " Copper Layer";
+        
+        const elDir = document.getElementById("tableDir"); if (elDir) elDir.innerText = spec.dir;
+        const elPitch = document.getElementById("tablePitch"); if (elPitch) elPitch.innerText = spec.pitch;
+        const elWdSp = document.getElementById("tableWdSp"); if (elWdSp) elWdSp.innerText = spec.width + " / " + spec.space;
+        const elRes = document.getElementById("tableRes"); if (elRes) elRes.innerText = spec.res;
+        const elCap = document.getElementById("tableCap"); if (elCap) elCap.innerText = spec.cap;
         
         document.getElementById("hudLabel").innerHTML = lName + " CONGESTION<br>" + (rawVal >= 85 ? "HOTSPOT" : "TRACK");
 
