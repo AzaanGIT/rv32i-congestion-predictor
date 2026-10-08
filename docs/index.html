@@ -751,50 +751,6 @@
         </div>
       </div>
 
-      <!-- CADENCE VIRTUOSO & OPENROAD SILICON LAYOUT GALLERY -->
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <div>
-            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">CADENCE VIRTUOSO & OPENROAD PDK LAYOUT GALLERY</span>
-            <h3 style="margin: 4px 0 0 0; font-size: 16px; font-weight: 800; color: #1a202c;">Authentic Silicon Layout Captures (SkyWater sky130hd PDK)</h3>
-          </div>
-          <span style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800;">7 CAD SPECS ATTACHED</span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s;" onclick="openImageModal('layers_pictures/cadence_power_mesh.jpeg', 'Chip Power Network & Routing Mesh (Cadence Virtuoso)')">
-            <img src="layers_pictures/cadence_power_mesh.jpeg" alt="Chip Power Mesh" style="width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #e2e8f0;">
-            <div style="padding: 10px;">
-              <div style="font-size: 12px; font-weight: 800; color: #1a202c;">Chip Power Grid & Rails</div>
-              <div style="color: #718096; font-size: 10px; margin-top: 4px;">Copper power rails & purple VDD/VSS grid straps</div>
-            </div>
-          </div>
-
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s;" onclick="openImageModal('layers_pictures/cadence_io_padring.jpeg', 'Top IO Pad Ring & Signal Pins (Cadence Virtuoso)')">
-            <img src="layers_pictures/cadence_io_padring.jpeg" alt="IO Pad Ring" style="width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #e2e8f0;">
-            <div style="padding: 10px;">
-              <div style="font-size: 12px; font-weight: 800; color: #1a202c;">IO Pad Ring & Macro Pins</div>
-              <div style="color: #718096; font-size: 10px; margin-top: 4px;">DOUT, CLK_REF, SEL_CONV_TIME, VDD/VSS pads</div>
-            </div>
-          </div>
-
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s;" onclick="openImageModal('layers_pictures/cadence_cell_routing.jpeg', 'Intra-Block Transistor Standard Cell Routing (Cadence Virtuoso)')">
-            <img src="layers_pictures/cadence_cell_routing.jpeg" alt="Standard Cell Routing" style="width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #e2e8f0;">
-            <div style="padding: 10px;">
-              <div style="font-size: 12px; font-weight: 800; color: #1a202c;">Standard Cell Polygon Tracks</div>
-              <div style="color: #718096; font-size: 10px; margin-top: 4px;">Cadence multi-layer FEOL/BEOL tracks & vias</div>
-            </div>
-          </div>
-
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s;" onclick="openImageModal('layers_pictures/openroad_met3_inspector.jpeg', 'SkyWater sky130hd Tech Inspector (OpenROAD met3)')">
-            <img src="layers_pictures/openroad_met3_inspector.jpeg" alt="OpenROAD Tech Inspector" style="width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #e2e8f0;">
-            <div style="padding: 10px;">
-              <div style="font-size: 12px; font-weight: 800; color: #1a202c;">OpenROAD Tech Inspector</div>
-              <div style="color: #718096; font-size: 10px; margin-top: 4px;">met3 tech specs (0.68 μm pitch, 47.01 mΩ/sq)</div>
-            </div>
-          </div>
-        </div>
-
       <!-- RECOMMENDATION SECTION -->
       <div class="card" style="border-left: 5px solid #16a34a;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -875,28 +831,7 @@
     </div>
   </div>
 
-  <!-- CAD IMAGE INSPECTOR MODAL -->
-  <div id="imageModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #ffffff; border-radius: 12px; max-width: 1000px; width: 95%; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;">
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e2e8f0;">
-        <h3 id="imageModalTitle" style="margin: 0; color: #1a202c; font-size: 16px; font-weight: 800;">CAD Layout Details</h3>
-        <button onclick="closeImageModal()" style="background: transparent; border: none; font-size: 20px; color: #718096; cursor: pointer;">✕</button>
-      </div>
-      <div style="padding: 16px; overflow-y: auto; text-align: center; background: #0f172a;">
-        <img id="imageModalSrc" src="" style="max-width: 100%; max-height: 75vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-      </div>
-    </div>
-  </div>
-
   <script>
-    function openImageModal(src, title) {
-      document.getElementById('imageModalSrc').src = src;
-      document.getElementById('imageModalTitle').innerText = title;
-      document.getElementById('imageModal').style.display = 'flex';
-    }
-    function closeImageModal() {
-      document.getElementById('imageModal').style.display = 'none';
-    }
     function openFixModal() { document.getElementById('fixModal').style.display = 'flex'; }
     function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
     function openSingleLayerFix(layer) {
