@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>RV32I Congestion Predictor</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
   <style>
     * { box-sizing: border-box; }
     body {
@@ -83,11 +82,27 @@
     .input-box .badge { background: #edf2f7; color: #4a5568; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }
     .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
 
-    /* 3D Panel & Inspector Styling */
-    #panel3D { display: block; margin-bottom: 24px; border: 1px solid #ddd6fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; }
-    .viewport-container { display: grid; grid-template-columns: 2.3fr 1fr; gap: 20px; }
-    #viewport3D { width: 100%; height: 560px; border-radius: 8px; background: #0f172a; cursor: grab; position: relative; overflow: hidden; }
-    #viewport3D:active { cursor: grabbing; }
+    /* Digital Logic Gate Schematic Styling (DigitalJS-inspired) */
+    #panelSchematic { display: block; margin-bottom: 24px; border: 1px solid #ddd6fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; }
+    .schematic-layout { display: grid; grid-template-columns: 2.3fr 1fr; gap: 20px; }
+    #schematicViewport { width: 100%; height: 560px; border-radius: 8px; background: #080c14; position: relative; overflow: hidden; border: 1px solid #1e293b; user-select: none; }
+    #schematicSvg { width: 100%; height: 100%; display: block; }
+
+    .schematic-ctrl-btn { background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .schematic-ctrl-btn:hover { border-color: #7c3aed; color: #7c3aed; background: #f5f3ff; }
+    .schematic-ctrl-btn.active { background: #7c3aed; color: #ffffff; border-color: #7c3aed; }
+
+    .comp-box { cursor: pointer; transition: all 0.2s ease; }
+    .comp-box:hover { filter: brightness(1.25); }
+    .comp-selected { stroke: #38bdf8 !important; stroke-width: 2.5px !important; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7)) !important; }
+
+    @keyframes wireFlow {
+      from { stroke-dashoffset: 24; }
+      to { stroke-dashoffset: 0; }
+    }
+    .wire-active { stroke: #38bdf8 !important; stroke-width: 2.5px !important; stroke-dasharray: 6 3; animation: wireFlow 0.8s linear infinite; filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.6)); }
+    .wire-control-active { stroke: #ec4899 !important; stroke-width: 2px !important; stroke-dasharray: 4 2; animation: wireFlow 0.6s linear infinite; filter: drop-shadow(0 0 5px rgba(236, 72, 153, 0.6)); }
+    .wire-hotspot-active { stroke: #ef4444 !important; stroke-width: 2.5px !important; stroke-dasharray: 6 3; animation: wireFlow 0.5s linear infinite; filter: drop-shadow(0 0 7px rgba(239, 68, 68, 0.8)); }
 
     .info-pane { display: flex; flex-direction: column; justify-content: space-between; }
     .inspector-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); }
@@ -108,10 +123,7 @@
     .btn-fix { background: #ffffff; border: 1px solid #cbd5e1; color: #4a5568; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .btn-fix:hover { color: #7c3aed; border-color: #7c3aed; background: #f5f3ff; }
 
-    /* HUD */
-    #hudContainer { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
-    #hudSvg { width: 100%; height: 100%; position: absolute; inset: 0; }
-    .hud-title { position: absolute; color: #7c3aed; font-family: monospace; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 8px rgba(124, 58, 237, 0.4); white-space: nowrap; }
+
 
     #fixModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
     .modal-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border-radius: 12px; width: 600px; max-width: 90%; padding: 24px; color: #1a202c; }
@@ -125,7 +137,7 @@
       <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #1a202c;">RV32I CONGESTION PREDICTOR</h2>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-      <button id="btnToggle3D" class="btn-3d" onclick="toggle3DView()">🔍 Analyze in 3D</button>
+      <button id="btnToggleSchematic" class="btn-3d" onclick="toggleSchematicView()">⚡ Logic Gate Schematic</button>
     </div>
   </div>
 
@@ -176,63 +188,310 @@
     <!-- RIGHT MAIN CONTENT -->
     <div class="main-content">
       
-      <!-- 3D COMMERCIAL INTERACTIVE VIEWER -->
-      <div id="panel3D" class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+      <!-- DIGITAL LOGIC GATE SCHEMATIC & WORKING PRINCIPLE (DIGITALJS ENGINE) -->
+      <div id="panelSchematic" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #7c3aed; font-size: 14px;">●</span>
-            <span style="color: #7c3aed; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">EDA SILICON ROUTING ENGINE</span>
-            <span style="color: #718096; font-size: 11px; margin-left: 8px;">(Click any layer in 3D to inspect/isolate)</span>
+            <span style="color: #10b981; font-size: 14px;">●</span>
+            <span style="color: #7c3aed; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">RV32I LOGIC SYNTHESIS & WORKING PRINCIPLE</span>
+            <span style="color: #718096; font-size: 11px; margin-left: 8px;">(DigitalJS Gate Netlist & Pin Congestion Engine)</span>
           </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <select id="layerSelectDropdown" onchange="handleDropdownLayerChange(this.value)" style="background: #ffffff; color: #7c3aed; border: 1px solid #7c3aed; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 700; outline: none; cursor: pointer;">
-              {% for layer in ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10"] %}
-              <option value="{{ layer }}" style="background: #ffffff; color: #1a202c;" {% if layer == peak_layer %}selected{% endif %}>Select {{ layer }} ({{ layer_usage_pct[layer] }}%)</option>
-              {% endfor %}
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <select id="instSelect" onchange="loadInstruction(this.value)" style="background: #ffffff; color: #7c3aed; border: 1px solid #7c3aed; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; outline: none; cursor: pointer;">
+              <option value="ADD">ADD x3, x1, x2 (Arithmetic R-Type)</option>
+              <option value="LW">LW x5, 0(x1) (Memory Load I-Type)</option>
+              <option value="SW">SW x2, 4(x3) (Memory Store S-Type)</option>
+              <option value="BEQ">BEQ x1, x2, +8 (Branch B-Type)</option>
+              <option value="XOR">XOR x4, x1, x2 (Bitwise Logic R-Type)</option>
             </select>
-            <button id="btnIsolate" onclick="toggleIsolationMode()" style="background: #0284c7; color: #fff; font-weight: bold; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">Show Full Stack</button>
-            <button onclick="reset3DView()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">🎯 Reset View</button>
-            <button id="btnExplode" onclick="toggleExplodeMode()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s; display: none;">Explode Stack</button>
-            <button onclick="toggle3DView()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">✕ Close 3D</button>
+            <button id="btnClockStep" class="schematic-ctrl-btn" onclick="stepClockCycle()">▶ Step Clock (CLK)</button>
+            <button id="btnAutoClock" class="schematic-ctrl-btn" onclick="toggleAutoClock()">⚡ Run Clock</button>
+            <button class="schematic-ctrl-btn" onclick="resetCircuit()">🔄 Reset</button>
+            <button class="schematic-ctrl-btn" onclick="toggleSchematicView()">✕ Close</button>
           </div>
         </div>
 
-        <div class="viewport-container">
-          <div id="viewport3D">
-            <div id="hudContainer">
-              <svg id="hudSvg">
-                <polyline id="hudLine" points="0,0 0,0 0,0" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="drop-shadow(0 0 6px #7c3aed)"/>
-                <circle id="hudDot1" cx="0" cy="0" r="3.5" fill="#ffffff" stroke="#7c3aed" stroke-width="2" filter="drop-shadow(0 0 6px #7c3aed)"/>
-                <circle id="hudDot2" cx="0" cy="0" r="3.5" fill="#ffffff" stroke="#7c3aed" stroke-width="2" filter="drop-shadow(0 0 6px #7c3aed)"/>
-              </svg>
-              <div id="hudLabel" class="hud-title">{{ peak_layer }} CONGESTION<br>TRACK</div>
-            </div>
+        <div class="schematic-layout">
+          <!-- LEFT: SVG LOGIC GATE SCHEMATIC VIEWPORT -->
+          <div id="schematicViewport">
+            <!-- Full DigitalJS Interactive SVG Schematic -->
+            <svg id="schematicSvg" viewBox="0 0 1020 560" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="edaGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#111827" stroke-width="0.8"/>
+                  <circle cx="20" cy="20" r="0.8" fill="#1e293b" />
+                </pattern>
+                <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+                </marker>
+                <marker id="arrowActive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+                </marker>
+                <marker id="arrowHotspot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444" />
+                </marker>
+              </defs>
+              <rect width="1020" height="560" fill="#080c14"/>
+              <rect width="1020" height="560" fill="url(#edaGrid)"/>
+
+              <!-- Status HUD Overlay -->
+              <g id="hudClock" transform="translate(15, 18)">
+                <rect width="210" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+                <circle id="clkIndicator" cx="12" cy="12" r="5" fill="#10b981"/>
+                <text id="clkText" x="25" y="16" fill="#94a3b8" font-size="11" font-family="monospace" font-weight="bold">CLK: HIGH | Cycle #1</text>
+              </g>
+
+              <!-- WIRES LAYER (Orthogonal Manhattan Netlist Wires) -->
+              <g id="wiresLayer">
+                <!-- PC to PC+4 & ROM -->
+                <path id="wire_pc_out" d="M 105 110 L 125 110 L 125 50 L 140 50" fill="none" stroke="#475569" stroke-width="2"/>
+                <path id="wire_pc_rom" d="M 125 110 L 295 110" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+                
+                <!-- PC+4 to Branch MUX -->
+                <path id="wire_pc4_mux" d="M 205 50 L 235 50 L 235 70" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+                <!-- Branch Adder to Branch MUX -->
+                <path id="wire_branch_target" d="M 205 130 L 235 130 L 235 105" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+                <!-- Branch MUX to PC In (Wrap-around loop) -->
+                <path id="wire_pc_in" d="M 265 87 L 275 87 L 275 25 L 15 25 L 15 110 L 25 110" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+                <!-- ROM to Decoder, RegFile, ImmGen -->
+                <path id="wire_inst_bus" d="M 405 110 L 420 110" fill="none" stroke="#475569" stroke-width="2.5"/>
+                <path id="wire_inst_dec" d="M 420 110 L 420 70 L 435 70" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+                <path id="wire_inst_rf" d="M 420 110 L 420 255 L 435 255" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+                <path id="wire_inst_imm" d="M 420 110 L 420 190 L 350 190 L 350 210" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+                <!-- Imm Gen to ALU Src MUX & Branch Adder -->
+                <path id="wire_imm_out" d="M 405 245 L 420 245 L 420 330 L 610 330" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+                <path id="wire_imm_branch" d="M 405 245 L 415 245 L 415 180 L 125 180 L 125 130 L 140 130" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2"/>
+
+                <!-- Control Signals from Decoder -->
+                <path id="wire_ctrl_regwrite" d="M 560 65 L 590 65 L 590 195 L 507 195 L 507 210" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+                <path id="wire_ctrl_alusrc" d="M 560 90 L 627 90 L 627 290" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+                <path id="wire_ctrl_aluop" d="M 560 115 L 747 115 L 747 210" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+                <path id="wire_ctrl_mem" d="M 560 140 L 920 140 L 920 210" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+                <path id="wire_ctrl_memtoreg" d="M 560 160 L 950 160 L 950 435 L 940 435" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
+
+                <!-- RegFile to ALU (RD1 -> ALU Operand A) -->
+                <path id="wire_rf_rd1" d="M 580 250 L 675 250" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+                
+                <!-- RegFile to ALU MUX (RD2 -> ALU MUX Input 0) -->
+                <path id="wire_rf_rd2" d="M 580 305 L 610 305" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+                <!-- RegFile to Data RAM (RD2 -> Data RAM Store Data) -->
+                <path id="wire_rf_ram_data" d="M 595 305 L 595 390 L 840 390 L 840 300 L 855 300" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+                <!-- ALU MUX to ALU Operand B -->
+                <path id="wire_mux_alub" d="M 645 315 L 675 315" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+                <!-- ALU Out (Result) to Data RAM and Writeback MUX -->
+                <path id="wire_alu_result" d="M 820 260 L 840 260 L 840 250 L 855 250" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+                <path id="wire_alu_wb" d="M 840 260 L 840 425 L 895 425" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+                <!-- ALU Zero Flag to Branch Logic -->
+                <path id="wire_alu_zero" d="M 820 320 L 835 320 L 835 35 L 250 35 L 250 55" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
+
+                <!-- Data RAM to Writeback MUX -->
+                <path id="wire_ram_wb" d="M 985 270 L 1000 270 L 1000 445 L 940 445" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+                <!-- Writeback MUX Feedback Bus back to RegFile WD (Long Loop) -->
+                <path id="wire_wb_bus" d="M 895 440 L 870 440 L 870 510 L 415 510 L 415 335 L 435 335" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+                <!-- Bus Bitwidth Labels -->
+                <g font-size="9" font-family="monospace" fill="#94a3b8" font-weight="bold">
+                  <rect x="180" y="102" width="36" height="15" rx="3" fill="#1e293b"/>
+                  <text x="184" y="113" fill="#38bdf8">[31:0]</text>
+
+                  <rect x="620" y="242" width="36" height="15" rx="3" fill="#1e293b"/>
+                  <text x="624" y="253" fill="#38bdf8">[31:0]</text>
+
+                  <rect x="750" y="252" width="36" height="15" rx="3" fill="#1e293b"/>
+                  <text x="754" y="263" fill="#ef4444">[31:0]</text>
+
+                  <rect x="600" y="502" width="70" height="15" rx="3" fill="#1e293b"/>
+                  <text x="604" y="513" fill="#a855f7">WB [31:0]</text>
+                </g>
+              </g>
+
+              <!-- LOGIC COMPONENTS LAYER -->
+              <g id="componentsLayer">
+                
+                <!-- 1. PROGRAM COUNTER (PC) -->
+                <g id="comp_pc" class="comp-box" onclick="selectComponent('pc')">
+                  <rect x="25" y="70" width="80" height="95" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+                  <rect x="25" y="70" width="80" height="22" rx="6" fill="#064e3b"/>
+                  <text x="65" y="85" text-anchor="middle" fill="#a7f3d0" font-size="10" font-weight="bold" font-family="monospace">PC [31:0]</text>
+                  <text x="32" y="114" fill="#64748b" font-size="9" font-family="monospace">D</text>
+                  <text x="95" y="114" fill="#64748b" font-size="9" font-family="monospace">Q</text>
+                  <path d="M 25 145 L 35 150 L 25 155" fill="none" stroke="#10b981" stroke-width="1.5"/>
+                  <text x="40" y="153" fill="#10b981" font-size="8" font-family="monospace">CLK</text>
+                  <rect x="32" y="122" width="66" height="16" rx="2" fill="#022c22"/>
+                  <text id="val_pc_hex" x="65" y="133" text-anchor="middle" fill="#34d399" font-size="9" font-family="monospace" font-weight="bold">0x00000004</text>
+                </g>
+
+                <!-- 2. PC + 4 ADDER -->
+                <g id="comp_pc4" class="comp-box" onclick="selectComponent('pc')">
+                  <polygon points="140,30 205,30 195,70 150,70" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
+                  <text x="172" y="54" text-anchor="middle" fill="#a7f3d0" font-size="11" font-weight="bold" font-family="monospace">+4</text>
+                </g>
+
+                <!-- 3. BRANCH TARGET ADDER -->
+                <g id="comp_br_adder" class="comp-box" onclick="selectComponent('alu')">
+                  <polygon points="140,110 205,110 195,150 150,150" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5"/>
+                  <text x="172" y="134" text-anchor="middle" fill="#67e8f9" font-size="10" font-weight="bold" font-family="monospace">+ Imm</text>
+                </g>
+
+                <!-- 4. BRANCH PC MUX -->
+                <g id="comp_br_mux" class="comp-box" onclick="selectComponent('mux')">
+                  <polygon points="235,55 265,65 265,110 235,120" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
+                  <text x="250" y="91" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="bold" font-family="monospace">MUX</text>
+                </g>
+
+                <!-- 5. INSTRUCTION ROM -->
+                <g id="comp_rom" class="comp-box" onclick="selectComponent('rom')">
+                  <rect x="295" y="55" width="110" height="110" rx="6" fill="#0f172a" stroke="#8b5cf6" stroke-width="2"/>
+                  <rect x="295" y="55" width="110" height="22" rx="6" fill="#4c1d95"/>
+                  <text x="350" y="70" text-anchor="middle" fill="#ddd6fe" font-size="9" font-weight="bold" font-family="monospace">INSTRUCTION ROM</text>
+                  <text x="302" y="105" fill="#a78bfa" font-size="9" font-family="monospace">Addr</text>
+                  <text x="375" y="105" fill="#a78bfa" font-size="9" font-family="monospace">Inst</text>
+                  <rect x="302" y="125" width="96" height="26" rx="3" fill="#1e1b4b"/>
+                  <text id="val_inst_asm" x="350" y="137" text-anchor="middle" fill="#c4b5fd" font-size="8.5" font-family="monospace" font-weight="bold">ADD x3, x1, x2</text>
+                  <text id="val_inst_hex" x="350" y="147" text-anchor="middle" fill="#818cf8" font-size="7.5" font-family="monospace">0x002081B3</text>
+                </g>
+
+                <!-- 6. CONTROL UNIT & DECODER -->
+                <g id="comp_decoder" class="comp-box" onclick="selectComponent('decoder')">
+                  <rect x="435" y="35" width="125" height="150" rx="6" fill="#0f172a" stroke="#ec4899" stroke-width="2"/>
+                  <rect x="435" y="35" width="125" height="22" rx="6" fill="#831843"/>
+                  <text x="497" y="50" text-anchor="middle" fill="#fbcfe8" font-size="9" font-weight="bold" font-family="monospace">CONTROL DECODER</text>
+                  
+                  <g transform="translate(445, 65)">
+                    <path d="M 5 5 L 15 5 A 8 8 0 0 1 15 21 L 5 21 Z" fill="#1e293b" stroke="#f472b6" stroke-width="1"/>
+                    <path d="M 35 5 Q 43 13 35 21 Q 48 21 52 13 Q 48 5 35 5 Z" fill="#1e293b" stroke="#f472b6" stroke-width="1"/>
+                    <polygon points="70,5 82,13 70,21" fill="#1e293b" stroke="#f472b6" stroke-width="1"/>
+                    <circle cx="85" cy="13" r="2" fill="none" stroke="#f472b6" stroke-width="1"/>
+                  </g>
+                  
+                  <text x="442" y="105" fill="#f472b6" font-size="8" font-family="monospace">Opcode [6:0]</text>
+                  <text x="495" y="125" fill="#94a3b8" font-size="8" font-family="monospace">RegWrite: <tspan id="val_sig_regwrite" fill="#ec4899" font-weight="bold">1</tspan></text>
+                  <text x="495" y="140" fill="#94a3b8" font-size="8" font-family="monospace">ALUSrc: <tspan id="val_sig_alusrc" fill="#ec4899" font-weight="bold">0</tspan></text>
+                  <text x="495" y="155" fill="#94a3b8" font-size="8" font-family="monospace">MemRead: <tspan id="val_sig_memread" fill="#ec4899" font-weight="bold">0</tspan></text>
+                  <text x="495" y="170" fill="#94a3b8" font-size="8" font-family="monospace">Branch: <tspan id="val_sig_branch" fill="#ec4899" font-weight="bold">0</tspan></text>
+                </g>
+
+                <!-- 7. IMM EXTENDER -->
+                <g id="comp_imm" class="comp-box" onclick="selectComponent('decoder')">
+                  <rect x="295" y="210" width="110" height="70" rx="6" fill="#0f172a" stroke="#06b6d4" stroke-width="1.8"/>
+                  <rect x="295" y="210" width="110" height="20" rx="6" fill="#164e63"/>
+                  <text x="350" y="224" text-anchor="middle" fill="#a5f3fc" font-size="8.5" font-weight="bold" font-family="monospace">IMM EXTENDER</text>
+                  <text x="302" y="250" fill="#67e8f9" font-size="8" font-family="monospace">Inst[31:0]</text>
+                  <text id="val_imm_out" x="375" y="250" fill="#22d3ee" font-size="8.5" font-family="monospace" font-weight="bold">0x00000000</text>
+                </g>
+
+                <!-- 8. REGISTER FILE (32x32 DFFs) -->
+                <g id="comp_rf" class="comp-box" onclick="selectComponent('regfile')">
+                  <rect x="435" y="210" width="145" height="165" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+                  <rect x="435" y="210" width="145" height="22" rx="6" fill="#78350f"/>
+                  <text x="507" y="225" text-anchor="middle" fill="#fde68a" font-size="9" font-weight="bold" font-family="monospace">REGISTER FILE (32x32)</text>
+                  <text x="442" y="248" fill="#fbbf24" font-size="8" font-family="monospace">rs1: <tspan id="val_rf_rs1" fill="#fef3c7" font-weight="bold">x1 (10)</tspan></text>
+                  <text x="442" y="278" fill="#fbbf24" font-size="8" font-family="monospace">rs2: <tspan id="val_rf_rs2" fill="#fef3c7" font-weight="bold">x2 (20)</tspan></text>
+                  <text x="442" y="308" fill="#fbbf24" font-size="8" font-family="monospace">rd: <tspan id="val_rf_rd" fill="#fef3c7" font-weight="bold">x3</tspan></text>
+                  <text x="442" y="338" fill="#fbbf24" font-size="8" font-family="monospace">WD [31:0]</text>
+
+                  <text x="548" y="250" fill="#f59e0b" font-size="8" font-family="monospace">RD1</text>
+                  <text x="548" y="308" fill="#f59e0b" font-size="8" font-family="monospace">RD2</text>
+                  
+                  <g transform="translate(485, 345)">
+                    <rect width="8" height="12" fill="#b45309" rx="1"/>
+                    <rect x="11" width="8" height="12" fill="#b45309" rx="1"/>
+                    <rect x="22" width="8" height="12" fill="#b45309" rx="1"/>
+                    <rect x="33" width="8" height="12" fill="#b45309" rx="1"/>
+                    <text x="46" y="10" fill="#d97706" font-size="7" font-family="monospace">1024 DFFs</text>
+                  </g>
+                </g>
+
+                <!-- 9. ALU SRC MUX -->
+                <g id="comp_alu_mux" class="comp-box" onclick="selectComponent('mux')">
+                  <polygon points="610,290 645,300 645,345 610,355" fill="#0f172a" stroke="#64748b" stroke-width="1.8"/>
+                  <text x="627" y="326" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="bold" font-family="monospace">MUX</text>
+                  <text x="614" y="306" fill="#64748b" font-size="7" font-family="monospace">0</text>
+                  <text x="614" y="342" fill="#64748b" font-size="7" font-family="monospace">1</text>
+                </g>
+
+                <!-- 10. 32-BIT ARITHMETIC LOGIC UNIT (ALU) [CRITICAL HOTSPOT] -->
+                <g id="comp_alu" class="comp-box" onclick="selectComponent('alu')">
+                  <polygon points="675,210 770,210 820,250 820,310 770,375 675,375 700,292" fill="#0f172a" stroke="#ef4444" stroke-width="2.5" filter="drop-shadow(0 0 8px rgba(239, 68, 68, 0.4))"/>
+                  <polygon points="675,210 770,210 750,232 682,232" fill="#7f1d1d"/>
+                  <text x="720" y="225" text-anchor="middle" fill="#fca5a5" font-size="9" font-weight="bold" font-family="monospace">32b ALU [HOTSPOT]</text>
+                  
+                  <rect x="685" y="352" width="125" height="15" rx="3" fill="#991b1b"/>
+                  <text x="747" y="363" text-anchor="middle" fill="#fef2f2" font-size="7.5" font-family="monospace" font-weight="bold">🔥 M2/M3 WIRE CONGESTION</text>
+
+                  <text x="735" y="260" fill="#f87171" font-size="11" font-family="monospace" font-weight="bold">ADDER (+)</text>
+                  <text x="715" y="280" fill="#fca5a5" font-size="9" font-family="monospace">AND / OR / XOR</text>
+                  <text x="725" y="298" fill="#fca5a5" font-size="8.5" font-family="monospace">32b Shifter</text>
+                  
+                  <text x="705" y="248" fill="#ef4444" font-size="8" font-family="monospace">Op A</text>
+                  <text x="705" y="325" fill="#ef4444" font-size="8" font-family="monospace">Op B</text>
+                  <text x="785" y="258" fill="#ef4444" font-size="8" font-family="monospace">Res</text>
+                  <text x="785" y="318" fill="#ef4444" font-size="8" font-family="monospace">Zero</text>
+
+                  <rect x="740" y="310" width="75" height="18" rx="2" fill="#450a0a"/>
+                  <text id="val_alu_out" x="777" y="322" text-anchor="middle" fill="#fca5a5" font-size="8.5" font-family="monospace" font-weight="bold">30 (0x1E)</text>
+                </g>
+
+                <!-- 11. DATA RAM (LOAD / STORE) -->
+                <g id="comp_ram" class="comp-box" onclick="selectComponent('ram')">
+                  <rect x="855" y="210" width="130" height="145" rx="6" fill="#0f172a" stroke="#8b5cf6" stroke-width="2"/>
+                  <rect x="855" y="210" width="130" height="22" rx="6" fill="#4c1d95"/>
+                  <text x="920" y="225" text-anchor="middle" fill="#ddd6fe" font-size="9" font-weight="bold" font-family="monospace">DATA RAM (SRAM)</text>
+                  <text x="862" y="254" fill="#a78bfa" font-size="8" font-family="monospace">Addr</text>
+                  <text x="862" y="298" fill="#a78bfa" font-size="8" font-family="monospace">DataIn</text>
+                  <text x="948" y="270" fill="#a78bfa" font-size="8" font-family="monospace">DataOut</text>
+                  <text id="val_ram_status" x="920" y="332" text-anchor="middle" fill="#c4b5fd" font-size="8" font-family="monospace">IDLE (No Memory Access)</text>
+                </g>
+
+                <!-- 12. WRITEBACK MULTIPLEXER (MemToReg) -->
+                <g id="comp_wb_mux" class="comp-box" onclick="selectComponent('mux')">
+                  <polygon points="895,410 940,410 930,460 905,460" fill="#0f172a" stroke="#64748b" stroke-width="1.8"/>
+                  <text x="917" y="435" text-anchor="middle" fill="#cbd5e1" font-size="9" font-weight="bold" font-family="monospace">WB MUX</text>
+                </g>
+              </g>
+            </svg>
           </div>
 
+          <!-- RIGHT: GATE INSPECTOR & PHYSICAL SILICON CONGESTION BRIDGE -->
           <div class="info-pane">
             <div>
-              <div style="color: #7c3aed; font-size: 12px; font-weight: 800; margin-bottom: 12px;">Selected Layer Inspector</div>
-              <div class="inspector-card">
-                <div style="font-size: 16px; font-weight: 800; color: #1a202c; margin-bottom: 8px;" id="inspName">{{ peak_layer }} (Routing Layer)</div>
-                <div style="color: #4a5568; font-size: 11px; margin-bottom: 4px;">Congestion Level: <b id="inspPct" style="color: {% if peak_val_pct >= 85 %}#dc2626{% else %}#15803d{% endif %}; font-weight: 800;">{{ peak_val_pct }}%</b></div>
-                <div style="color: #4a5568; font-size: 11px; margin-bottom: 4px;">Local Estimated Temp: <b id="inspTemp" style="color: #ea580c; font-weight: 800;">{{ peak_temp_c }} °C</b></div>
-                <div style="color: #4a5568; font-size: 11px;">Interconnect Structure: <span id="inspStruct" style="color: #7c3aed; font-weight: 700;">Semi-Global Bus Tracks & Via Pillars</span></div>
+              <div style="color: #7c3aed; font-size: 12px; font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span>LOGIC GATE & CELL INSPECTOR</span>
+                <span id="inspGateBadge" style="background: #fef2f2; color: #dc2626; font-size: 9px; padding: 2px 6px; border-radius: 4px; border: 1px solid #fecaca;">HOTSPOT BLOCK</span>
               </div>
-              <div style="color: #d97706; font-size: 11px; font-weight: 800; margin-bottom: 8px;">BEOL / FEOL ARCHITECTURAL SPECIFICATION</div>
-              <p id="inspDef" style="color: #4a5568; font-size: 11px; line-height: 1.5; margin: 0;">
-                Primary low-pitch copper metal layer for standard cell local signal routing and dense intra-block buses.
-              </p>
+              
+              <div class="inspector-card">
+                <div style="font-size: 15px; font-weight: 800; color: #1a202c; margin-bottom: 4px;" id="inspCompTitle">32-Bit Arithmetic Logic Unit (ALU)</div>
+                <div style="color: #64748b; font-size: 10.5px; margin-bottom: 10px;" id="inspCompSub">SkyWater 130nm Execution Datapath</div>
+                
+                <table class="def-table" style="width: 100%; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 8px;">
+                  <tr><td style="width: 44%;">Standard Cell Count:</td><td id="inspGateCount" style="color: #1a202c; font-weight: bold;">1,420 Gates</td></tr>
+                  <tr><td>Cell Primitives:</td><td id="inspCellPrim" style="color: #7c3aed; font-weight: bold; font-size: 10px;">sky130_fd_sc_hd__fa, xnor2, and2</td></tr>
+                  <tr><td>Physical Pin Count:</td><td id="inspPinCount" style="color: #ea580c; font-weight: bold;">4,260 Pins (High Density)</td></tr>
+                  <tr><td>Interconnect Fanout:</td><td id="inspFanout" style="color: #0284c7; font-weight: bold;">3.6 nets / gate</td></tr>
+                </table>
+
+                <div style="color: #b91c1c; font-size: 10px; font-weight: 800; margin-bottom: 4px;">BEOL METAL CONGESTION IMPACT</div>
+                <p id="inspCongestionImpact" style="color: #475569; font-size: 11px; line-height: 1.45; margin: 0;">
+                  Intra-ALU 32-bit carry propagation and barrel shifting require dense horizontal (M2) and vertical (M3) track allocation. This localized pin clustering is the PRIMARY driver of the <b>{{ peak_val_pct }}% saturation on {{ peak_layer }}</b>!
+                </p>
+              </div>
             </div>
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
-              <div style="color: #718096; font-size: 10px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">SKY130HD PDK TECH INSPECTOR</div>
-              <table class="def-table" style="width: 100%;">
-                <tr><td style="width: 48%;">PDK Technology:</td><td style="color:#1a202c; font-weight: bold;">SkyWater sky130hd</td></tr>
-                <tr><td>Preferred Direction:</td><td id="tableDir" style="color:#7c3aed; font-weight: bold;">HORIZONTAL</td></tr>
-                <tr><td>Track Pitch:</td><td id="tablePitch" style="color:#1a202c; font-weight: bold;">0.68 μm</td></tr>
-                <tr><td>Width / Spacing:</td><td id="tableWdSp" style="color:#1a202c; font-weight: bold;">0.30 μm / 0.30 μm</td></tr>
-                <tr><td>Sheet Resistance:</td><td id="tableRes" style="color:#ea580c; font-weight: bold;">47.01 mΩ/sq</td></tr>
-                <tr><td>Area Capacitance:</td><td id="tableCap" style="color:#0284c7; font-weight: bold;">0.717 fF/μm²</td></tr>
-              </table>
+
+            <!-- WORKING PRINCIPLE & AGENDA SUMMARY CARD -->
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px;">
+              <div style="color: #d97706; font-size: 11px; font-weight: 800; margin-bottom: 6px;">WORKING PRINCIPLE: RTL TO SILICON</div>
+              <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 10px; font-size: 10.5px; color: #92400e; line-height: 1.45;">
+                <b>Why map gates to metal congestion?</b> Commercial EDA Place-and-Route (P&R) runs take <b>4–8 hours</b> to route metal layers (M1–M10). High pin-density units like the 32-bit ALU exhaust routing tracks, causing DRC violations. Our Machine Learning models predict this routing overflow in <b>&lt; 5 ms</b> directly from RTL & floorplan parameters!
+              </div>
             </div>
           </div>
         </div>
@@ -581,462 +840,295 @@
       }
     });
 
-    let sceneInit = false, isIsolated = true, exploded = false;
-    let selectedLayerName = "{{ peak_layer }}";
-    let globalCamera, globalRenderer, globalControls;
-    let isolatedAssembly, fullStackAssembly, isolatedSlabMesh;
-    const stackLayerGroups = [];
+        // ==========================================
+    // DIGITALJS-STYLE LOGIC SCHEMATIC CONTROLLER
+    // ==========================================
 
-    const pdkSpecs = {
-      'M1': { pitch: '0.34 μm', width: '0.14 μm', space: '0.14 μm', res: '125 mΩ/sq', cap: '0.94 fF/μm²', dir: 'HORIZONTAL', struct: 'Local Cell Rails & Standard Cell Power Grid', color: 0xb87333 },
-      'M2': { pitch: '0.46 μm', width: '0.14 μm', space: '0.14 μm', res: '125 mΩ/sq', cap: '0.82 fF/μm²', dir: 'VERTICAL', struct: 'Intra-Block Signal Routing Tracks', color: 0x9d4edd },
-      'M3': { pitch: '0.68 μm', width: '0.30 μm', space: '0.30 μm', res: '47.01 mΩ/sq', cap: '0.717 fF/μm²', dir: 'HORIZONTAL', struct: 'High-Density Signal Bus Tracks', color: 0x00b4d8 },
-      'M4': { pitch: '0.92 μm', width: '0.30 μm', space: '0.30 μm', res: '47.01 mΩ/sq', cap: '0.65 fF/μm²', dir: 'VERTICAL', struct: 'Intermediate Inter-Block Bus Nets', color: 0xe76f51 },
-      'M5': { pitch: '1.40 μm', width: '0.60 μm', space: '0.60 μm', res: '28.50 mΩ/sq', cap: '0.52 fF/μm²', dir: 'HORIZONTAL', struct: 'Clock Trunk Nets & High-Speed Buses', color: 0x2a9d8f },
-      'M6': { pitch: '1.40 μm', width: '0.60 μm', space: '0.60 μm', res: '28.50 mΩ/sq', cap: '0.50 fF/μm²', dir: 'VERTICAL', struct: 'Semi-Global Data Highways', color: 0xe0a96d },
-      'M7': { pitch: '3.00 μm', width: '1.20 μm', space: '1.20 μm', res: '18.20 mΩ/sq', cap: '0.41 fF/μm²', dir: 'HORIZONTAL', struct: 'Global Datapath Bus Lines', color: 0x4361ee },
-      'M8': { pitch: '3.00 μm', width: '1.20 μm', space: '1.20 μm', res: '18.20 mΩ/sq', cap: '0.39 fF/μm²', dir: 'VERTICAL', struct: 'Secondary Power Grid Straps', color: 0x7209b7 },
-      'M9': { pitch: '5.60 μm', width: '2.40 μm', space: '2.40 μm', res: '8.40 mΩ/sq', cap: '0.28 fF/μm²', dir: 'HORIZONTAL (PDN)', struct: 'Primary VDD/VSS Power Distribution Mesh', color: 0xf59e0b },
-      'M10': { pitch: '10.0 μm', width: '5.00 μm', space: '5.00 μm', res: '4.20 mΩ/sq', cap: '0.15 fF/μm²', dir: 'PAD RING / RDL', struct: 'Top Redistribution Layer & C4 I/O Pad Ring', color: 0xb45309 }
+    const circuitComponents = {
+      alu: {
+        title: "32-Bit Arithmetic Logic Unit (ALU)",
+        sub: "SkyWater 130nm Execution Datapath",
+        gates: "1,420 Gates",
+        cells: "sky130_fd_sc_hd__fa, xnor2, and2, mux2",
+        pins: "4,260 Pins (High Density)",
+        fanout: "3.6 nets / gate",
+        hotspot: true,
+        impact: "Intra-ALU 32-bit carry propagation and barrel shifting require dense horizontal (M2) and vertical (M3) track allocation. This localized pin clustering is the PRIMARY driver of the <b>{{ peak_val_pct }}% saturation on {{ peak_layer }}</b>!"
+      },
+      regfile: {
+        title: "Register File (x0-x31)",
+        sub: "Dual-Read / Single-Write 32b DFF Matrix",
+        gates: "3,840 Gates",
+        cells: "sky130_fd_sc_hd__dfxtp (1024 DFFs) + MUX32",
+        pins: "5,120 Pins",
+        fanout: "4.2 nets / gate",
+        hotspot: false,
+        impact: "Dense 32x32 storage array requires multi-layer routing across M2, M3, and M4 to distribute 32-bit read/write buses without cross-coupling parasitic delay."
+      },
+      decoder: {
+        title: "Instruction Decoder & Control FSM",
+        sub: "RISC-V Opcode & Micro-Op Synthesizer",
+        gates: "420 Gates",
+        cells: "sky130_fd_sc_hd__nand2, nor2, inv",
+        pins: "940 Pins",
+        fanout: "8.5 nets / gate (High Fanout)",
+        hotspot: false,
+        impact: "Generates long-distance control lines (RegWrite, ALUSrc, MemToReg) that traverse large chip spans, demanding M4/M5 semi-global routing tracks."
+      },
+      rom: {
+        title: "Instruction ROM (Cache)",
+        sub: "Instruction Fetch Stage",
+        gates: "2,100 Equivalent Gates",
+        cells: "sky130_sram_1kbyte macro wrapper",
+        pins: "128 Macro Pins",
+        fanout: "1.0 (Bus Interface)",
+        hotspot: false,
+        impact: "Macro boundary blockage requires routing keepouts and ring straps on M3/M4."
+      },
+      pc: {
+        title: "Program Counter (PC) Unit",
+        sub: "Instruction Pointer & Next-PC Logic",
+        gates: "320 Gates",
+        cells: "sky130_fd_sc_hd__dfxtp_1 (32 DFFs) + Ripple Adder",
+        pins: "380 Pins",
+        fanout: "2.1 nets / gate",
+        hotspot: false,
+        impact: "Local routing on M1/M2 with clock tree buffer insertion on M5."
+      },
+      ram: {
+        title: "Data Memory (Data RAM)",
+        sub: "Load/Store SRAM Subsystem",
+        gates: "2,400 Equivalent Gates",
+        cells: "sky130_sram_1kbyte macro",
+        pins: "160 Macro Pins",
+        fanout: "1.2 nets / pin",
+        hotspot: false,
+        impact: "Memory address and data buses require dedicated M4/M5 corridors to prevent DRC pitch violations."
+      },
+      mux: {
+        title: "Datapath Multiplexers (ALUSrc / WB)",
+        sub: "2-to-1 32-bit High Speed Multiplexers",
+        gates: "192 Gates (64 x 2-to-1 MUX cells)",
+        cells: "sky130_fd_sc_hd__mux2_1",
+        pins: "576 Pins",
+        fanout: "1.0",
+        hotspot: false,
+        impact: "Local pitch-matched placement on standard cell rows using M1 and M2."
+      }
     };
 
-    const layerDefs = {
-      'M1': 'Metal 1 (met1): 0.34 μm pitch horizontal routing layer for SkyWater sky130hd standard cell local pins & rail connections.',
-      'M2': 'Metal 2 (met2): 0.46 μm pitch vertical routing layer for intra-block signal interconnects.',
-      'M3': 'Metal 3 (met3): 0.68 μm pitch horizontal routing layer with 47.01 mΩ/sq sheet resistance & 0.717 fF/μm² capacitance.',
-      'M4': 'Metal 4 (met4): 0.92 μm pitch vertical routing layer for intermediate signal routing across macro boundaries.',
-      'M5': 'Metal 5 (met5): 1.40 μm pitch horizontal medium-thick metal for clock distribution trunk lines.',
-      'M6': 'Metal 6 (met6): 1.40 μm pitch vertical medium-thick metal for semi-global routing across clock domains.',
-      'M7': 'Metal 7 (met7): 3.00 μm pitch horizontal thick metal layer reserved for high-speed datapath lines.',
-      'M8': 'Metal 8 (met8): 3.00 μm pitch vertical thick metal layer for global wiring and secondary power straps.',
-      'M9': 'Metal 9 (met9): 5.60 μm pitch thick copper layer for the main VDD/VSS power distribution network (PDN) mesh.',
-      'M10': 'Metal 10 (met10): Top thick Redistribution Layer (RDL) featuring C4 solder bumps and IO Pad Ring (DOUT, CLK_REF, VDD, VSS).'
+    const instructionSet = {
+      ADD: {
+        asm: "ADD x3, x1, x2",
+        hex: "0x002081B3",
+        pc: "0x00000004",
+        rs1: "x1 (10)",
+        rs2: "x2 (20)",
+        rd: "x3 <= 30",
+        aluOut: "30 (0x1E)",
+        imm: "0x00000000",
+        regWrite: 1, aluSrc: 0, memRead: 0, branch: 0,
+        ramStatus: "IDLE (No Memory Access)",
+        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_ctrl_regwrite", "wire_ctrl_aluop", "wire_rf_rd1", "wire_rf_rd2", "wire_mux_alub", "wire_alu_result", "wire_alu_wb", "wire_wb_bus"],
+        hotspotWires: ["wire_rf_rd1", "wire_mux_alub", "wire_alu_result"]
+      },
+      LW: {
+        asm: "LW x5, 0(x1)",
+        hex: "0x0000A283",
+        pc: "0x00000008",
+        rs1: "x1 (0x1000)",
+        rs2: "N/A (Imm)",
+        rd: "x5 <= 0xCAFEBABE",
+        aluOut: "0x1000 (RAM Addr)",
+        imm: "0x00000000",
+        regWrite: 1, aluSrc: 1, memRead: 1, branch: 0,
+        ramStatus: "READING: 0xCAFEBABE @ 0x1000",
+        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_inst_imm", "wire_imm_out", "wire_ctrl_regwrite", "wire_ctrl_alusrc", "wire_ctrl_mem", "wire_rf_rd1", "wire_mux_alub", "wire_alu_result", "wire_ram_wb", "wire_wb_bus"],
+        hotspotWires: ["wire_alu_result"]
+      },
+      SW: {
+        asm: "SW x2, 4(x3)",
+        hex: "0x0021A223",
+        pc: "0x0000000C",
+        rs1: "x3 (0x1000)",
+        rs2: "x2 (0x002A)",
+        rd: "N/A (Mem Write)",
+        aluOut: "0x1004 (RAM Addr)",
+        imm: "0x00000004",
+        regWrite: 0, aluSrc: 1, memRead: 0, branch: 0,
+        ramStatus: "WRITING: 0x002A into @ 0x1004",
+        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_inst_imm", "wire_imm_out", "wire_ctrl_alusrc", "wire_ctrl_mem", "wire_rf_rd1", "wire_rf_ram_data", "wire_mux_alub", "wire_alu_result"],
+        hotspotWires: ["wire_rf_ram_data", "wire_alu_result"]
+      },
+      BEQ: {
+        asm: "BEQ x1, x2, +8",
+        hex: "0x00208463",
+        pc: "0x00000010",
+        rs1: "x1 (15)",
+        rs2: "x2 (15)",
+        rd: "PC <= 0x00000018",
+        aluOut: "0 (Zero = 1)",
+        imm: "0x00000008",
+        regWrite: 0, aluSrc: 0, memRead: 0, branch: 1,
+        ramStatus: "IDLE (Branch Evaluated)",
+        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_branch_target", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_inst_imm", "wire_imm_branch", "wire_rf_rd1", "wire_rf_rd2", "wire_mux_alub", "wire_alu_zero", "wire_pc_in"],
+        hotspotWires: ["wire_alu_zero"]
+      },
+      XOR: {
+        asm: "XOR x4, x1, x2",
+        hex: "0x0020C233",
+        pc: "0x00000014",
+        rs1: "x1 (0x5555)",
+        rs2: "x2 (0xAAAA)",
+        rd: "x4 <= 0xFFFF",
+        aluOut: "0xFFFF",
+        imm: "0x00000000",
+        regWrite: 1, aluSrc: 0, memRead: 0, branch: 0,
+        ramStatus: "IDLE (No Memory Access)",
+        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_ctrl_regwrite", "wire_ctrl_aluop", "wire_rf_rd1", "wire_rf_rd2", "wire_mux_alub", "wire_alu_result", "wire_alu_wb", "wire_wb_bus"],
+        hotspotWires: ["wire_rf_rd1", "wire_mux_alub", "wire_alu_result"]
+      }
     };
 
-    function reset3DView() {
-      if (globalControls && globalCamera) {
-        globalControls.target.set(0, 0, 0);
-        if (isIsolated) {
-          globalCamera.position.set(6.5, 5.2, 6.5);
-        } else {
-          globalCamera.position.set(8.5, 6.5, 8.5);
-        }
-        globalControls.update();
+    let currentInst = "ADD";
+    let clockCycle = 1;
+    let clockHigh = true;
+    let autoClockInterval = null;
+    let selectedComp = "alu";
+
+    function selectComponent(compKey) {
+      selectedComp = compKey;
+      const comp = circuitComponents[compKey] || circuitComponents.alu;
+
+      document.querySelectorAll(".comp-box").forEach(el => el.classList.remove("comp-selected"));
+      const el = document.getElementById("comp_" + compKey);
+      if (el) el.classList.add("comp-selected");
+
+      document.getElementById("inspCompTitle").innerText = comp.title;
+      document.getElementById("inspCompSub").innerText = comp.sub;
+      document.getElementById("inspGateCount").innerText = comp.gates;
+      document.getElementById("inspCellPrim").innerText = comp.cells;
+      document.getElementById("inspPinCount").innerText = comp.pins;
+      document.getElementById("inspFanout").innerText = comp.fanout;
+      document.getElementById("inspCongestionImpact").innerHTML = comp.impact;
+
+      const badge = document.getElementById("inspGateBadge");
+      if (comp.hotspot) {
+        badge.innerText = "HOTSPOT BLOCK";
+        badge.style.background = "#fef2f2";
+        badge.style.color = "#dc2626";
+        badge.style.borderColor = "#fecaca";
+      } else {
+        badge.innerText = "STANDARD CELL";
+        badge.style.background = "#f0fdf4";
+        badge.style.color = "#16a34a";
+        badge.style.borderColor = "#bbf7d0";
       }
     }
 
-    function update3DCanvasSize() {
-      const cont = document.getElementById("viewport3D");
-      if (!cont) return;
-      const w = cont.clientWidth;
-      const h = cont.clientHeight;
+    function loadInstruction(key) {
+      currentInst = key;
+      const inst = instructionSet[key] || instructionSet.ADD;
 
-      if (!sceneInit && w > 0 && h > 0) {
-        init3DScene();
-        return;
+      const elPc = document.getElementById("val_pc_hex"); if (elPc) elPc.textContent = inst.pc;
+      const elAsm = document.getElementById("val_inst_asm"); if (elAsm) elAsm.textContent = inst.asm;
+      const elHex = document.getElementById("val_inst_hex"); if (elHex) elHex.textContent = inst.hex;
+      const elRs1 = document.getElementById("val_rf_rs1"); if (elRs1) elRs1.textContent = inst.rs1;
+      const elRs2 = document.getElementById("val_rf_rs2"); if (elRs2) elRs2.textContent = inst.rs2;
+      const elRd = document.getElementById("val_rf_rd"); if (elRd) elRd.textContent = inst.rd.split(" ")[0];
+      const elImm = document.getElementById("val_imm_out"); if (elImm) elImm.textContent = inst.imm;
+      const elAlu = document.getElementById("val_alu_out"); if (elAlu) elAlu.textContent = inst.aluOut;
+      const elRam = document.getElementById("val_ram_status"); if (elRam) elRam.textContent = inst.ramStatus;
+
+      const elRw = document.getElementById("val_sig_regwrite"); if (elRw) elRw.textContent = inst.regWrite;
+      const elAs = document.getElementById("val_sig_alusrc"); if (elAs) elAs.textContent = inst.aluSrc;
+      const elMr = document.getElementById("val_sig_memread"); if (elMr) elMr.textContent = inst.memRead;
+      const elBr = document.getElementById("val_sig_branch"); if (elBr) elBr.textContent = inst.branch;
+
+      // Update active wires
+      document.querySelectorAll("#wiresLayer path").forEach(p => {
+        p.classList.remove("wire-active", "wire-control-active", "wire-hotspot-active");
+      });
+
+      inst.activeWires.forEach(wId => {
+        const wireEl = document.getElementById(wId);
+        if (wireEl) {
+          if (wId.startsWith("wire_ctrl_")) {
+            wireEl.classList.add("wire-control-active");
+          } else if (inst.hotspotWires && inst.hotspotWires.includes(wId)) {
+            wireEl.classList.add("wire-hotspot-active");
+          } else {
+            wireEl.classList.add("wire-active");
+          }
+        }
+      });
+    }
+
+    function stepClockCycle() {
+      clockHigh = !clockHigh;
+      if (clockHigh) clockCycle++;
+
+      const ind = document.getElementById("clkIndicator");
+      const txt = document.getElementById("clkText");
+
+      if (clockHigh) {
+        if (ind) ind.setAttribute("fill", "#10b981");
+        if (txt) txt.textContent = `CLK: HIGH | Cycle #${clockCycle}`;
+      } else {
+        if (ind) ind.setAttribute("fill", "#64748b");
+        if (txt) txt.textContent = `CLK: LOW  | Cycle #${clockCycle}`;
       }
 
-      if (globalRenderer && globalCamera && w > 0 && h > 0) {
-        globalCamera.aspect = w / h;
-        globalCamera.updateProjectionMatrix();
-        globalRenderer.setSize(w, h);
-        if (globalControls) {
-          globalControls.target.set(0, 0, 0);
-          globalControls.update();
+      const active = document.querySelectorAll(".wire-active, .wire-hotspot-active, .wire-control-active");
+      active.forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight; /* trigger reflow */
+        el.style.animation = null;
+      });
+    }
+
+    function toggleAutoClock() {
+      const btn = document.getElementById("btnAutoClock");
+      if (autoClockInterval) {
+        clearInterval(autoClockInterval);
+        autoClockInterval = null;
+        if (btn) {
+          btn.innerText = "⚡ Run Clock";
+          btn.classList.remove("active");
+        }
+      } else {
+        autoClockInterval = setInterval(stepClockCycle, 650);
+        if (btn) {
+          btn.innerText = "⏸ Pause Clock";
+          btn.classList.add("active");
         }
       }
     }
 
-    function toggle3DView() {
-      const p = document.getElementById("panel3D");
+    function resetCircuit() {
+      if (autoClockInterval) toggleAutoClock();
+      clockCycle = 1;
+      clockHigh = true;
+      stepClockCycle();
+      const sel = document.getElementById("instSelect");
+      loadInstruction(sel ? sel.value : "ADD");
+      selectComponent("alu");
+    }
+
+    function toggleSchematicView() {
+      const p = document.getElementById("panelSchematic");
+      if (!p) return;
       if (p.style.display === "none") {
         p.style.display = "block";
-        setTimeout(update3DCanvasSize, 50);
-        setTimeout(update3DCanvasSize, 250);
-        setTimeout(reset3DView, 300);
+        resetCircuit();
       } else {
         p.style.display = "none";
       }
     }
 
-    window.addEventListener('load', () => {
-      setTimeout(update3DCanvasSize, 50);
-      setTimeout(update3DCanvasSize, 250);
-      setTimeout(update3DCanvasSize, 600);
+    window.addEventListener("DOMContentLoaded", () => {
+      resetCircuit();
     });
-    window.addEventListener('resize', update3DCanvasSize);
-
-    function toggleIsolationMode() {
-      isIsolated = !isIsolated;
-      isolatedAssembly.visible = isIsolated;
-      fullStackAssembly.visible = !isIsolated;
-      
-      const btnIso = document.getElementById("btnIsolate");
-      const btnExp = document.getElementById("btnExplode");
-      
-      if (isIsolated) {
-        btnIso.innerText = "Show Full Stack";
-        btnIso.style.background = "#0284c7";
-        btnIso.style.color = "#fff";
-        btnExp.style.display = "none";
-        
-        window.selectLayerFunc(selectedLayerName);
-        globalControls.target.set(0, 0, 0);
-        globalCamera.position.set(7.5, 6.2, 7.5);
-      } else {
-        btnIso.innerText = "Isolate Layer";
-        btnIso.style.background = "transparent";
-        btnIso.style.color = "#38bdf8";
-        btnExp.style.display = "block";
-        
-        globalControls.target.set(0, 0, 0);
-        globalCamera.position.set(9.5, 7.5, 9.5);
-      }
-    }
-
-    function toggleExplodeMode() {
-      exploded = !exploded;
-      document.getElementById("btnExplode").innerText = exploded ? "Collapse Stack" : "Explode Stack";
-    }
-
-    function handleDropdownLayerChange(val) {
-      if (window.selectLayerFunc) window.selectLayerFunc(val);
-    }
-
-    // Generate RV32I Processor Floorplan Canvas (GDS Base Substrate)
-    function generateRV32IFloorplanCanvas() {
-      const cvs = document.createElement("canvas");
-      cvs.width = 1024; cvs.height = 1024;
-      const ctx = cvs.getContext("2d");
-
-      // Silicon substrate
-      ctx.fillStyle = "#070a0f";
-      ctx.fillRect(0, 0, 1024, 1024);
-
-      // Guard ring & die perimeter
-      ctx.strokeStyle = "#1e293b";
-      ctx.lineWidth = 14;
-      ctx.strokeRect(18, 18, 988, 988);
-
-      // Standard cell rows
-      ctx.strokeStyle = "rgba(30, 41, 59, 0.4)";
-      ctx.lineWidth = 2;
-      for (let y = 60; y < 960; y += 18) {
-        ctx.beginPath();
-        ctx.moveTo(35, y);
-        ctx.lineTo(989, y);
-        ctx.stroke();
-      }
-
-      function drawBlock(x, y, w, h, name, subtitle, color) {
-        ctx.fillStyle = "rgba(11, 15, 23, 0.9)";
-        ctx.fillRect(x, y, w, h);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(x, y, w, h);
-
-        // Header accent bar
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, w, 28);
-        ctx.fillStyle = "#000";
-        ctx.font = "bold 15px monospace";
-        ctx.fillText(name, x + 12, y + 20);
-
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = "14px monospace";
-        ctx.fillText(subtitle, x + 12, y + 54);
-      }
-
-      // RV32I Core Functional Units
-      drawBlock(50, 50, 430, 260, "CONTROL & INSTRUCTION DECODER", "Opcode Decoder / Micro-Op FSM", "#38bdf8");
-      drawBlock(520, 50, 450, 260, "FETCH & PC UNIT", "Branch Target Adder / Next PC", "#10b981");
-      drawBlock(50, 340, 430, 370, "ALU & EXECUTION UNIT [HOTSPOT]", "32b Parallel Adder / Shifter / Logic", "#ef4444");
-      drawBlock(520, 340, 450, 370, "REGISTER FILE (x0-x31)", "32x32b Dual-Port DFF Array", "#f59e0b");
-      drawBlock(50, 740, 920, 220, "LOAD-STORE UNIT & BUS INTERFACE", "Data Memory Stage / Wishbone Master", "#a855f7");
-
-      return cvs;
-    }
-
-    // Helper: Build GDS-style physical wire tracks and vias for a layer
-    function createGDSLayerGroup(lName, usagePct) {
-      const grp = new THREE.Group();
-      grp.userData = { name: lName, raw: usagePct };
-
-      // Transparent picking carrier slab
-      const slabMat = new THREE.MeshStandardMaterial({
-        color: 0x0f172a,
-        transparent: true,
-        opacity: 0.15,
-        roughness: 0.8
-      });
-      const slab = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.04, 4.6), slabMat);
-      slab.userData = { name: lName };
-      grp.add(slab);
-
-      const idx = parseInt(lName.replace("M", ""));
-
-      let baseColor = (pdkSpecs[lName] && pdkSpecs[lName].color) ? pdkSpecs[lName].color : 0x38bdf8;
-      if (usagePct >= 85) baseColor = 0xef4444;
-
-      if (idx === 10) {
-        // M10: Top RDL & C4 Solder Bumps Array
-        const bumpGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.08, 16);
-        const bumpMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.2 });
-        for (let bx = -1.8; bx <= 1.8; bx += 0.9) {
-          for (let bz = -1.8; bz <= 1.8; bz += 0.9) {
-            const bump = new THREE.Mesh(bumpGeo, bumpMat);
-            bump.position.set(bx, 0.04, bz);
-            bump.userData = { name: lName };
-            grp.add(bump);
-          }
-        }
-        // Peripheral bonding frame
-        const frameMat = new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.85, roughness: 0.3 });
-        const topFrame = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.03, 0.15), frameMat);
-        topFrame.position.set(0, 0.02, 2.1);
-        grp.add(topFrame);
-        const btmFrame = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.03, 0.15), frameMat);
-        btmFrame.position.set(0, 0.02, -2.1);
-        grp.add(btmFrame);
-      } else if (idx === 9) {
-        // M9: Power Distribution Network (PDN) Orthogonal Grid (VDD/VSS Straps)
-        const vddMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.85, roughness: 0.25 });
-        const vssMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.85, roughness: 0.25 });
-        for (let x = -2.0; x <= 2.0; x += 0.6) {
-          const strap = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.03, 4.2), (Math.abs(x) < 0.8) ? vddMat : vssMat);
-          strap.position.set(x, 0.015, 0);
-          strap.userData = { name: lName };
-          grp.add(strap);
-        }
-        for (let z = -2.0; z <= 2.0; z += 0.6) {
-          const strap = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.03, 0.12), (Math.abs(z) < 0.8) ? vddMat : vssMat);
-          strap.position.set(0, 0.015, z);
-          strap.userData = { name: lName };
-          grp.add(strap);
-        }
-      } else {
-        // Standard routing layers: M1 to M8
-        // Alternating Manhattan routing: Odd = Horizontal (X), Even = Vertical (Z)
-        const isHorizontal = (idx % 2 !== 0);
-        const trackCount = Math.floor(18 + (usagePct / 100.0) * 32);
-        const step = 4.0 / trackCount;
-
-        const wireMat = new THREE.MeshStandardMaterial({
-          color: baseColor,
-          metalness: 0.85,
-          roughness: 0.25
-        });
-
-        const wDimX = isHorizontal ? 4.2 : 0.04;
-        const wDimZ = isHorizontal ? 0.04 : 4.2;
-        const wireGeo = new THREE.BoxGeometry(wDimX, 0.025, wDimZ);
-        const instWires = new THREE.InstancedMesh(wireGeo, wireMat, trackCount);
-
-        const dummy = new THREE.Object3D();
-        for (let w = 0; w < trackCount; w++) {
-          const coord = -2.0 + (w * step);
-          if (isHorizontal) {
-            dummy.position.set(0, 0.015, coord);
-          } else {
-            dummy.position.set(coord, 0.015, 0);
-          }
-          dummy.updateMatrix();
-          instWires.setMatrixAt(w, dummy.matrix);
-        }
-        instWires.userData = { name: lName };
-        grp.add(instWires);
-
-        // Via contact pillars to layer below
-        const viaCount = Math.floor(12 + (usagePct / 100.0) * 20);
-        const viaGeo = new THREE.BoxGeometry(0.045, 0.12, 0.045);
-        const viaMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
-        const instVias = new THREE.InstancedMesh(viaGeo, viaMat, viaCount);
-        for (let v = 0; v < viaCount; v++) {
-          const vx = -1.8 + Math.random() * 3.6;
-          const vz = -1.8 + Math.random() * 3.6;
-          dummy.position.set(vx, -0.06, vz);
-          dummy.updateMatrix();
-          instVias.setMatrixAt(v, dummy.matrix);
-        }
-        grp.add(instVias);
-      }
-
-      return grp;
-    }
-
-    function init3DScene() {
-      const cont = document.getElementById("viewport3D");
-      if (!cont) return;
-      const w = cont.clientWidth > 0 ? cont.clientWidth : 720;
-      const h = cont.clientHeight > 0 ? cont.clientHeight : 560;
-
-      if (sceneInit && globalRenderer) {
-        update3DCanvasSize();
-        return;
-      }
-      sceneInit = true;
-
-      const scene = new THREE.Scene();
-
-      globalCamera = new THREE.PerspectiveCamera(36, w / h, 0.1, 1000);
-      globalCamera.position.set(7.5, 6.2, 7.5);
-
-      globalRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-      globalRenderer.setSize(w, h);
-      globalRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-      // Ensure canvas element is properly managed
-      const oldCanvas = cont.querySelector('canvas');
-      if (oldCanvas) oldCanvas.remove();
-      cont.appendChild(globalRenderer.domElement);
-
-      globalControls = new THREE.OrbitControls(globalCamera, globalRenderer.domElement);
-      globalControls.enableDamping = true;
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.95));
-      const dl = new THREE.DirectionalLight(0xffffff, 0.85); dl.position.set(10, 15, 10); scene.add(dl);
-      const dl2 = new THREE.DirectionalLight(0x38bdf8, 0.4); dl2.position.set(-10, -5, -10); scene.add(dl2);
-
-      // RV32I Substrate Texture
-      const substrateTex = new THREE.CanvasTexture(generateRV32IFloorplanCanvas());
-      substrateTex.magFilter = THREE.LinearFilter;
-      const substrateMat = new THREE.MeshStandardMaterial({ map: substrateTex, roughness: 0.7 });
-
-      // Isolated Stage
-      isolatedAssembly = new THREE.Group();
-      scene.add(isolatedAssembly);
-
-      // Base die substrate in isolated view
-      const isoSubstrateMesh = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.08, 4.8), substrateMat);
-      isoSubstrateMesh.position.y = -0.5;
-      isolatedAssembly.add(isoSubstrateMesh);
-
-      // Active isolated layer group
-      let activeIsoGroup = createGDSLayerGroup(selectedLayerName, rawData[selectedLayerName] || 0.0);
-      activeIsoGroup.position.y = 0.0;
-      isolatedAssembly.add(activeIsoGroup);
-
-      // Full Stack Stage
-      fullStackAssembly = new THREE.Group();
-      fullStackAssembly.visible = false;
-      scene.add(fullStackAssembly);
-
-      // Base die substrate in full stack view
-      const fullSubstrateMesh = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.1, 4.8), substrateMat);
-      fullSubstrateMesh.position.y = -1.35;
-      fullStackAssembly.add(fullSubstrateMesh);
-
-      ["M1","M2","M3","M4","M5","M6","M7","M8","M9","M10"].forEach((lName, idx) => {
-        const grp = createGDSLayerGroup(lName, rawData[lName] || 0.0);
-        const defY = -0.9 + idx * 0.22;
-        const expY = -1.9 + idx * 0.46;
-        grp.position.y = defY;
-        grp.userData = { name: lName, defY: defY, expY: expY, raw: rawData[lName] };
-        fullStackAssembly.add(grp);
-        stackLayerGroups.push(grp);
-      });
-
-      window.selectLayerFunc = (lName) => {
-        selectedLayerName = lName;
-        document.getElementById("layerSelectDropdown").value = lName;
-        const rawVal = rawData[lName] || 0.0;
-        const spec = pdkSpecs[lName] || pdkSpecs['M1'];
-        
-        document.getElementById("inspName").innerText = lName + " (" + spec.dir.split(' ')[0] + " Layer)";
-        document.getElementById("inspPct").innerText = rawVal + "%";
-        document.getElementById("inspPct").style.color = rawVal >= 85 ? "#ef4444" : "#10b981";
-        document.getElementById("inspTemp").innerText = (38.0 + (rawVal * 0.35)).toFixed(1) + " °C";
-        document.getElementById("inspStruct").innerText = spec.struct;
-        document.getElementById("inspDef").innerText = layerDefs[lName] || layerDefs['M1'];
-        
-        const elDir = document.getElementById("tableDir"); if (elDir) elDir.innerText = spec.dir;
-        const elPitch = document.getElementById("tablePitch"); if (elPitch) elPitch.innerText = spec.pitch;
-        const elWdSp = document.getElementById("tableWdSp"); if (elWdSp) elWdSp.innerText = spec.width + " / " + spec.space;
-        const elRes = document.getElementById("tableRes"); if (elRes) elRes.innerText = spec.res;
-        const elCap = document.getElementById("tableCap"); if (elCap) elCap.innerText = spec.cap;
-        
-        document.getElementById("hudLabel").innerHTML = lName + " CONGESTION<br>" + (rawVal >= 85 ? "HOTSPOT" : "TRACK");
-
-        if (isIsolated) {
-          isolatedAssembly.remove(activeIsoGroup);
-          activeIsoGroup = createGDSLayerGroup(lName, rawVal);
-          activeIsoGroup.position.y = 0.0;
-          isolatedAssembly.add(activeIsoGroup);
-        }
-      };
-
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-
-      globalRenderer.domElement.addEventListener("pointerdown", (e) => {
-        const rect = globalRenderer.domElement.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(mouse, globalCamera);
-
-        const targetGroup = isIsolated ? isolatedAssembly : fullStackAssembly;
-        const hits = raycaster.intersectObjects(targetGroup.children, true);
-        for (let h of hits) {
-          let curr = h.object;
-          while (curr && curr !== targetGroup) {
-            if (curr.userData && curr.userData.name) {
-              window.selectLayerFunc(curr.userData.name);
-              return;
-            }
-            curr = curr.parent;
-          }
-        }
-      });
-
-      window.addEventListener('resize', () => {
-        globalCamera.aspect = cont.clientWidth / cont.clientHeight;
-        globalCamera.updateProjectionMatrix();
-        globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
-      });
-
-      const hudLine = document.getElementById("hudLine");
-      const hudDot1 = document.getElementById("hudDot1");
-      const hudDot2 = document.getElementById("hudDot2");
-      const hudLabel = document.getElementById("hudLabel");
-
-      function anim() {
-        requestAnimationFrame(anim);
-        if (!isIsolated) {
-          stackLayerGroups.forEach(l => {
-            const targetY = exploded ? l.userData.expY : l.userData.defY;
-            l.position.y += (targetY - l.position.y) * 0.08;
-          });
-        }
-        
-        if (isIsolated) {
-          const p1 = new THREE.Vector3(0.0, 0.15, 0.0);
-          const p2 = new THREE.Vector3(0.6, 0.15, -0.6);
-          const v1 = p1.clone().project(globalCamera);
-          const v2 = p2.clone().project(globalCamera);
-
-          const inFrustum = (v1.z < 1.0 && v2.z < 1.0 && Math.abs(v1.x) <= 1.0 && Math.abs(v1.y) <= 1.0 && Math.abs(v2.x) <= 1.0 && Math.abs(v2.y) <= 1.0);
-
-          if (inFrustum) {
-            hudLine.style.display = "block"; hudDot1.style.display = "block"; hudDot2.style.display = "block"; hudLabel.style.display = "block";
-            const s1 = { x: (v1.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v1.y * 0.5) + 0.5) * cont.clientHeight };
-            const s2 = { x: (v2.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v2.y * 0.5) + 0.5) * cont.clientHeight };
-
-            hudLine.setAttribute("points", `${s2.x},${s2.y} ${s2.x + 90},${s2.y - 65} ${s2.x + 160},${s2.y - 65}`);
-            hudDot1.setAttribute("cx", s1.x); hudDot1.setAttribute("cy", s1.y);
-            hudDot2.setAttribute("cx", s2.x); hudDot2.setAttribute("cy", s2.y);
-            hudLabel.style.left = `${s2.x + 172}px`; hudLabel.style.top = `${s2.y - 79}px`;
-          } else {
-            hudLine.style.display = "none"; hudDot1.style.display = "none"; hudDot2.style.display = "none"; hudLabel.style.display = "none";
-          }
-        } else {
-          hudLine.style.display = "none"; hudDot1.style.display = "none"; hudDot2.style.display = "none"; hudLabel.style.display = "none";
-        }
-
-        globalControls.update();
-        globalRenderer.render(scene, globalCamera);
-      }
-      anim();
-    }
   </script>
 </body>
 </html>
