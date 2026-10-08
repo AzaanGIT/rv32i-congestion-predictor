@@ -3,11 +3,16 @@ import json
 import joblib
 import numpy as np
 import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 
 app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(__file__)
+
+@app.route('/layers_pictures/<path:filename>')
+def serve_layers_pictures(filename):
+    docs_img_dir = os.path.abspath(os.path.join(BASE_DIR, '..', 'docs', 'layers_pictures'))
+    return send_from_directory(docs_img_dir, filename)
 
 # Model File Paths
 XGB_REG_PATH = os.path.join(BASE_DIR, "model", "xgboost_regressors.joblib")
