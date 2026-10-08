@@ -945,38 +945,41 @@
       'M10': 'Metal 10 (met10): Top thick Redistribution Layer (RDL) featuring C4 solder bumps and IO Pad Ring (DOUT, CLK_REF, VDD, VSS).'
     };
 
+    function update3DCanvasSize() {
+      const cont = document.getElementById("viewport3D");
+      if (!cont) return;
+      const w = cont.clientWidth;
+      const h = cont.clientHeight;
+
+      if (!sceneInit && w > 0 && h > 0) {
+        init3DScene();
+        return;
+      }
+
+      if (globalRenderer && globalCamera && w > 0 && h > 0) {
+        globalCamera.aspect = w / h;
+        globalCamera.updateProjectionMatrix();
+        globalRenderer.setSize(w, h);
+      }
+    }
+
     function toggle3DView() {
       const p = document.getElementById("panel3D");
       if (p.style.display === "none") {
         p.style.display = "block";
-        if (!sceneInit) init3DScene();
-        setTimeout(() => { 
-          if (globalRenderer) {
-            const cont = document.getElementById("viewport3D");
-            globalCamera.aspect = cont.clientWidth / cont.clientHeight;
-            globalCamera.updateProjectionMatrix();
-            globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
-          }
-        }, 50);
+        setTimeout(update3DCanvasSize, 50);
+        setTimeout(update3DCanvasSize, 250);
       } else {
         p.style.display = "none";
       }
     }
 
-    // Auto initialize 3D scene on page load so 3D model is rendered immediately
     window.addEventListener('load', () => {
-      if (!sceneInit) {
-        init3DScene();
-        setTimeout(() => { 
-          if (globalRenderer) {
-            const cont = document.getElementById("viewport3D");
-            globalCamera.aspect = cont.clientWidth / cont.clientHeight;
-            globalCamera.updateProjectionMatrix();
-            globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
-          }
-        }, 100);
-      }
+      setTimeout(update3DCanvasSize, 50);
+      setTimeout(update3DCanvasSize, 250);
+      setTimeout(update3DCanvasSize, 600);
     });
+    window.addEventListener('resize', update3DCanvasSize);
 
     function toggleIsolationMode() {
       isIsolated = !isIsolated;
@@ -1177,16 +1180,29 @@
     }
 
     function init3DScene() {
-      sceneInit = true;
       const cont = document.getElementById("viewport3D");
+      if (!cont) return;
+      const w = cont.clientWidth > 0 ? cont.clientWidth : 720;
+      const h = cont.clientHeight > 0 ? cont.clientHeight : 560;
+
+      if (sceneInit && globalRenderer) {
+        update3DCanvasSize();
+        return;
+      }
+      sceneInit = true;
+
       const scene = new THREE.Scene();
 
-      globalCamera = new THREE.PerspectiveCamera(36, cont.clientWidth / cont.clientHeight, 0.1, 1000);
+      globalCamera = new THREE.PerspectiveCamera(36, w / h, 0.1, 1000);
       globalCamera.position.set(7.5, 6.2, 7.5);
 
-      globalRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      globalRenderer.setSize(cont.clientWidth, cont.clientHeight);
-      globalRenderer.setPixelRatio(window.devicePixelRatio);
+      globalRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+      globalRenderer.setSize(w, h);
+      globalRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // Ensure canvas element is properly managed
+      const oldCanvas = cont.querySelector('canvas');
+      if (oldCanvas) oldCanvas.remove();
       cont.appendChild(globalRenderer.domElement);
 
       globalControls = new THREE.OrbitControls(globalCamera, globalRenderer.domElement);
@@ -1361,7 +1377,12 @@
       document.getElementById('resultsView').style.display = 'block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      if (!sceneInit && typeof init3DScene === 'function') {
+      if (typeof update3DCanvasSize === 'function') {
+        update3DCanvasSize();
+        setTimeout(update3DCanvasSize, 50);
+        setTimeout(update3DCanvasSize, 200);
+        setTimeout(update3DCanvasSize, 500);
+      } else if (!sceneInit && typeof init3DScene === 'function') {
         init3DScene();
       }
     }
