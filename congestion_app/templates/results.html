@@ -243,7 +243,611 @@
 
               <!-- Dynamic Gate Canvas Container -->
               <g id="gateCanvasGroup">
-                <!-- Injected via JavaScript renderCurrentView() -->
+
+    <!-- STAGE BOUNDING FRAMES -->
+    <g font-size="8.5" font-family="monospace" font-weight="bold">
+      <!-- Stage 1 Frame -->
+      <rect x="25" y="32" width="285" height="520" rx="6" fill="#070d1a" stroke="#10b981" stroke-width="1" stroke-dasharray="4 2"/>
+      <rect x="25" y="32" width="285" height="22" rx="6" fill="#064e3b"/>
+      <text x="35" y="47" fill="#a7f3d0">STAGE 1: PC REGISTER (8-NAND DFF) &amp; FETCH GATES</text>
+
+      <!-- Stage 2 Frame -->
+      <rect x="325" y="32" width="265" height="255" rx="6" fill="#070d1a" stroke="#ec4899" stroke-width="1" stroke-dasharray="4 2"/>
+      <rect x="325" y="32" width="265" height="22" rx="6" fill="#831843"/>
+      <text x="335" y="47" fill="#fbcfe8">STAGE 2: DECODER (INVERTERS &amp; AND MATRIX)</text>
+
+      <!-- Stage 3 Frame -->
+      <rect x="325" y="297" width="265" height="255" rx="6" fill="#070d1a" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 2"/>
+      <rect x="325" y="297" width="265" height="22" rx="6" fill="#78350f"/>
+      <text x="335" y="312" fill="#fde68a">STAGE 3: REGISTER FILE BITCELL (NAND LATCH)</text>
+
+      <!-- Stage 4 Frame: ALU HOTSPOT -->
+      <rect x="605" y="32" width="445" height="520" rx="6" fill="#140a0f" stroke="#ef4444" stroke-width="1.8" filter="drop-shadow(0 0 10px rgba(239, 68, 68, 0.3))"/>
+      <rect x="605" y="32" width="445" height="22" rx="6" fill="#7f1d1d"/>
+      <text x="615" y="47" fill="#fca5a5">STAGE 4: 32-BIT ALU LOGIC GATES [🔥 CRITICAL M2/M3 CONGESTION HOTSPOT]</text>
+    </g>
+
+    <!-- ============================================== -->
+    <!-- STAGE 1: PC D-FLIP-FLOP & FETCH LOGIC GATES -->
+    <!-- ============================================== -->
+    <!-- Clock Inverter -->
+    
+    <g id="pc_clk_inv" class="logic-gate comp-box" onclick="selectLogicGate('pc_clk_inv')">
+      <polygon points="35,77 59,90 35,103" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="62" cy="90" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="37" y="71" fill="#94a3b8" font-size="7.5" font-family="monospace">CLK_INV</text>
+      <circle cx="35" cy="90" r="2.5" fill="#64748b"/>
+      <circle cx="65" cy="90" r="2.5" fill="#64748b"/>
+    </g>
+    <path d="M 15 90 L 35 90" fill="none" stroke="#64748b" stroke-width="2"/>
+    <circle cx="15" cy="90" r="3.5" fill="#10b981"/>
+    <text x="12" y="82" fill="#10b981" font-size="8" font-family="monospace" font-weight="bold">CLK</text>
+
+    <!-- Master Stage 4-NAND Latch -->
+    
+    <g id="dff_nand1" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand1')" >
+      <path d="M 80 65 L 100 65 A 15 15 0 0 1 100 95 L 80 95 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="118" cy="80" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="93" y="84" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="82" y="61" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND1</text>
+      <circle cx="80" cy="73" r="2.5" fill="#a855f7"/>
+      <circle cx="80" cy="87" r="2.5" fill="#a855f7"/>
+      <circle cx="121" cy="80" r="2.5" fill="#a855f7"/>
+    </g>
+    
+    <g id="dff_nand2" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand2')" >
+      <path d="M 80 120 L 100 120 A 15 15 0 0 1 100 150 L 80 150 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="118" cy="135" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="93" y="139" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="82" y="116" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND2</text>
+      <circle cx="80" cy="128" r="2.5" fill="#a855f7"/>
+      <circle cx="80" cy="142" r="2.5" fill="#a855f7"/>
+      <circle cx="121" cy="135" r="2.5" fill="#a855f7"/>
+    </g>
+    
+    <g id="dff_nand3" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand3')" >
+      <path d="M 140 65 L 160 65 A 15 15 0 0 1 160 95 L 140 95 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="178" cy="80" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="153" y="84" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="142" y="61" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND3</text>
+      <circle cx="140" cy="73" r="2.5" fill="#a855f7"/>
+      <circle cx="140" cy="87" r="2.5" fill="#a855f7"/>
+      <circle cx="181" cy="80" r="2.5" fill="#a855f7"/>
+    </g>
+    
+    <g id="dff_nand4" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand4')" >
+      <path d="M 140 120 L 160 120 A 15 15 0 0 1 160 150 L 140 150 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="178" cy="135" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="153" y="139" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="142" y="116" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND4</text>
+      <circle cx="140" cy="128" r="2.5" fill="#a855f7"/>
+      <circle cx="140" cy="142" r="2.5" fill="#a855f7"/>
+      <circle cx="181" cy="135" r="2.5" fill="#a855f7"/>
+    </g>
+
+    <!-- Master Crossed Feedback Net -->
+    <path d="M 181 80 L 195 80 L 195 105 L 128 105 L 128 128 L 140 128" fill="none" stroke="#a855f7" stroke-width="1.8"/>
+    <path d="M 181 135 L 195 135 L 195 112 L 128 112 L 128 88 L 140 88" fill="none" stroke="#a855f7" stroke-width="1.8"/>
+
+    <!-- Slave Stage 4-NAND Latch -->
+    
+    <g id="dff_nand5" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand5')" >
+      <path d="M 205 65 L 225 65 A 15 15 0 0 1 225 95 L 205 95 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="243" cy="80" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="218" y="84" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="207" y="61" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND5</text>
+      <circle cx="205" cy="73" r="2.5" fill="#a855f7"/>
+      <circle cx="205" cy="87" r="2.5" fill="#a855f7"/>
+      <circle cx="246" cy="80" r="2.5" fill="#a855f7"/>
+    </g>
+    
+    <g id="dff_nand6" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand6')" >
+      <path d="M 205 120 L 225 120 A 15 15 0 0 1 225 150 L 205 150 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="243" cy="135" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="218" y="139" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="207" y="116" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND6</text>
+      <circle cx="205" cy="128" r="2.5" fill="#a855f7"/>
+      <circle cx="205" cy="142" r="2.5" fill="#a855f7"/>
+      <circle cx="246" cy="135" r="2.5" fill="#a855f7"/>
+    </g>
+    
+    <g id="dff_nand7" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand7')" >
+      <path d="M 260 65 L 280 65 A 15 15 0 0 1 280 95 L 260 95 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="298" cy="80" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="273" y="84" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="262" y="61" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND7</text>
+      <circle cx="260" cy="73" r="2.5" fill="#a855f7"/>
+      <circle cx="260" cy="87" r="2.5" fill="#a855f7"/>
+      <circle cx="301" cy="80" r="2.5" fill="#a855f7"/>
+    </g>
+    
+    <g id="dff_nand8" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand8')" >
+      <path d="M 260 120 L 280 120 A 15 15 0 0 1 280 150 L 260 150 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="298" cy="135" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="273" y="139" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="262" y="116" fill="#94a3b8" font-size="7.5" font-family="monospace">NAND8</text>
+      <circle cx="260" cy="128" r="2.5" fill="#a855f7"/>
+      <circle cx="260" cy="142" r="2.5" fill="#a855f7"/>
+      <circle cx="301" cy="135" r="2.5" fill="#a855f7"/>
+    </g>
+
+    <!-- Slave Crossed Feedback Net -->
+    <path d="M 301 80 L 312 80 L 312 105 L 248 105 L 248 128 L 260 128" fill="none" stroke="#a855f7" stroke-width="1.8"/>
+    <path d="M 301 135 L 312 135 L 312 112 L 248 112 L 248 88 L 260 88" fill="none" stroke="#a855f7" stroke-width="1.8"/>
+
+    <!-- Interconnects from Master to Slave -->
+    <path d="M 181 80 L 205 80" fill="none" stroke="#38bdf8" stroke-width="2"/>
+    <path d="M 181 135 L 205 135" fill="none" stroke="#38bdf8" stroke-width="2"/>
+
+    <!-- PC Q Output Net -->
+    <path id="wire_pc_q" d="M 301 80 L 325 80" fill="none" stroke="#10b981" stroke-width="2.5"/>
+    <circle cx="325" cy="80" r="3" fill="#10b981"/>
+    <text x="312" y="73" fill="#34d399" font-size="8" font-family="monospace" font-weight="bold">Q (PC)</text>
+
+    <!-- Next-PC Increment Half-Adder (+4) -->
+    
+    <g id="pc_add_xor" class="logic-gate comp-box" onclick="selectLogicGate('pc_add_xor')" >
+      <path d="M 86 185 Q 97 200 86 215" fill="none" stroke="#ec4899" stroke-width="1.8"/>
+      <path d="M 90 185 Q 101 200 90 215 Q 115 215 128 200 Q 115 185 90 185 Z" fill="#0b1329" stroke="#ec4899" stroke-width="1.8"/>
+      <text x="109" y="204" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="bold" font-family="monospace">=1</text>
+      <text x="92" y="181" fill="#94a3b8" font-size="7.5" font-family="monospace">PC_XOR</text>
+      <circle cx="88" cy="193" r="2.5" fill="#ec4899"/>
+      <circle cx="88" cy="207" r="2.5" fill="#ec4899"/>
+      <circle cx="128" cy="200" r="2.5" fill="#ec4899"/>
+    </g>
+    
+    <g id="pc_add_and" class="logic-gate comp-box" onclick="selectLogicGate('pc_add_and')" >
+      <path d="M 90 230 L 110 230 A 15 15 0 0 1 110 260 L 90 260 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="103" y="249" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="92" y="226" fill="#94a3b8" font-size="7.5" font-family="monospace">PC_AND</text>
+      <circle cx="90" cy="238" r="2.5" fill="#38bdf8"/>
+      <circle cx="90" cy="252" r="2.5" fill="#38bdf8"/>
+      <circle cx="125" cy="245" r="2.5" fill="#38bdf8"/>
+    </g>
+    <path d="M 315 80 L 315 170 L 70 170 L 70 193 L 88 193" fill="none" stroke="#10b981" stroke-width="1.8"/>
+
+    <!-- Branch Target Adder Gates -->
+    
+    <g id="br_add_xor" class="logic-gate comp-box" onclick="selectLogicGate('br_add_xor')" >
+      <path d="M 86 290 Q 97 305 86 320" fill="none" stroke="#ec4899" stroke-width="1.8"/>
+      <path d="M 90 290 Q 101 305 90 320 Q 115 320 128 305 Q 115 290 90 290 Z" fill="#0b1329" stroke="#ec4899" stroke-width="1.8"/>
+      <text x="109" y="309" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="bold" font-family="monospace">=1</text>
+      <text x="92" y="286" fill="#94a3b8" font-size="7.5" font-family="monospace">BR_XOR</text>
+      <circle cx="88" cy="298" r="2.5" fill="#ec4899"/>
+      <circle cx="88" cy="312" r="2.5" fill="#ec4899"/>
+      <circle cx="128" cy="305" r="2.5" fill="#ec4899"/>
+    </g>
+    
+    <g id="br_add_and" class="logic-gate comp-box" onclick="selectLogicGate('br_add_and')" >
+      <path d="M 90 335 L 110 335 A 15 15 0 0 1 110 365 L 90 365 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="103" y="354" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="92" y="331" fill="#94a3b8" font-size="7.5" font-family="monospace">BR_AND</text>
+      <circle cx="90" cy="343" r="2.5" fill="#38bdf8"/>
+      <circle cx="90" cy="357" r="2.5" fill="#38bdf8"/>
+      <circle cx="125" cy="350" r="2.5" fill="#38bdf8"/>
+    </g>
+
+    <!-- Branch Multiplexer Gates -->
+    
+    <g id="br_mux_inv" class="logic-gate comp-box" onclick="selectLogicGate('br_mux_inv')">
+      <polygon points="165,197 189,210 165,223" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="192" cy="210" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="167" y="191" fill="#94a3b8" font-size="7.5" font-family="monospace">B_INV</text>
+      <circle cx="165" cy="210" r="2.5" fill="#64748b"/>
+      <circle cx="195" cy="210" r="2.5" fill="#64748b"/>
+    </g>
+    
+    <g id="br_mux_and0" class="logic-gate comp-box" onclick="selectLogicGate('br_mux_and0')" >
+      <path d="M 205 185 L 225 185 A 15 15 0 0 1 225 215 L 205 215 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="218" y="204" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="207" y="181" fill="#94a3b8" font-size="7.5" font-family="monospace">B_AND0</text>
+      <circle cx="205" cy="193" r="2.5" fill="#38bdf8"/>
+      <circle cx="205" cy="207" r="2.5" fill="#38bdf8"/>
+      <circle cx="240" cy="200" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="br_mux_and1" class="logic-gate comp-box" onclick="selectLogicGate('br_mux_and1')" >
+      <path d="M 205 230 L 225 230 A 15 15 0 0 1 225 260 L 205 260 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="218" y="249" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="207" y="226" fill="#94a3b8" font-size="7.5" font-family="monospace">B_AND1</text>
+      <circle cx="205" cy="238" r="2.5" fill="#38bdf8"/>
+      <circle cx="205" cy="252" r="2.5" fill="#38bdf8"/>
+      <circle cx="240" cy="245" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="br_mux_or" class="logic-gate comp-box" onclick="selectLogicGate('br_mux_or')" >
+      <path d="M 260 205 Q 271 220 260 235 Q 285 235 298 220 Q 285 205 260 205 Z" fill="#0b1329" stroke="#10b981" stroke-width="1.8"/>
+      <text x="279" y="224" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="262" y="201" fill="#94a3b8" font-size="7.5" font-family="monospace">B_OR</text>
+      <circle cx="263" cy="213" r="2.5" fill="#10b981"/>
+      <circle cx="263" cy="227" r="2.5" fill="#10b981"/>
+      <circle cx="298" cy="220" r="2.5" fill="#10b981"/>
+    </g>
+
+    <!-- MUX to PC D Input (Wrap around net) -->
+    <path id="wire_pc_d" d="M 298 220 L 315 220 L 315 270 L 20 270 L 20 73 L 80 73" fill="none" stroke="#38bdf8" stroke-width="2.2" marker-end="url(#arrow)"/>
+    <text x="24" y="68" fill="#38bdf8" font-size="8" font-family="monospace">D_In</text>
+
+    <!-- ============================================== -->
+    <!-- STAGE 2: INSTRUCTION DECODER LOGIC GATES -->
+    <!-- ============================================== -->
+    <path d="M 325 80 L 340 80" fill="none" stroke="#64748b" stroke-width="2"/>
+    
+    <g id="dec_inv1" class="logic-gate comp-box" onclick="selectLogicGate('dec_inv1')">
+      <polygon points="345,70 369,83 345,96" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="372" cy="83" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="347" y="64" fill="#94a3b8" font-size="7.5" font-family="monospace">INV_OP5</text>
+      <circle cx="345" cy="83" r="2.5" fill="#64748b"/>
+      <circle cx="375" cy="83" r="2.5" fill="#64748b"/>
+    </g>
+    
+    <g id="dec_inv2" class="logic-gate comp-box" onclick="selectLogicGate('dec_inv2')">
+      <polygon points="345,117 369,130 345,143" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="372" cy="130" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="347" y="111" fill="#94a3b8" font-size="7.5" font-family="monospace">INV_OP6</text>
+      <circle cx="345" cy="130" r="2.5" fill="#64748b"/>
+      <circle cx="375" cy="130" r="2.5" fill="#64748b"/>
+    </g>
+    
+    <g id="dec_inv3" class="logic-gate comp-box" onclick="selectLogicGate('dec_inv3')">
+      <polygon points="345,164 369,177 345,190" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="372" cy="177" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="347" y="158" fill="#94a3b8" font-size="7.5" font-family="monospace">INV_OP2</text>
+      <circle cx="345" cy="177" r="2.5" fill="#64748b"/>
+      <circle cx="375" cy="177" r="2.5" fill="#64748b"/>
+    </g>
+    
+    <g id="dec_inv4" class="logic-gate comp-box" onclick="selectLogicGate('dec_inv4')">
+      <polygon points="345,212 369,225 345,238" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="372" cy="225" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="347" y="206" fill="#94a3b8" font-size="7.5" font-family="monospace">INV_F3</text>
+      <circle cx="345" cy="225" r="2.5" fill="#64748b"/>
+      <circle cx="375" cy="225" r="2.5" fill="#64748b"/>
+    </g>
+
+    
+    <g id="dec_and_r" class="logic-gate comp-box" onclick="selectLogicGate('dec_and_r')" >
+      <path d="M 425 65 L 445 65 A 15 15 0 0 1 445 95 L 425 95 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="438" y="84" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="427" y="61" fill="#94a3b8" font-size="7.5" font-family="monospace">AND_R (0110011)</text>
+      <circle cx="425" cy="73" r="2.5" fill="#38bdf8"/>
+      <circle cx="425" cy="87" r="2.5" fill="#38bdf8"/>
+      <circle cx="460" cy="80" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="dec_and_load" class="logic-gate comp-box" onclick="selectLogicGate('dec_and_load')" >
+      <path d="M 425 115 L 445 115 A 15 15 0 0 1 445 145 L 425 145 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="438" y="134" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="427" y="111" fill="#94a3b8" font-size="7.5" font-family="monospace">AND_LOAD (0000011)</text>
+      <circle cx="425" cy="123" r="2.5" fill="#38bdf8"/>
+      <circle cx="425" cy="137" r="2.5" fill="#38bdf8"/>
+      <circle cx="460" cy="130" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="dec_and_store" class="logic-gate comp-box" onclick="selectLogicGate('dec_and_store')" >
+      <path d="M 425 165 L 445 165 A 15 15 0 0 1 445 195 L 425 195 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="438" y="184" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="427" y="161" fill="#94a3b8" font-size="7.5" font-family="monospace">AND_STORE (0100011)</text>
+      <circle cx="425" cy="173" r="2.5" fill="#38bdf8"/>
+      <circle cx="425" cy="187" r="2.5" fill="#38bdf8"/>
+      <circle cx="460" cy="180" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="dec_and_branch" class="logic-gate comp-box" onclick="selectLogicGate('dec_and_branch')" >
+      <path d="M 425 215 L 445 215 A 15 15 0 0 1 445 245 L 425 245 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="438" y="234" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="427" y="211" fill="#94a3b8" font-size="7.5" font-family="monospace">AND_BEQ (1100011)</text>
+      <circle cx="425" cy="223" r="2.5" fill="#38bdf8"/>
+      <circle cx="425" cy="237" r="2.5" fill="#38bdf8"/>
+      <circle cx="460" cy="230" r="2.5" fill="#38bdf8"/>
+    </g>
+
+    
+    <g id="dec_or_rw" class="logic-gate comp-box" onclick="selectLogicGate('dec_or_rw')" >
+      <path d="M 515 88 Q 526 103 515 118 Q 540 118 553 103 Q 540 88 515 88 Z" fill="#0b1329" stroke="#10b981" stroke-width="1.8"/>
+      <text x="534" y="107" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="517" y="84" fill="#94a3b8" font-size="7.5" font-family="monospace">OR_REGWRITE</text>
+      <circle cx="518" cy="96" r="2.5" fill="#10b981"/>
+      <circle cx="518" cy="110" r="2.5" fill="#10b981"/>
+      <circle cx="553" cy="103" r="2.5" fill="#10b981"/>
+    </g>
+    
+    <g id="dec_or_as" class="logic-gate comp-box" onclick="selectLogicGate('dec_or_as')" >
+      <path d="M 515 142 Q 526 157 515 172 Q 540 172 553 157 Q 540 142 515 142 Z" fill="#0b1329" stroke="#10b981" stroke-width="1.8"/>
+      <text x="534" y="161" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="517" y="138" fill="#94a3b8" font-size="7.5" font-family="monospace">OR_ALUSRC</text>
+      <circle cx="518" cy="150" r="2.5" fill="#10b981"/>
+      <circle cx="518" cy="164" r="2.5" fill="#10b981"/>
+      <circle cx="553" cy="157" r="2.5" fill="#10b981"/>
+    </g>
+
+    <!-- Decoder control output lines -->
+    <path id="wire_ctrl_rw" d="M 553 103 L 575 103 L 575 330 L 360 330" fill="none" stroke="#ec4899" stroke-width="2"/>
+    <text x="560" y="98" fill="#f472b6" font-size="8" font-family="monospace" font-weight="bold">RegWrite</text>
+
+    <path id="wire_ctrl_as" d="M 553 157 L 595 157 L 595 405 L 635 405" fill="none" stroke="#ec4899" stroke-width="2"/>
+    <text x="560" y="152" fill="#f472b6" font-size="8" font-family="monospace" font-weight="bold">ALUSrc</text>
+
+    <!-- ============================================== -->
+    <!-- STAGE 3: REGISTER FILE BITCELL NAND GATES -->
+    <!-- ============================================== -->
+    
+    <g id="rf_w_and" class="logic-gate comp-box" onclick="selectLogicGate('rf_w_and')" >
+      <path d="M 355 335 L 375 335 A 15 15 0 0 1 375 365 L 355 365 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="368" y="354" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="357" y="331" fill="#94a3b8" font-size="7.5" font-family="monospace">W_AND</text>
+      <circle cx="355" cy="343" r="2.5" fill="#38bdf8"/>
+      <circle cx="355" cy="357" r="2.5" fill="#38bdf8"/>
+      <circle cx="390" cy="350" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="rf_latch_nand1" class="logic-gate comp-box" onclick="selectLogicGate('rf_latch_nand1')" >
+      <path d="M 420 335 L 440 335 A 15 15 0 0 1 440 365 L 420 365 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="458" cy="350" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="433" y="354" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="422" y="331" fill="#94a3b8" font-size="7.5" font-family="monospace">RF_NAND1</text>
+      <circle cx="420" cy="343" r="2.5" fill="#a855f7"/>
+      <circle cx="420" cy="357" r="2.5" fill="#a855f7"/>
+      <circle cx="461" cy="350" r="2.5" fill="#a855f7"/>
+    </g>
+    
+    <g id="rf_latch_nand2" class="logic-gate comp-box" onclick="selectLogicGate('rf_latch_nand2')" >
+      <path d="M 420 385 L 440 385 A 15 15 0 0 1 440 415 L 420 415 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
+      <circle cx="458" cy="400" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="433" y="404" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="bold" font-family="monospace">NAND</text>
+      <text x="422" y="381" fill="#94a3b8" font-size="7.5" font-family="monospace">RF_NAND2</text>
+      <circle cx="420" cy="393" r="2.5" fill="#a855f7"/>
+      <circle cx="420" cy="407" r="2.5" fill="#a855f7"/>
+      <circle cx="461" cy="400" r="2.5" fill="#a855f7"/>
+    </g>
+
+    <!-- RegFile Crossed Feedback Net -->
+    <path d="M 461 350 L 475 350 L 475 372 L 410 372 L 410 393 L 420 393" fill="none" stroke="#f59e0b" stroke-width="1.8"/>
+    <path d="M 461 400 L 475 400 L 475 378 L 410 378 L 410 357 L 420 357" fill="none" stroke="#f59e0b" stroke-width="1.8"/>
+
+    <!-- Read Select AND Gates -->
+    
+    <g id="rf_rd1_and" class="logic-gate comp-box" onclick="selectLogicGate('rf_rd1_and')" >
+      <path d="M 510 335 L 530 335 A 15 15 0 0 1 530 365 L 510 365 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="523" y="354" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="512" y="331" fill="#94a3b8" font-size="7.5" font-family="monospace">RD1_AND</text>
+      <circle cx="510" cy="343" r="2.5" fill="#38bdf8"/>
+      <circle cx="510" cy="357" r="2.5" fill="#38bdf8"/>
+      <circle cx="545" cy="350" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="rf_rd2_and" class="logic-gate comp-box" onclick="selectLogicGate('rf_rd2_and')" >
+      <path d="M 510 395 L 530 395 A 15 15 0 0 1 530 425 L 510 425 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="523" y="414" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="512" y="391" fill="#94a3b8" font-size="7.5" font-family="monospace">RD2_AND</text>
+      <circle cx="510" cy="403" r="2.5" fill="#38bdf8"/>
+      <circle cx="510" cy="417" r="2.5" fill="#38bdf8"/>
+      <circle cx="545" cy="410" r="2.5" fill="#38bdf8"/>
+    </g>
+
+    <!-- RD1 net to ALU Input A -->
+    <path id="wire_rf_rd1" d="M 545 350 L 630 350 L 630 80 L 715 80" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+    <text x="555" y="344" fill="#38bdf8" font-size="8" font-family="monospace" font-weight="bold">RD1 [Op A]</text>
+
+    <!-- RD2 net to ALU MUX Input 0 -->
+    <path id="wire_rf_rd2" d="M 545 410 L 610 410 L 610 370 L 640 370" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
+    <text x="555" y="405" fill="#38bdf8" font-size="8" font-family="monospace">RD2</text>
+
+    <!-- ============================================== -->
+    <!-- STAGE 4: ALU LOGIC GATES [CRITICAL HOTSPOT] -->
+    <!-- ============================================== -->
+    <!-- ALU Source Multiplexer Gates -->
+    
+    <g id="mux_inv" class="logic-gate comp-box" onclick="selectLogicGate('mux_inv')">
+      <polygon points="605,397 629,410 605,423" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="632" cy="410" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="607" y="391" fill="#94a3b8" font-size="7.5" font-family="monospace">M_INV</text>
+      <circle cx="605" cy="410" r="2.5" fill="#64748b"/>
+      <circle cx="635" cy="410" r="2.5" fill="#64748b"/>
+    </g>
+    
+    <g id="mux_and1" class="logic-gate comp-box" onclick="selectLogicGate('mux_and1')" >
+      <path d="M 645 360 L 665 360 A 15 15 0 0 1 665 390 L 645 390 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="658" y="379" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="647" y="356" fill="#94a3b8" font-size="7.5" font-family="monospace">M_AND0 (RD2)</text>
+      <circle cx="645" cy="368" r="2.5" fill="#38bdf8"/>
+      <circle cx="645" cy="382" r="2.5" fill="#38bdf8"/>
+      <circle cx="680" cy="375" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="mux_and2" class="logic-gate comp-box" onclick="selectLogicGate('mux_and2')" >
+      <path d="M 645 410 L 665 410 A 15 15 0 0 1 665 440 L 645 440 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="658" y="429" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="647" y="406" fill="#94a3b8" font-size="7.5" font-family="monospace">M_AND1 (Imm)</text>
+      <circle cx="645" cy="418" r="2.5" fill="#38bdf8"/>
+      <circle cx="645" cy="432" r="2.5" fill="#38bdf8"/>
+      <circle cx="680" cy="425" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="mux_or" class="logic-gate comp-box" onclick="selectLogicGate('mux_or')" >
+      <path d="M 705 385 Q 716 400 705 415 Q 730 415 743 400 Q 730 385 705 385 Z" fill="#0b1329" stroke="#10b981" stroke-width="1.8"/>
+      <text x="724" y="404" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="707" y="381" fill="#94a3b8" font-size="7.5" font-family="monospace">M_OR (Op B)</text>
+      <circle cx="708" cy="393" r="2.5" fill="#10b981"/>
+      <circle cx="708" cy="407" r="2.5" fill="#10b981"/>
+      <circle cx="743" cy="400" r="2.5" fill="#10b981"/>
+    </g>
+
+    <path id="wire_alu_b" d="M 743 400 L 760 400 L 760 140 L 715 140" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+    <text x="745" y="394" fill="#38bdf8" font-size="8" font-family="monospace" font-weight="bold">Operand B ──►</text>
+
+    <!-- ALU Bit 0 Full Adder Gates -->
+    
+    <g id="alu_xor1" class="logic-gate comp-box" onclick="selectLogicGate('alu_xor1')" filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))">
+      <path d="M 721 65 Q 732 80 721 95" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+      <path d="M 725 65 Q 736 80 725 95 Q 750 95 763 80 Q 750 65 725 65 Z" fill="#0b1329" stroke="#ef4444" stroke-width="1.8"/>
+      <text x="744" y="84" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="bold" font-family="monospace">=1</text>
+      <text x="727" y="61" fill="#94a3b8" font-size="7.5" font-family="monospace">XOR_FA1 (A⊕B)</text>
+      <circle cx="723" cy="73" r="2.5" fill="#ef4444"/>
+      <circle cx="723" cy="87" r="2.5" fill="#ef4444"/>
+      <circle cx="763" cy="80" r="2.5" fill="#ef4444"/>
+    </g>
+    
+    <g id="alu_xor2" class="logic-gate comp-box" onclick="selectLogicGate('alu_xor2')" filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))">
+      <path d="M 791 65 Q 802 80 791 95" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+      <path d="M 795 65 Q 806 80 795 95 Q 820 95 833 80 Q 820 65 795 65 Z" fill="#0b1329" stroke="#ef4444" stroke-width="1.8"/>
+      <text x="814" y="84" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="bold" font-family="monospace">=1</text>
+      <text x="797" y="61" fill="#94a3b8" font-size="7.5" font-family="monospace">XOR_SUM (Sum0)</text>
+      <circle cx="793" cy="73" r="2.5" fill="#ef4444"/>
+      <circle cx="793" cy="87" r="2.5" fill="#ef4444"/>
+      <circle cx="833" cy="80" r="2.5" fill="#ef4444"/>
+    </g>
+    <path d="M 763 80 L 791 80" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+
+    
+    <g id="alu_and1" class="logic-gate comp-box" onclick="selectLogicGate('alu_and1')" filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))">
+      <path d="M 725 115 L 745 115 A 15 15 0 0 1 745 145 L 725 145 Z" fill="#0b1329" stroke="#ef4444" stroke-width="1.8"/>
+      <text x="738" y="134" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="727" y="111" fill="#94a3b8" font-size="7.5" font-family="monospace">AND_G (A·B)</text>
+      <circle cx="725" cy="123" r="2.5" fill="#ef4444"/>
+      <circle cx="725" cy="137" r="2.5" fill="#ef4444"/>
+      <circle cx="760" cy="130" r="2.5" fill="#ef4444"/>
+    </g>
+    
+    <g id="alu_and2" class="logic-gate comp-box" onclick="selectLogicGate('alu_and2')" filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))">
+      <path d="M 795 115 L 815 115 A 15 15 0 0 1 815 145 L 795 145 Z" fill="#0b1329" stroke="#ef4444" stroke-width="1.8"/>
+      <text x="808" y="134" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="797" y="111" fill="#94a3b8" font-size="7.5" font-family="monospace">AND_P (P·Cin)</text>
+      <circle cx="795" cy="123" r="2.5" fill="#ef4444"/>
+      <circle cx="795" cy="137" r="2.5" fill="#ef4444"/>
+      <circle cx="830" cy="130" r="2.5" fill="#ef4444"/>
+    </g>
+    
+    <g id="alu_or1" class="logic-gate comp-box" onclick="selectLogicGate('alu_or1')" filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))">
+      <path d="M 865 95 Q 876 110 865 125 Q 890 125 903 110 Q 890 95 865 95 Z" fill="#0b1329" stroke="#ef4444" stroke-width="1.8"/>
+      <text x="884" y="114" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="867" y="91" fill="#94a3b8" font-size="7.5" font-family="monospace">OR_COUT (Cout0)</text>
+      <circle cx="868" cy="103" r="2.5" fill="#ef4444"/>
+      <circle cx="868" cy="117" r="2.5" fill="#ef4444"/>
+      <circle cx="903" cy="110" r="2.5" fill="#ef4444"/>
+    </g>
+
+    <path d="M 760 130 L 760 180 L 865 180 L 865 108 L 868 108" fill="none" stroke="#ef4444" stroke-width="2"/>
+    <path d="M 830 130 L 845 130 L 845 102 L 868 102" fill="none" stroke="#ef4444" stroke-width="2"/>
+    <text x="910" y="110" fill="#fca5a5" font-size="8" font-family="monospace">Cout0 [M3 Wire Track]</text>
+
+    <!-- Bitwise Logic Operation Gates -->
+    
+    <g id="alu_and_op" class="logic-gate comp-box" onclick="selectLogicGate('alu_and_op')" >
+      <path d="M 725 180 L 745 180 A 15 15 0 0 1 745 210 L 725 210 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="738" y="199" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="727" y="176" fill="#94a3b8" font-size="7.5" font-family="monospace">AND_LOGIC</text>
+      <circle cx="725" cy="188" r="2.5" fill="#38bdf8"/>
+      <circle cx="725" cy="202" r="2.5" fill="#38bdf8"/>
+      <circle cx="760" cy="195" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="alu_or_op" class="logic-gate comp-box" onclick="selectLogicGate('alu_or_op')" >
+      <path d="M 725 225 Q 736 240 725 255 Q 750 255 763 240 Q 750 225 725 225 Z" fill="#0b1329" stroke="#10b981" stroke-width="1.8"/>
+      <text x="744" y="244" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="727" y="221" fill="#94a3b8" font-size="7.5" font-family="monospace">OR_LOGIC</text>
+      <circle cx="728" cy="233" r="2.5" fill="#10b981"/>
+      <circle cx="728" cy="247" r="2.5" fill="#10b981"/>
+      <circle cx="763" cy="240" r="2.5" fill="#10b981"/>
+    </g>
+    
+    <g id="alu_xor_op" class="logic-gate comp-box" onclick="selectLogicGate('alu_xor_op')" >
+      <path d="M 721 270 Q 732 285 721 300" fill="none" stroke="#ec4899" stroke-width="1.8"/>
+      <path d="M 725 270 Q 736 285 725 300 Q 750 300 763 285 Q 750 270 725 270 Z" fill="#0b1329" stroke="#ec4899" stroke-width="1.8"/>
+      <text x="744" y="289" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="bold" font-family="monospace">=1</text>
+      <text x="727" y="266" fill="#94a3b8" font-size="7.5" font-family="monospace">XOR_LOGIC</text>
+      <circle cx="723" cy="278" r="2.5" fill="#ec4899"/>
+      <circle cx="723" cy="292" r="2.5" fill="#ec4899"/>
+      <circle cx="763" cy="285" r="2.5" fill="#ec4899"/>
+    </g>
+
+    <!-- ALU Result Select MUX Gates -->
+    
+    <g id="alu_sel_and0" class="logic-gate comp-box" onclick="selectLogicGate('alu_sel_and0')" >
+      <path d="M 840 190 L 860 190 A 15 15 0 0 1 860 220 L 840 220 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="853" y="209" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="842" y="186" fill="#94a3b8" font-size="7.5" font-family="monospace">SEL_ADD</text>
+      <circle cx="840" cy="198" r="2.5" fill="#38bdf8"/>
+      <circle cx="840" cy="212" r="2.5" fill="#38bdf8"/>
+      <circle cx="875" cy="205" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="alu_sel_and1" class="logic-gate comp-box" onclick="selectLogicGate('alu_sel_and1')" >
+      <path d="M 840 235 L 860 235 A 15 15 0 0 1 860 265 L 840 265 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="853" y="254" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="842" y="231" fill="#94a3b8" font-size="7.5" font-family="monospace">SEL_LOG</text>
+      <circle cx="840" cy="243" r="2.5" fill="#38bdf8"/>
+      <circle cx="840" cy="257" r="2.5" fill="#38bdf8"/>
+      <circle cx="875" cy="250" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="alu_res_or" class="logic-gate comp-box" onclick="selectLogicGate('alu_res_or')" >
+      <path d="M 910 210 Q 921 225 910 240 Q 935 240 948 225 Q 935 210 910 210 Z" fill="#0b1329" stroke="#10b981" stroke-width="1.8"/>
+      <text x="929" y="229" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="912" y="206" fill="#94a3b8" font-size="7.5" font-family="monospace">ALU_RESULT_OR</text>
+      <circle cx="913" cy="218" r="2.5" fill="#10b981"/>
+      <circle cx="913" cy="232" r="2.5" fill="#10b981"/>
+      <circle cx="948" cy="225" r="2.5" fill="#10b981"/>
+    </g>
+
+    <!-- Zero Flag Multi-Input NOR Gate -->
+    
+    <g id="alu_nor_zero" class="logic-gate comp-box" onclick="selectLogicGate('alu_nor_zero')">
+      <path d="M 985 210 Q 996 225 985 240 Q 1010 240 1023 225 Q 1010 210 985 210 Z" fill="#0b1329" stroke="#f59e0b" stroke-width="1.8"/>
+      <circle cx="1026" cy="225" r="3" fill="#080c14" stroke="#f59e0b" stroke-width="1.5"/>
+      <text x="1004" y="229" text-anchor="middle" fill="#fcd34d" font-size="8.5" font-weight="bold" font-family="monospace">NOR</text>
+      <text x="987" y="206" fill="#94a3b8" font-size="7.5" font-family="monospace">NOR_ZERO</text>
+      <circle cx="988" cy="218" r="2.5" fill="#f59e0b"/>
+      <circle cx="988" cy="232" r="2.5" fill="#f59e0b"/>
+      <circle cx="1029" cy="225" r="2.5" fill="#f59e0b"/>
+    </g>
+    <path d="M 948 225 L 985 225" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+    <text x="1030" y="228" fill="#fcd34d" font-size="8.5" font-family="monospace" font-weight="bold">Zero [1]</text>
+
+    <!-- Writeback 2:1 Multiplexer Gates -->
+    
+    <g id="wb_inv" class="logic-gate comp-box" onclick="selectLogicGate('wb_inv')">
+      <polygon points="875,367 899,380 875,393" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
+      <circle cx="902" cy="380" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+      <text x="877" y="361" fill="#94a3b8" font-size="7.5" font-family="monospace">WB_INV</text>
+      <circle cx="875" cy="380" r="2.5" fill="#64748b"/>
+      <circle cx="905" cy="380" r="2.5" fill="#64748b"/>
+    </g>
+    
+    <g id="wb_and0" class="logic-gate comp-box" onclick="selectLogicGate('wb_and0')" >
+      <path d="M 915 350 L 935 350 A 15 15 0 0 1 935 380 L 915 380 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="928" y="369" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="917" y="346" fill="#94a3b8" font-size="7.5" font-family="monospace">WB_AND0 (ALU)</text>
+      <circle cx="915" cy="358" r="2.5" fill="#38bdf8"/>
+      <circle cx="915" cy="372" r="2.5" fill="#38bdf8"/>
+      <circle cx="950" cy="365" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="wb_and1" class="logic-gate comp-box" onclick="selectLogicGate('wb_and1')" >
+      <path d="M 915 400 L 935 400 A 15 15 0 0 1 935 430 L 915 430 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
+      <text x="928" y="419" text-anchor="middle" fill="#7dd3fc" font-size="10" font-weight="bold" font-family="monospace">&amp;</text>
+      <text x="917" y="396" fill="#94a3b8" font-size="7.5" font-family="monospace">WB_AND1 (RAM)</text>
+      <circle cx="915" cy="408" r="2.5" fill="#38bdf8"/>
+      <circle cx="915" cy="422" r="2.5" fill="#38bdf8"/>
+      <circle cx="950" cy="415" r="2.5" fill="#38bdf8"/>
+    </g>
+    
+    <g id="wb_or" class="logic-gate comp-box" onclick="selectLogicGate('wb_or')" >
+      <path d="M 975 375 Q 986 390 975 405 Q 1000 405 1013 390 Q 1000 375 975 375 Z" fill="#0b1329" stroke="#10b981" stroke-width="1.8"/>
+      <text x="994" y="394" text-anchor="middle" fill="#6ee7b7" font-size="10" font-weight="bold" font-family="monospace">≥</text>
+      <text x="977" y="371" fill="#94a3b8" font-size="7.5" font-family="monospace">WB_OR</text>
+      <circle cx="978" cy="383" r="2.5" fill="#10b981"/>
+      <circle cx="978" cy="397" r="2.5" fill="#10b981"/>
+      <circle cx="1013" cy="390" r="2.5" fill="#10b981"/>
+    </g>
+
+    <!-- Connect ALU Result to Writeback MUX -->
+    <path id="wire_alu_res" d="M 948 225 L 965 225 L 965 365 L 915 365" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+
+    <!-- Long Writeback Feedback Net across the bottom -->
+    <path id="wire_wb_bus" d="M 1013 390 L 1035 390 L 1035 535 L 340 535 L 340 348 L 355 348" fill="none" stroke="#a855f7" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <text x="610" y="528" fill="#c084fc" font-size="9" font-family="monospace" font-weight="bold">WRITEBACK NET: WD &lt;= Result [M3/M4 Routing Corridor] ────────►</text>
+
               </g>
 
               <!-- Status HUD Overlay -->
