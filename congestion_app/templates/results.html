@@ -188,16 +188,23 @@
     <!-- RIGHT MAIN CONTENT -->
     <div class="main-content">
       
-      <!-- DIGITAL LOGIC GATE SCHEMATIC & WORKING PRINCIPLE (DIGITALJS ENGINE) -->
+      <!-- DIGITALJS GATE-LEVEL LOGIC SCHEMATIC & WORKING PRINCIPLE -->
       <div id="panelSchematic" class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="color: #10b981; font-size: 14px;">●</span>
-            <span style="color: #7c3aed; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">RV32I LOGIC SYNTHESIS & WORKING PRINCIPLE</span>
-            <span style="color: #718096; font-size: 11px; margin-left: 8px;">(DigitalJS Gate Netlist & Pin Congestion Engine)</span>
+            <span style="color: #7c3aed; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">RV32I GATE-LEVEL LOGIC CIRCUIT VISUALIZER</span>
+            <span style="color: #718096; font-size: 11px; margin-left: 8px;">(DigitalJS Gate Netlist: AND, NAND, OR, NOR, XOR, Inverters)</span>
           </div>
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <select id="instSelect" onchange="loadInstruction(this.value)" style="background: #ffffff; color: #7c3aed; border: 1px solid #7c3aed; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; outline: none; cursor: pointer;">
+            <select id="viewModeSelect" onchange="switchViewMode(this.value)" style="background: #f5f3ff; color: #7c3aed; border: 1.5px solid #7c3aed; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 800; outline: none; cursor: pointer;">
+              <option value="full">⚡ Full RV32I Processor Gate Netlist</option>
+              <option value="alu">🔥 ALU 32-bit Carry Adder & Logic Gates (Hotspot)</option>
+              <option value="dff">💾 Master-Slave D-Flip-Flop (8-NAND Gate Latch)</option>
+              <option value="decoder">🎛️ Opcode Decoder (Inverter + AND Gates)</option>
+              <option value="mux">🔀 Datapath Multiplexer (NOT-AND-OR Gates)</option>
+            </select>
+            <select id="instSelect" onchange="loadInstruction(this.value)" style="background: #ffffff; color: #1a202c; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 700; outline: none; cursor: pointer;">
               <option value="ADD">ADD x3, x1, x2 (Arithmetic R-Type)</option>
               <option value="LW">LW x5, 0(x1) (Memory Load I-Type)</option>
               <option value="SW">SW x2, 4(x3) (Memory Store S-Type)</option>
@@ -215,7 +222,7 @@
           <!-- LEFT: SVG LOGIC GATE SCHEMATIC VIEWPORT -->
           <div id="schematicViewport">
             <!-- Full DigitalJS Interactive SVG Schematic -->
-            <svg id="schematicSvg" viewBox="0 0 1020 560" xmlns="http://www.w3.org/2000/svg">
+            <svg id="schematicSvg" viewBox="0 0 1060 570" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="edaGrid" width="20" height="20" patternUnits="userSpaceOnUse">
                   <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#111827" stroke-width="0.8"/>
@@ -231,231 +238,20 @@
                   <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444" />
                 </marker>
               </defs>
-              <rect width="1020" height="560" fill="#080c14"/>
-              <rect width="1020" height="560" fill="url(#edaGrid)"/>
+              <rect width="1060" height="570" fill="#080c14"/>
+              <rect width="1060" height="570" fill="url(#edaGrid)"/>
+
+              <!-- Dynamic Gate Canvas Container -->
+              <g id="gateCanvasGroup">
+                <!-- Injected via JavaScript renderCurrentView() -->
+              </g>
 
               <!-- Status HUD Overlay -->
-              <g id="hudClock" transform="translate(15, 18)">
-                <rect width="210" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
-                <circle id="clkIndicator" cx="12" cy="12" r="5" fill="#10b981"/>
-                <text id="clkText" x="25" y="16" fill="#94a3b8" font-size="11" font-family="monospace" font-weight="bold">CLK: HIGH | Cycle #1</text>
-              </g>
-
-              <!-- WIRES LAYER (Orthogonal Manhattan Netlist Wires) -->
-              <g id="wiresLayer">
-                <!-- PC to PC+4 & ROM -->
-                <path id="wire_pc_out" d="M 105 110 L 125 110 L 125 50 L 140 50" fill="none" stroke="#475569" stroke-width="2"/>
-                <path id="wire_pc_rom" d="M 125 110 L 295 110" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-                
-                <!-- PC+4 to Branch MUX -->
-                <path id="wire_pc4_mux" d="M 205 50 L 235 50 L 235 70" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-
-                <!-- Branch Adder to Branch MUX -->
-                <path id="wire_branch_target" d="M 205 130 L 235 130 L 235 105" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-
-                <!-- Branch MUX to PC In (Wrap-around loop) -->
-                <path id="wire_pc_in" d="M 265 87 L 275 87 L 275 25 L 15 25 L 15 110 L 25 110" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-
-                <!-- ROM to Decoder, RegFile, ImmGen -->
-                <path id="wire_inst_bus" d="M 405 110 L 420 110" fill="none" stroke="#475569" stroke-width="2.5"/>
-                <path id="wire_inst_dec" d="M 420 110 L 420 70 L 435 70" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-                <path id="wire_inst_rf" d="M 420 110 L 420 255 L 435 255" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-                <path id="wire_inst_imm" d="M 420 110 L 420 190 L 350 190 L 350 210" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-
-                <!-- Imm Gen to ALU Src MUX & Branch Adder -->
-                <path id="wire_imm_out" d="M 405 245 L 420 245 L 420 330 L 610 330" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-                <path id="wire_imm_branch" d="M 405 245 L 415 245 L 415 180 L 125 180 L 125 130 L 140 130" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2"/>
-
-                <!-- Control Signals from Decoder -->
-                <path id="wire_ctrl_regwrite" d="M 560 65 L 590 65 L 590 195 L 507 195 L 507 210" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
-                <path id="wire_ctrl_alusrc" d="M 560 90 L 627 90 L 627 290" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
-                <path id="wire_ctrl_aluop" d="M 560 115 L 747 115 L 747 210" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
-                <path id="wire_ctrl_mem" d="M 560 140 L 920 140 L 920 210" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
-                <path id="wire_ctrl_memtoreg" d="M 560 160 L 950 160 L 950 435 L 940 435" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#arrow)"/>
-
-                <!-- RegFile to ALU (RD1 -> ALU Operand A) -->
-                <path id="wire_rf_rd1" d="M 580 250 L 675 250" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-                
-                <!-- RegFile to ALU MUX (RD2 -> ALU MUX Input 0) -->
-                <path id="wire_rf_rd2" d="M 580 305 L 610 305" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-                <!-- RegFile to Data RAM (RD2 -> Data RAM Store Data) -->
-                <path id="wire_rf_ram_data" d="M 595 305 L 595 390 L 840 390 L 840 300 L 855 300" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#arrow)"/>
-
-                <!-- ALU MUX to ALU Operand B -->
-                <path id="wire_mux_alub" d="M 645 315 L 675 315" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-
-                <!-- ALU Out (Result) to Data RAM and Writeback MUX -->
-                <path id="wire_alu_result" d="M 820 260 L 840 260 L 840 250 L 855 250" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-                <path id="wire_alu_wb" d="M 840 260 L 840 425 L 895 425" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-
-                <!-- ALU Zero Flag to Branch Logic -->
-                <path id="wire_alu_zero" d="M 820 320 L 835 320 L 835 35 L 250 35 L 250 55" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
-
-                <!-- Data RAM to Writeback MUX -->
-                <path id="wire_ram_wb" d="M 985 270 L 1000 270 L 1000 445 L 940 445" fill="none" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
-
-                <!-- Writeback MUX Feedback Bus back to RegFile WD (Long Loop) -->
-                <path id="wire_wb_bus" d="M 895 440 L 870 440 L 870 510 L 415 510 L 415 335 L 435 335" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
-
-                <!-- Bus Bitwidth Labels -->
-                <g font-size="9" font-family="monospace" fill="#94a3b8" font-weight="bold">
-                  <rect x="180" y="102" width="36" height="15" rx="3" fill="#1e293b"/>
-                  <text x="184" y="113" fill="#38bdf8">[31:0]</text>
-
-                  <rect x="620" y="242" width="36" height="15" rx="3" fill="#1e293b"/>
-                  <text x="624" y="253" fill="#38bdf8">[31:0]</text>
-
-                  <rect x="750" y="252" width="36" height="15" rx="3" fill="#1e293b"/>
-                  <text x="754" y="263" fill="#ef4444">[31:0]</text>
-
-                  <rect x="600" y="502" width="70" height="15" rx="3" fill="#1e293b"/>
-                  <text x="604" y="513" fill="#a855f7">WB [31:0]</text>
-                </g>
-              </g>
-
-              <!-- LOGIC COMPONENTS LAYER -->
-              <g id="componentsLayer">
-                
-                <!-- 1. PROGRAM COUNTER (PC) -->
-                <g id="comp_pc" class="comp-box" onclick="selectComponent('pc')">
-                  <rect x="25" y="70" width="80" height="95" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
-                  <rect x="25" y="70" width="80" height="22" rx="6" fill="#064e3b"/>
-                  <text x="65" y="85" text-anchor="middle" fill="#a7f3d0" font-size="10" font-weight="bold" font-family="monospace">PC [31:0]</text>
-                  <text x="32" y="114" fill="#64748b" font-size="9" font-family="monospace">D</text>
-                  <text x="95" y="114" fill="#64748b" font-size="9" font-family="monospace">Q</text>
-                  <path d="M 25 145 L 35 150 L 25 155" fill="none" stroke="#10b981" stroke-width="1.5"/>
-                  <text x="40" y="153" fill="#10b981" font-size="8" font-family="monospace">CLK</text>
-                  <rect x="32" y="122" width="66" height="16" rx="2" fill="#022c22"/>
-                  <text id="val_pc_hex" x="65" y="133" text-anchor="middle" fill="#34d399" font-size="9" font-family="monospace" font-weight="bold">0x00000004</text>
-                </g>
-
-                <!-- 2. PC + 4 ADDER -->
-                <g id="comp_pc4" class="comp-box" onclick="selectComponent('pc')">
-                  <polygon points="140,30 205,30 195,70 150,70" fill="#0f172a" stroke="#10b981" stroke-width="1.5"/>
-                  <text x="172" y="54" text-anchor="middle" fill="#a7f3d0" font-size="11" font-weight="bold" font-family="monospace">+4</text>
-                </g>
-
-                <!-- 3. BRANCH TARGET ADDER -->
-                <g id="comp_br_adder" class="comp-box" onclick="selectComponent('alu')">
-                  <polygon points="140,110 205,110 195,150 150,150" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5"/>
-                  <text x="172" y="134" text-anchor="middle" fill="#67e8f9" font-size="10" font-weight="bold" font-family="monospace">+ Imm</text>
-                </g>
-
-                <!-- 4. BRANCH PC MUX -->
-                <g id="comp_br_mux" class="comp-box" onclick="selectComponent('mux')">
-                  <polygon points="235,55 265,65 265,110 235,120" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
-                  <text x="250" y="91" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="bold" font-family="monospace">MUX</text>
-                </g>
-
-                <!-- 5. INSTRUCTION ROM -->
-                <g id="comp_rom" class="comp-box" onclick="selectComponent('rom')">
-                  <rect x="295" y="55" width="110" height="110" rx="6" fill="#0f172a" stroke="#8b5cf6" stroke-width="2"/>
-                  <rect x="295" y="55" width="110" height="22" rx="6" fill="#4c1d95"/>
-                  <text x="350" y="70" text-anchor="middle" fill="#ddd6fe" font-size="9" font-weight="bold" font-family="monospace">INSTRUCTION ROM</text>
-                  <text x="302" y="105" fill="#a78bfa" font-size="9" font-family="monospace">Addr</text>
-                  <text x="375" y="105" fill="#a78bfa" font-size="9" font-family="monospace">Inst</text>
-                  <rect x="302" y="125" width="96" height="26" rx="3" fill="#1e1b4b"/>
-                  <text id="val_inst_asm" x="350" y="137" text-anchor="middle" fill="#c4b5fd" font-size="8.5" font-family="monospace" font-weight="bold">ADD x3, x1, x2</text>
-                  <text id="val_inst_hex" x="350" y="147" text-anchor="middle" fill="#818cf8" font-size="7.5" font-family="monospace">0x002081B3</text>
-                </g>
-
-                <!-- 6. CONTROL UNIT & DECODER -->
-                <g id="comp_decoder" class="comp-box" onclick="selectComponent('decoder')">
-                  <rect x="435" y="35" width="125" height="150" rx="6" fill="#0f172a" stroke="#ec4899" stroke-width="2"/>
-                  <rect x="435" y="35" width="125" height="22" rx="6" fill="#831843"/>
-                  <text x="497" y="50" text-anchor="middle" fill="#fbcfe8" font-size="9" font-weight="bold" font-family="monospace">CONTROL DECODER</text>
-                  
-                  <g transform="translate(445, 65)">
-                    <path d="M 5 5 L 15 5 A 8 8 0 0 1 15 21 L 5 21 Z" fill="#1e293b" stroke="#f472b6" stroke-width="1"/>
-                    <path d="M 35 5 Q 43 13 35 21 Q 48 21 52 13 Q 48 5 35 5 Z" fill="#1e293b" stroke="#f472b6" stroke-width="1"/>
-                    <polygon points="70,5 82,13 70,21" fill="#1e293b" stroke="#f472b6" stroke-width="1"/>
-                    <circle cx="85" cy="13" r="2" fill="none" stroke="#f472b6" stroke-width="1"/>
-                  </g>
-                  
-                  <text x="442" y="105" fill="#f472b6" font-size="8" font-family="monospace">Opcode [6:0]</text>
-                  <text x="495" y="125" fill="#94a3b8" font-size="8" font-family="monospace">RegWrite: <tspan id="val_sig_regwrite" fill="#ec4899" font-weight="bold">1</tspan></text>
-                  <text x="495" y="140" fill="#94a3b8" font-size="8" font-family="monospace">ALUSrc: <tspan id="val_sig_alusrc" fill="#ec4899" font-weight="bold">0</tspan></text>
-                  <text x="495" y="155" fill="#94a3b8" font-size="8" font-family="monospace">MemRead: <tspan id="val_sig_memread" fill="#ec4899" font-weight="bold">0</tspan></text>
-                  <text x="495" y="170" fill="#94a3b8" font-size="8" font-family="monospace">Branch: <tspan id="val_sig_branch" fill="#ec4899" font-weight="bold">0</tspan></text>
-                </g>
-
-                <!-- 7. IMM EXTENDER -->
-                <g id="comp_imm" class="comp-box" onclick="selectComponent('decoder')">
-                  <rect x="295" y="210" width="110" height="70" rx="6" fill="#0f172a" stroke="#06b6d4" stroke-width="1.8"/>
-                  <rect x="295" y="210" width="110" height="20" rx="6" fill="#164e63"/>
-                  <text x="350" y="224" text-anchor="middle" fill="#a5f3fc" font-size="8.5" font-weight="bold" font-family="monospace">IMM EXTENDER</text>
-                  <text x="302" y="250" fill="#67e8f9" font-size="8" font-family="monospace">Inst[31:0]</text>
-                  <text id="val_imm_out" x="375" y="250" fill="#22d3ee" font-size="8.5" font-family="monospace" font-weight="bold">0x00000000</text>
-                </g>
-
-                <!-- 8. REGISTER FILE (32x32 DFFs) -->
-                <g id="comp_rf" class="comp-box" onclick="selectComponent('regfile')">
-                  <rect x="435" y="210" width="145" height="165" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
-                  <rect x="435" y="210" width="145" height="22" rx="6" fill="#78350f"/>
-                  <text x="507" y="225" text-anchor="middle" fill="#fde68a" font-size="9" font-weight="bold" font-family="monospace">REGISTER FILE (32x32)</text>
-                  <text x="442" y="248" fill="#fbbf24" font-size="8" font-family="monospace">rs1: <tspan id="val_rf_rs1" fill="#fef3c7" font-weight="bold">x1 (10)</tspan></text>
-                  <text x="442" y="278" fill="#fbbf24" font-size="8" font-family="monospace">rs2: <tspan id="val_rf_rs2" fill="#fef3c7" font-weight="bold">x2 (20)</tspan></text>
-                  <text x="442" y="308" fill="#fbbf24" font-size="8" font-family="monospace">rd: <tspan id="val_rf_rd" fill="#fef3c7" font-weight="bold">x3</tspan></text>
-                  <text x="442" y="338" fill="#fbbf24" font-size="8" font-family="monospace">WD [31:0]</text>
-
-                  <text x="548" y="250" fill="#f59e0b" font-size="8" font-family="monospace">RD1</text>
-                  <text x="548" y="308" fill="#f59e0b" font-size="8" font-family="monospace">RD2</text>
-                  
-                  <g transform="translate(485, 345)">
-                    <rect width="8" height="12" fill="#b45309" rx="1"/>
-                    <rect x="11" width="8" height="12" fill="#b45309" rx="1"/>
-                    <rect x="22" width="8" height="12" fill="#b45309" rx="1"/>
-                    <rect x="33" width="8" height="12" fill="#b45309" rx="1"/>
-                    <text x="46" y="10" fill="#d97706" font-size="7" font-family="monospace">1024 DFFs</text>
-                  </g>
-                </g>
-
-                <!-- 9. ALU SRC MUX -->
-                <g id="comp_alu_mux" class="comp-box" onclick="selectComponent('mux')">
-                  <polygon points="610,290 645,300 645,345 610,355" fill="#0f172a" stroke="#64748b" stroke-width="1.8"/>
-                  <text x="627" y="326" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="bold" font-family="monospace">MUX</text>
-                  <text x="614" y="306" fill="#64748b" font-size="7" font-family="monospace">0</text>
-                  <text x="614" y="342" fill="#64748b" font-size="7" font-family="monospace">1</text>
-                </g>
-
-                <!-- 10. 32-BIT ARITHMETIC LOGIC UNIT (ALU) [CRITICAL HOTSPOT] -->
-                <g id="comp_alu" class="comp-box" onclick="selectComponent('alu')">
-                  <polygon points="675,210 770,210 820,250 820,310 770,375 675,375 700,292" fill="#0f172a" stroke="#ef4444" stroke-width="2.5" filter="drop-shadow(0 0 8px rgba(239, 68, 68, 0.4))"/>
-                  <polygon points="675,210 770,210 750,232 682,232" fill="#7f1d1d"/>
-                  <text x="720" y="225" text-anchor="middle" fill="#fca5a5" font-size="9" font-weight="bold" font-family="monospace">32b ALU [HOTSPOT]</text>
-                  
-                  <rect x="685" y="352" width="125" height="15" rx="3" fill="#991b1b"/>
-                  <text x="747" y="363" text-anchor="middle" fill="#fef2f2" font-size="7.5" font-family="monospace" font-weight="bold">🔥 M2/M3 WIRE CONGESTION</text>
-
-                  <text x="735" y="260" fill="#f87171" font-size="11" font-family="monospace" font-weight="bold">ADDER (+)</text>
-                  <text x="715" y="280" fill="#fca5a5" font-size="9" font-family="monospace">AND / OR / XOR</text>
-                  <text x="725" y="298" fill="#fca5a5" font-size="8.5" font-family="monospace">32b Shifter</text>
-                  
-                  <text x="705" y="248" fill="#ef4444" font-size="8" font-family="monospace">Op A</text>
-                  <text x="705" y="325" fill="#ef4444" font-size="8" font-family="monospace">Op B</text>
-                  <text x="785" y="258" fill="#ef4444" font-size="8" font-family="monospace">Res</text>
-                  <text x="785" y="318" fill="#ef4444" font-size="8" font-family="monospace">Zero</text>
-
-                  <rect x="740" y="310" width="75" height="18" rx="2" fill="#450a0a"/>
-                  <text id="val_alu_out" x="777" y="322" text-anchor="middle" fill="#fca5a5" font-size="8.5" font-family="monospace" font-weight="bold">30 (0x1E)</text>
-                </g>
-
-                <!-- 11. DATA RAM (LOAD / STORE) -->
-                <g id="comp_ram" class="comp-box" onclick="selectComponent('ram')">
-                  <rect x="855" y="210" width="130" height="145" rx="6" fill="#0f172a" stroke="#8b5cf6" stroke-width="2"/>
-                  <rect x="855" y="210" width="130" height="22" rx="6" fill="#4c1d95"/>
-                  <text x="920" y="225" text-anchor="middle" fill="#ddd6fe" font-size="9" font-weight="bold" font-family="monospace">DATA RAM (SRAM)</text>
-                  <text x="862" y="254" fill="#a78bfa" font-size="8" font-family="monospace">Addr</text>
-                  <text x="862" y="298" fill="#a78bfa" font-size="8" font-family="monospace">DataIn</text>
-                  <text x="948" y="270" fill="#a78bfa" font-size="8" font-family="monospace">DataOut</text>
-                  <text id="val_ram_status" x="920" y="332" text-anchor="middle" fill="#c4b5fd" font-size="8" font-family="monospace">IDLE (No Memory Access)</text>
-                </g>
-
-                <!-- 12. WRITEBACK MULTIPLEXER (MemToReg) -->
-                <g id="comp_wb_mux" class="comp-box" onclick="selectComponent('mux')">
-                  <polygon points="895,410 940,410 930,460 905,460" fill="#0f172a" stroke="#64748b" stroke-width="1.8"/>
-                  <text x="917" y="435" text-anchor="middle" fill="#cbd5e1" font-size="9" font-weight="bold" font-family="monospace">WB MUX</text>
-                </g>
+              <g id="hudClock" transform="translate(15, 14)">
+                <rect width="250" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+                <circle id="clkIndicator" cx="14" cy="12" r="5" fill="#10b981"/>
+                <text id="clkText" x="28" y="16" fill="#94a3b8" font-size="11" font-family="monospace" font-weight="bold">CLK: HIGH | Cycle #1</text>
+                <text id="activeModeText" x="165" y="16" fill="#a78bfa" font-size="10" font-family="monospace" font-weight="bold">[GATE LEVEL]</text>
               </g>
             </svg>
           </div>
@@ -463,34 +259,35 @@
           <!-- RIGHT: GATE INSPECTOR & PHYSICAL SILICON CONGESTION BRIDGE -->
           <div class="info-pane">
             <div>
-              <div style="color: #7c3aed; font-size: 12px; font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <span>LOGIC GATE & CELL INSPECTOR</span>
-                <span id="inspGateBadge" style="background: #fef2f2; color: #dc2626; font-size: 9px; padding: 2px 6px; border-radius: 4px; border: 1px solid #fecaca;">HOTSPOT BLOCK</span>
+              <div style="color: #7c3aed; font-size: 12px; font-weight: 800; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <span>LOGIC GATE LEVEL INSPECTOR</span>
+                <span id="inspGateBadge" style="background: #fef2f2; color: #dc2626; font-size: 9px; padding: 2px 6px; border-radius: 4px; border: 1px solid #fecaca;">HOTSPOT GATE</span>
               </div>
               
               <div class="inspector-card">
-                <div style="font-size: 15px; font-weight: 800; color: #1a202c; margin-bottom: 4px;" id="inspCompTitle">32-Bit Arithmetic Logic Unit (ALU)</div>
-                <div style="color: #64748b; font-size: 10.5px; margin-bottom: 10px;" id="inspCompSub">SkyWater 130nm Execution Datapath</div>
+                <div style="font-size: 15px; font-weight: 800; color: #1a202c; margin-bottom: 2px;" id="inspGateName">2-Input XOR Gate (XOR2)</div>
+                <div style="color: #64748b; font-size: 10.5px; margin-bottom: 8px;" id="inspGateSub">U_ALU_XOR1 (ALU Full Adder Carry Slice)</div>
                 
-                <table class="def-table" style="width: 100%; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 8px;">
-                  <tr><td style="width: 44%;">Standard Cell Count:</td><td id="inspGateCount" style="color: #1a202c; font-weight: bold;">1,420 Gates</td></tr>
-                  <tr><td>Cell Primitives:</td><td id="inspCellPrim" style="color: #7c3aed; font-weight: bold; font-size: 10px;">sky130_fd_sc_hd__fa, xnor2, and2</td></tr>
-                  <tr><td>Physical Pin Count:</td><td id="inspPinCount" style="color: #ea580c; font-weight: bold;">4,260 Pins (High Density)</td></tr>
-                  <tr><td>Interconnect Fanout:</td><td id="inspFanout" style="color: #0284c7; font-weight: bold;">3.6 nets / gate</td></tr>
+                <table class="def-table" style="width: 100%; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; margin-bottom: 6px;">
+                  <tr><td style="width: 44%;">Boolean Logic:</td><td id="inspGateEquation" style="color: #1a202c; font-weight: bold; font-family: monospace;">Y = A ⊕ B</td></tr>
+                  <tr><td>Live Pin Values:</td><td id="inspGatePins" style="color: #10b981; font-weight: bold; font-family: monospace;">A=1, B=1 → Y=0</td></tr>
+                  <tr><td>Standard Cell:</td><td id="inspCellPrim" style="color: #7c3aed; font-weight: bold; font-size: 10px;">sky130_fd_sc_hd__xor2_1</td></tr>
+                  <tr><td>Physical Cell Pins:</td><td id="inspPinCount" style="color: #ea580c; font-weight: bold;">3 Pins (A, B on M1, Y on M1)</td></tr>
+                  <tr><td>Gate Transistors:</td><td id="inspTransistors" style="color: #0284c7; font-weight: bold;">8 CMOS FETs (4 NMOS, 4 PMOS)</td></tr>
                 </table>
 
-                <div style="color: #b91c1c; font-size: 10px; font-weight: 800; margin-bottom: 4px;">BEOL METAL CONGESTION IMPACT</div>
-                <p id="inspCongestionImpact" style="color: #475569; font-size: 11px; line-height: 1.45; margin: 0;">
-                  Intra-ALU 32-bit carry propagation and barrel shifting require dense horizontal (M2) and vertical (M3) track allocation. This localized pin clustering is the PRIMARY driver of the <b>{{ peak_val_pct }}% saturation on {{ peak_layer }}</b>!
+                <div style="color: #b91c1c; font-size: 10px; font-weight: 800; margin-bottom: 4px;">BEOL WIRE TRACK IMPACT</div>
+                <p id="inspCongestionImpact" style="color: #475569; font-size: 10.5px; line-height: 1.45; margin: 0;">
+                  This logic gate connects on Metal 1. In the 32-bit ALU, 64 XOR gates cluster in standard cell rows, requiring continuous horizontal (M2) and vertical (M3) track routing that causes the predicted <b>{{ peak_val_pct }}% saturation on {{ peak_layer }}</b>!
                 </p>
               </div>
             </div>
 
-            <!-- WORKING PRINCIPLE & AGENDA SUMMARY CARD -->
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; margin-top: 8px;">
-              <div style="color: #d97706; font-size: 11px; font-weight: 800; margin-bottom: 6px;">WORKING PRINCIPLE: RTL TO SILICON</div>
-              <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 10px; font-size: 10.5px; color: #92400e; line-height: 1.45;">
-                <b>Why map gates to metal congestion?</b> Commercial EDA Place-and-Route (P&R) runs take <b>4–8 hours</b> to route metal layers (M1–M10). High pin-density units like the 32-bit ALU exhaust routing tracks, causing DRC violations. Our Machine Learning models predict this routing overflow in <b>&lt; 5 ms</b> directly from RTL & floorplan parameters!
+            <!-- GATE-LEVEL AGENDA & WORKING PRINCIPLE CARD -->
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 6px;">
+              <div style="color: #d97706; font-size: 10.5px; font-weight: 800; margin-bottom: 6px;">AGENDA: GATE NETLIST TO METAL CONGESTION</div>
+              <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 10px; font-size: 10px; color: #92400e; line-height: 1.45;">
+                <b>Why visualize gate-level connections?</b> Every logic gate (AND, NAND, OR, XOR, DFF) contains physical pins on Metal 1. In dense datapath units like the 32-bit ALU, thousands of gate wires must cross over each other on <b>Metal 2 & Metal 3</b>. Our ML model predicts whether these gate wires will overflow metal capacity in <b>&lt; 5 ms</b>!
               </div>
             </div>
           </div>
@@ -841,185 +638,799 @@
     });
 
         // ==========================================
-    // DIGITALJS-STYLE LOGIC SCHEMATIC CONTROLLER
+    // DIGITALJS GATE-LEVEL NETLIST CONTROLLER
     // ==========================================
 
-    const circuitComponents = {
-      alu: {
-        title: "32-Bit Arithmetic Logic Unit (ALU)",
-        sub: "SkyWater 130nm Execution Datapath",
-        gates: "1,420 Gates",
-        cells: "sky130_fd_sc_hd__fa, xnor2, and2, mux2",
-        pins: "4,260 Pins (High Density)",
-        fanout: "3.6 nets / gate",
-        hotspot: true,
-        impact: "Intra-ALU 32-bit carry propagation and barrel shifting require dense horizontal (M2) and vertical (M3) track allocation. This localized pin clustering is the PRIMARY driver of the <b>{{ peak_val_pct }}% saturation on {{ peak_layer }}</b>!"
-      },
-      regfile: {
-        title: "Register File (x0-x31)",
-        sub: "Dual-Read / Single-Write 32b DFF Matrix",
-        gates: "3,840 Gates",
-        cells: "sky130_fd_sc_hd__dfxtp (1024 DFFs) + MUX32",
-        pins: "5,120 Pins",
-        fanout: "4.2 nets / gate",
-        hotspot: false,
-        impact: "Dense 32x32 storage array requires multi-layer routing across M2, M3, and M4 to distribute 32-bit read/write buses without cross-coupling parasitic delay."
-      },
-      decoder: {
-        title: "Instruction Decoder & Control FSM",
-        sub: "RISC-V Opcode & Micro-Op Synthesizer",
-        gates: "420 Gates",
-        cells: "sky130_fd_sc_hd__nand2, nor2, inv",
-        pins: "940 Pins",
-        fanout: "8.5 nets / gate (High Fanout)",
-        hotspot: false,
-        impact: "Generates long-distance control lines (RegWrite, ALUSrc, MemToReg) that traverse large chip spans, demanding M4/M5 semi-global routing tracks."
-      },
-      rom: {
-        title: "Instruction ROM (Cache)",
-        sub: "Instruction Fetch Stage",
-        gates: "2,100 Equivalent Gates",
-        cells: "sky130_sram_1kbyte macro wrapper",
-        pins: "128 Macro Pins",
-        fanout: "1.0 (Bus Interface)",
-        hotspot: false,
-        impact: "Macro boundary blockage requires routing keepouts and ring straps on M3/M4."
-      },
-      pc: {
-        title: "Program Counter (PC) Unit",
-        sub: "Instruction Pointer & Next-PC Logic",
-        gates: "320 Gates",
-        cells: "sky130_fd_sc_hd__dfxtp_1 (32 DFFs) + Ripple Adder",
-        pins: "380 Pins",
-        fanout: "2.1 nets / gate",
-        hotspot: false,
-        impact: "Local routing on M1/M2 with clock tree buffer insertion on M5."
-      },
-      ram: {
-        title: "Data Memory (Data RAM)",
-        sub: "Load/Store SRAM Subsystem",
-        gates: "2,400 Equivalent Gates",
-        cells: "sky130_sram_1kbyte macro",
-        pins: "160 Macro Pins",
-        fanout: "1.2 nets / pin",
-        hotspot: false,
-        impact: "Memory address and data buses require dedicated M4/M5 corridors to prevent DRC pitch violations."
-      },
-      mux: {
-        title: "Datapath Multiplexers (ALUSrc / WB)",
-        sub: "2-to-1 32-bit High Speed Multiplexers",
-        gates: "192 Gates (64 x 2-to-1 MUX cells)",
-        cells: "sky130_fd_sc_hd__mux2_1",
-        pins: "576 Pins",
-        fanout: "1.0",
-        hotspot: false,
-        impact: "Local pitch-matched placement on standard cell rows using M1 and M2."
-      }
-    };
-
-    const instructionSet = {
-      ADD: {
-        asm: "ADD x3, x1, x2",
-        hex: "0x002081B3",
-        pc: "0x00000004",
-        rs1: "x1 (10)",
-        rs2: "x2 (20)",
-        rd: "x3 <= 30",
-        aluOut: "30 (0x1E)",
-        imm: "0x00000000",
-        regWrite: 1, aluSrc: 0, memRead: 0, branch: 0,
-        ramStatus: "IDLE (No Memory Access)",
-        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_ctrl_regwrite", "wire_ctrl_aluop", "wire_rf_rd1", "wire_rf_rd2", "wire_mux_alub", "wire_alu_result", "wire_alu_wb", "wire_wb_bus"],
-        hotspotWires: ["wire_rf_rd1", "wire_mux_alub", "wire_alu_result"]
-      },
-      LW: {
-        asm: "LW x5, 0(x1)",
-        hex: "0x0000A283",
-        pc: "0x00000008",
-        rs1: "x1 (0x1000)",
-        rs2: "N/A (Imm)",
-        rd: "x5 <= 0xCAFEBABE",
-        aluOut: "0x1000 (RAM Addr)",
-        imm: "0x00000000",
-        regWrite: 1, aluSrc: 1, memRead: 1, branch: 0,
-        ramStatus: "READING: 0xCAFEBABE @ 0x1000",
-        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_inst_imm", "wire_imm_out", "wire_ctrl_regwrite", "wire_ctrl_alusrc", "wire_ctrl_mem", "wire_rf_rd1", "wire_mux_alub", "wire_alu_result", "wire_ram_wb", "wire_wb_bus"],
-        hotspotWires: ["wire_alu_result"]
-      },
-      SW: {
-        asm: "SW x2, 4(x3)",
-        hex: "0x0021A223",
-        pc: "0x0000000C",
-        rs1: "x3 (0x1000)",
-        rs2: "x2 (0x002A)",
-        rd: "N/A (Mem Write)",
-        aluOut: "0x1004 (RAM Addr)",
-        imm: "0x00000004",
-        regWrite: 0, aluSrc: 1, memRead: 0, branch: 0,
-        ramStatus: "WRITING: 0x002A into @ 0x1004",
-        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_inst_imm", "wire_imm_out", "wire_ctrl_alusrc", "wire_ctrl_mem", "wire_rf_rd1", "wire_rf_ram_data", "wire_mux_alub", "wire_alu_result"],
-        hotspotWires: ["wire_rf_ram_data", "wire_alu_result"]
-      },
-      BEQ: {
-        asm: "BEQ x1, x2, +8",
-        hex: "0x00208463",
-        pc: "0x00000010",
-        rs1: "x1 (15)",
-        rs2: "x2 (15)",
-        rd: "PC <= 0x00000018",
-        aluOut: "0 (Zero = 1)",
-        imm: "0x00000008",
-        regWrite: 0, aluSrc: 0, memRead: 0, branch: 1,
-        ramStatus: "IDLE (Branch Evaluated)",
-        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_branch_target", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_inst_imm", "wire_imm_branch", "wire_rf_rd1", "wire_rf_rd2", "wire_mux_alub", "wire_alu_zero", "wire_pc_in"],
-        hotspotWires: ["wire_alu_zero"]
-      },
-      XOR: {
-        asm: "XOR x4, x1, x2",
-        hex: "0x0020C233",
-        pc: "0x00000014",
-        rs1: "x1 (0x5555)",
-        rs2: "x2 (0xAAAA)",
-        rd: "x4 <= 0xFFFF",
-        aluOut: "0xFFFF",
-        imm: "0x00000000",
-        regWrite: 1, aluSrc: 0, memRead: 0, branch: 0,
-        ramStatus: "IDLE (No Memory Access)",
-        activeWires: ["wire_pc_out", "wire_pc_rom", "wire_pc4_mux", "wire_pc_in", "wire_inst_bus", "wire_inst_dec", "wire_inst_rf", "wire_ctrl_regwrite", "wire_ctrl_aluop", "wire_rf_rd1", "wire_rf_rd2", "wire_mux_alub", "wire_alu_result", "wire_alu_wb", "wire_wb_bus"],
-        hotspotWires: ["wire_rf_rd1", "wire_mux_alub", "wire_alu_result"]
-      }
-    };
-
+    let currentViewMode = "full"; // "full", "alu", "dff", "decoder", "mux"
     let currentInst = "ADD";
     let clockCycle = 1;
     let clockHigh = true;
     let autoClockInterval = null;
-    let selectedComp = "alu";
+    let selectedGateId = "alu_xor1";
 
-    function selectComponent(compKey) {
-      selectedComp = compKey;
-      const comp = circuitComponents[compKey] || circuitComponents.alu;
+    // Gate Database & SkyWater Standard Cell Metadata
+    const gateDatabase = {
+      alu_xor1: {
+        name: "2-Input XOR Gate (XOR2)",
+        sub: "U_ALU_XOR1 (ALU Bit 0 Half Adder)",
+        eq: "Y = A ⊕ B",
+        cell: "sky130_fd_sc_hd__xor2_1",
+        pins: "A, B (Inputs on M1) → Y (Output on M1)",
+        transistors: "8 CMOS FETs (4 NMOS, 4 PMOS)",
+        hotspot: true,
+        impact: "This gate connects operand A and B for bit 0. In the 32-bit ALU, 64 XOR gates cluster in standard cell rows, generating dense pin demand on Metal 1 and track congestion on Metal 2 and Metal 3 ({{ peak_val_pct }}% on {{ peak_layer }})."
+      },
+      alu_xor2: {
+        name: "2-Input XOR Gate (XOR2)",
+        sub: "U_ALU_XOR2 (ALU Bit 0 Sum Generator)",
+        eq: "Sum = (A ⊕ B) ⊕ Cin",
+        cell: "sky130_fd_sc_hd__xor2_1",
+        pins: "A, Cin (M1) → Sum (M1)",
+        transistors: "8 CMOS FETs",
+        hotspot: true,
+        impact: "Computes the final sum bit. Long routing from carry chain causes high coupling capacitance on Metal 2."
+      },
+      alu_and1: {
+        name: "2-Input AND Gate (AND2)",
+        sub: "U_ALU_AND1 (Carry Generation G = A·B)",
+        eq: "G = A · B",
+        cell: "sky130_fd_sc_hd__and2_1",
+        pins: "A, B (M1) → G (M1)",
+        transistors: "6 CMOS FETs (NAND2 + Inverter)",
+        hotspot: true,
+        impact: "Generates carry propagation logic. Frequent switching under arithmetic operations causes dynamic thermal peaks."
+      },
+      alu_and2: {
+        name: "2-Input AND Gate (AND2)",
+        sub: "U_ALU_AND2 (Carry Propagation P·Cin)",
+        eq: "P_Cin = (A ⊕ B) · Cin",
+        cell: "sky130_fd_sc_hd__and2_1",
+        pins: "P, Cin (M1) → Cout_part (M1)",
+        transistors: "6 CMOS FETs",
+        hotspot: true,
+        impact: "Transmits carry forward. High fanout load on the carry propagation line requires wide wire tracks on Metal 3."
+      },
+      alu_or1: {
+        name: "2-Input OR Gate (OR2)",
+        sub: "U_ALU_OR1 (Carry Out Combiner)",
+        eq: "Cout = (A·B) + ((A⊕B)·Cin)",
+        cell: "sky130_fd_sc_hd__or2_1",
+        pins: "In1, In2 (M1) → Cout (M1)",
+        transistors: "6 CMOS FETs",
+        hotspot: true,
+        impact: "Produces Cout for next bit stage. 32-stage ripple carry wire spans across the core, creating severe track blockage on M3."
+      },
+      alu_nor_zero: {
+        name: "32-Input NOR Tree (NOR32)",
+        sub: "U_ALU_NOR_ZERO (Zero Flag Detector)",
+        eq: "Zero = ~(Sum[0] | ... | Sum[31])",
+        cell: "sky130_fd_sc_hd__nor4_1 (Tree Array)",
+        pins: "32 Sum inputs (M2) → Zero (M4)",
+        transistors: "68 CMOS FETs",
+        hotspot: false,
+        impact: "Large fan-in multi-stage NOR tree spans the width of the ALU, requiring multi-layer routing up to Metal 4."
+      },
+      dff_nand1: {
+        name: "2-Input NAND Gate (NAND2)",
+        sub: "U_DFF_M1 (Master Latch Input Gate)",
+        eq: "Y = ~(D · CLK)",
+        cell: "sky130_fd_sc_hd__nand2_1",
+        pins: "D, CLK (M1) → Node_M1 (M1)",
+        transistors: "4 CMOS FETs",
+        hotspot: false,
+        impact: "Gates input data D on positive clock edge. Connects to local clock tree line on Metal 5."
+      },
+      dff_nand3: {
+        name: "2-Input NAND Gate (Cross-Coupled)",
+        sub: "U_DFF_M3 (Master Storage Latch Gate)",
+        eq: "Qm = ~(Node_M1 · Qm_bar)",
+        cell: "sky130_fd_sc_hd__nand2_1",
+        pins: "In1, Feedback (M1) → Qm (M1)",
+        transistors: "4 CMOS FETs",
+        hotspot: false,
+        impact: "Forms the cross-coupled bi-stable storage loop. Intra-cell local interconnect routes strictly on Metal 1."
+      },
+      dff_nand7: {
+        name: "2-Input NAND Gate (Slave Output)",
+        sub: "U_DFF_S3 (Slave Output Latch)",
+        eq: "Q = ~(Node_S1 · Q_bar)",
+        cell: "sky130_fd_sc_hd__nand2_1",
+        pins: "In1, Feedback (M1) → Q (M1)",
+        transistors: "4 CMOS FETs",
+        hotspot: false,
+        impact: "Drives the register Q output into datapath routing tracks on Metal 2."
+      },
+      dec_inv1: {
+        name: "Inverter / NOT Gate (INV)",
+        sub: "U_DEC_INV1 (Opcode Bit Inverter)",
+        eq: "Y = ~Op[5]",
+        cell: "sky130_fd_sc_hd__inv_1",
+        pins: "A (M1) → Y (M1)",
+        transistors: "2 CMOS FETs",
+        hotspot: false,
+        impact: "Generates inverted opcode lines. High fanout inverter driving multiple decoding AND gates."
+      },
+      dec_and_r: {
+        name: "4-Input AND Gate (AND4)",
+        sub: "U_DEC_AND_RTYPE (R-Type Instruction Decoder)",
+        eq: "is_R = ~Op[6] & Op[5] & Op[4] & ~Op[2]",
+        cell: "sky130_fd_sc_hd__and4_1",
+        pins: "Op[6..2] (M1) → RegWrite (M2)",
+        transistors: "10 CMOS FETs",
+        hotspot: false,
+        impact: "Decodes 0110011 (ADD/XOR). Drives RegWrite control line across Register File on Metal 3."
+      },
+      mux_and1: {
+        name: "2-Input AND Gate (AND2)",
+        sub: "U_MUX_AND0 (Channel 0 Pass Gate)",
+        eq: "Y = D0 · ~Sel",
+        cell: "sky130_fd_sc_hd__and2_1",
+        pins: "D0, ~Sel (M1) → Y (M1)",
+        transistors: "6 CMOS FETs",
+        hotspot: false,
+        impact: "Selects register operand RD2 when ALUSrc = 0. Pitch-matched placement on standard cell rows."
+      },
+      mux_or: {
+        name: "2-Input OR Gate (OR2)",
+        sub: "U_MUX_OR (Channel Combiner)",
+        eq: "Out = (D0·~Sel) + (D1·Sel)",
+        cell: "sky130_fd_sc_hd__or2_1",
+        pins: "In0, In1 (M1) → MuxOut (M1)",
+        transistors: "6 CMOS FETs",
+        hotspot: false,
+        impact: "Feeds operand into ALU input B on Metal 2."
+      }
+    };
+
+    // Helper functions to generate SVG Logic Gate Symbols
+    function gateSvgAnd(x, y, id, label) {
+      return `
+        <g id="${id}" class="comp-box" onclick="selectLogicGate('${id}')">
+          <path d="M ${x} ${y} L ${x+18} ${y} A 14 14 0 0 1 ${x+18} ${y+28} L ${x} ${y+28} Z" fill="#0f172a" stroke="#38bdf8" stroke-width="1.8"/>
+          <text x="${x+12}" y="${y+18}" text-anchor="middle" fill="#7dd3fc" font-size="9" font-weight="bold" font-family="monospace">&amp;</text>
+          <text x="${x+2}" y="${y-4}" fill="#94a3b8" font-size="7.5" font-family="monospace">${label}</text>
+          <circle cx="${x}" cy="${y+7}" r="2" fill="#38bdf8"/>
+          <circle cx="${x}" cy="${y+21}" r="2" fill="#38bdf8"/>
+          <circle cx="${x+32}" cy="${y+14}" r="2" fill="#38bdf8"/>
+        </g>
+      `;
+    }
+
+    function gateSvgNand(x, y, id, label) {
+      return `
+        <g id="${id}" class="comp-box" onclick="selectLogicGate('${id}')">
+          <path d="M ${x} ${y} L ${x+18} ${y} A 14 14 0 0 1 ${x+18} ${y+28} L ${x} ${y+28} Z" fill="#0f172a" stroke="#a855f7" stroke-width="1.8"/>
+          <circle cx="${x+35}" cy="${y+14}" r="3" fill="#080c14" stroke="#a855f7" stroke-width="1.5"/>
+          <text x="${x+12}" y="${y+18}" text-anchor="middle" fill="#c084fc" font-size="8" font-weight="bold" font-family="monospace">NAND</text>
+          <text x="${x+2}" y="${y-4}" fill="#94a3b8" font-size="7.5" font-family="monospace">${label}</text>
+          <circle cx="${x}" cy="${y+7}" r="2" fill="#a855f7"/>
+          <circle cx="${x}" cy="${y+21}" r="2" fill="#a855f7"/>
+          <circle cx="${x+38}" cy="${y+14}" r="2" fill="#a855f7"/>
+        </g>
+      `;
+    }
+
+    function gateSvgOr(x, y, id, label) {
+      return `
+        <g id="${id}" class="comp-box" onclick="selectLogicGate('${id}')">
+          <path d="M ${x} ${y} Q ${x+10} ${y+14} ${x} ${y+28} Q ${x+24} ${y+28} ${x+36} ${y+14} Q ${x+24} ${y} ${x} ${y} Z" fill="#0f172a" stroke="#10b981" stroke-width="1.8"/>
+          <text x="${x+18}" y="${y+18}" text-anchor="middle" fill="#6ee7b7" font-size="9" font-weight="bold" font-family="monospace">≥</text>
+          <text x="${x+2}" y="${y-4}" fill="#94a3b8" font-size="7.5" font-family="monospace">${label}</text>
+          <circle cx="${x+3}" cy="${y+7}" r="2" fill="#10b981"/>
+          <circle cx="${x+3}" cy="${y+21}" r="2" fill="#10b981"/>
+          <circle cx="${x+36}" cy="${y+14}" r="2" fill="#10b981"/>
+        </g>
+      `;
+    }
+
+    function gateSvgNor(x, y, id, label) {
+      return `
+        <g id="${id}" class="comp-box" onclick="selectLogicGate('${id}')">
+          <path d="M ${x} ${y} Q ${x+10} ${y+14} ${x} ${y+28} Q ${x+24} ${y+28} ${x+36} ${y+14} Q ${x+24} ${y} ${x} ${y} Z" fill="#0f172a" stroke="#f59e0b" stroke-width="1.8"/>
+          <circle cx="${x+39}" cy="${y+14}" r="3" fill="#080c14" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="${x+18}" y="${y+18}" text-anchor="middle" fill="#fcd34d" font-size="8" font-weight="bold" font-family="monospace">NOR</text>
+          <text x="${x+2}" y="${y-4}" fill="#94a3b8" font-size="7.5" font-family="monospace">${label}</text>
+          <circle cx="${x+3}" cy="${y+7}" r="2" fill="#f59e0b"/>
+          <circle cx="${x+3}" cy="${y+21}" r="2" fill="#f59e0b"/>
+          <circle cx="${x+42}" cy="${y+14}" r="2" fill="#f59e0b"/>
+        </g>
+      `;
+    }
+
+    function gateSvgXor(x, y, id, label, isHotspot=false) {
+      const strokeColor = isHotspot ? "#ef4444" : "#ec4899";
+      const textColor = isHotspot ? "#fca5a5" : "#f472b6";
+      const filterStr = isHotspot ? 'filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))"' : '';
+      return `
+        <g id="${id}" class="comp-box" onclick="selectLogicGate('${id}')" ${filterStr}>
+          <path d="M ${x-4} ${y} Q ${x+6} ${y+14} ${x-4} ${y+28}" fill="none" stroke="${strokeColor}" stroke-width="1.8"/>
+          <path d="M ${x} ${y} Q ${x+10} ${y+14} ${x} ${y+28} Q ${x+24} ${y+28} ${x+36} ${y+14} Q ${x+24} ${y} ${x} ${y} Z" fill="#0f172a" stroke="${strokeColor}" stroke-width="1.8"/>
+          <text x="${x+18}" y="${y+18}" text-anchor="middle" fill="${textColor}" font-size="9" font-weight="bold" font-family="monospace">=1</text>
+          <text x="${x+2}" y="${y-4}" fill="#94a3b8" font-size="7.5" font-family="monospace">${label}</text>
+          <circle cx="${x-2}" cy="${y+7}" r="2" fill="${strokeColor}"/>
+          <circle cx="${x-2}" cy="${y+21}" r="2" fill="${strokeColor}"/>
+          <circle cx="${x+36}" cy="${y+14}" r="2" fill="${strokeColor}"/>
+        </g>
+      `;
+    }
+
+    function gateSvgNot(x, y, id, label) {
+      return `
+        <g id="${id}" class="comp-box" onclick="selectLogicGate('${id}')">
+          <polygon points="${x},${y+2} ${x+22},${y+14} ${x},${y+26}" fill="#0f172a" stroke="#64748b" stroke-width="1.8"/>
+          <circle cx="${x+25}" cy="${y+14}" r="3" fill="#080c14" stroke="#64748b" stroke-width="1.5"/>
+          <text x="${x+2}" y="${y-4}" fill="#94a3b8" font-size="7.5" font-family="monospace">${label}</text>
+          <circle cx="${x}" cy="${y+14}" r="2" fill="#64748b"/>
+          <circle cx="${x+28}" cy="${y+14}" r="2" fill="#64748b"/>
+        </g>
+      `;
+    }
+
+    // Render Full Processor Gate-Level Datapath Netlist
+    function renderFullProcessorGates() {
+      return `
+        <!-- REGION LABELS -->
+        <g font-size="8.5" font-family="monospace" font-weight="bold" fill="#64748b">
+          <rect x="25" y="38" width="280" height="20" rx="3" fill="#0f172a" stroke="#1e293b"/>
+          <text x="35" y="52" fill="#10b981">STAGE 1: PC REGISTER (8-NAND DFF) &amp; FETCH GATES</text>
+
+          <rect x="330" y="38" width="260" height="20" rx="3" fill="#0f172a" stroke="#1e293b"/>
+          <text x="340" y="52" fill="#ec4899">STAGE 2: CONTROL DECODER (INVERTER &amp; AND MATRIX)</text>
+
+          <rect x="330" y="270" width="260" height="20" rx="3" fill="#0f172a" stroke="#1e293b"/>
+          <text x="340" y="284" fill="#f59e0b">STAGE 3: REGISTER FILE BITCELL (NAND LATCH &amp; READ MUX)</text>
+
+          <rect x="615" y="38" width="425" height="20" rx="3" fill="#0f172a" stroke="#ef4444"/>
+          <text x="625" y="52" fill="#f87171">STAGE 4: ALU EXECUTION GATES [🔥 CRITICAL M2/M3 HOTSPOT]</text>
+        </g>
+
+        <!-- STAGE 1: PC D-FLIP-FLOP EXPANDED INTO 8 NAND GATES -->
+        <!-- Clock Inverter -->
+        ${gateSvgNot(35, 75, "pc_clk_inv", "CLK_INV")}
+        <path d="M 15 89 L 35 89" fill="none" stroke="#64748b" stroke-width="1.8"/>
+        <text x="15" y="83" fill="#94a3b8" font-size="7.5" font-family="monospace">CLK</text>
+
+        <!-- Master Latch NANDs -->
+        ${gateSvgNand(80, 70, "dff_nand1", "NAND1")}
+        ${gateSvgNand(80, 120, "dff_nand2", "NAND2")}
+        ${gateSvgNand(140, 70, "dff_nand3", "NAND3")}
+        ${gateSvgNand(140, 120, "dff_nand4", "NAND4")}
+
+        <!-- Cross-coupled feedback for Master -->
+        <path d="M 178 84 L 190 84 L 190 105 L 130 105 L 130 127 L 140 127" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+        <path d="M 178 134 L 190 134 L 190 115 L 130 115 L 130 91 L 140 91" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+
+        <!-- Slave Latch NANDs -->
+        ${gateSvgNand(200, 70, "dff_nand5", "NAND5")}
+        ${gateSvgNand(200, 120, "dff_nand6", "NAND6")}
+        ${gateSvgNand(260, 70, "dff_nand7", "NAND7")}
+        ${gateSvgNand(260, 120, "dff_nand8", "NAND8")}
+
+        <!-- Cross-coupled feedback for Slave -->
+        <path d="M 298 84 L 308 84 L 308 105 L 250 105 L 250 127 L 260 127" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+        <path d="M 298 134 L 308 134 L 308 115 L 250 115 L 250 91 L 260 91" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+
+        <!-- Interconnecting wires between Master & Slave -->
+        <path id="wire_pc_q" d="M 298 84 L 325 84" fill="none" stroke="#10b981" stroke-width="2.5"/>
+        <text x="312" y="78" fill="#34d399" font-size="8" font-family="monospace" font-weight="bold">Q (PC)</text>
+
+        <!-- PC Increment Adder Gates (+4) -->
+        ${gateSvgXor(100, 185, "pc_add_xor", "PC_XOR")}
+        ${gateSvgAnd(100, 225, "pc_add_and", "PC_AND")}
+        <!-- Connect Q down to PC+4 adder -->
+        <path d="M 315 84 L 315 170 L 80 170 L 80 192 L 98 192" fill="none" stroke="#10b981" stroke-width="1.8"/>
+
+        <!-- Branch MUX Gates -->
+        ${gateSvgNot(170, 185, "br_mux_inv", "B_INV")}
+        ${gateSvgAnd(210, 180, "br_mux_and0", "B_AND0")}
+        ${gateSvgAnd(210, 220, "br_mux_and1", "B_AND1")}
+        ${gateSvgOr(265, 200, "br_mux_or", "B_OR")}
+        <!-- Wrap MUX output to PC D input -->
+        <path id="wire_pc_d" d="M 301 214 L 315 214 L 315 255 L 20 255 L 20 77 L 80 77" fill="none" stroke="#38bdf8" stroke-width="2"/>
+        <text x="25" y="72" fill="#38bdf8" font-size="8" font-family="monospace">D_In</text>
+
+        <!-- STAGE 2: INSTRUCTION DECODER GATES -->
+        <path d="M 325 84 L 340 84 L 340 100 L 350 100" fill="none" stroke="#64748b" stroke-width="2"/>
+        ${gateSvgNot(350, 75, "dec_inv1", "INV_OP5")}
+        ${gateSvgNot(350, 120, "dec_inv2", "INV_OP6")}
+        ${gateSvgNot(350, 165, "dec_inv3", "INV_OP2")}
+
+        ${gateSvgAnd(430, 70, "dec_and_r", "AND_RTYPE")}
+        ${gateSvgAnd(430, 115, "dec_and_load", "AND_LOAD")}
+        ${gateSvgAnd(430, 160, "dec_and_branch", "AND_BEQ")}
+        ${gateSvgOr(500, 95, "dec_or_rw", "OR_REGWRITE")}
+
+        <!-- Control output nets -->
+        <path id="wire_ctrl_rw" d="M 536 109 L 555 109 L 555 300 L 360 300" fill="none" stroke="#ec4899" stroke-width="2"/>
+        <text x="560" y="112" fill="#f472b6" font-size="8" font-family="monospace">RegWrite</text>
+
+        <path id="wire_ctrl_as" d="M 462 129 L 585 129 L 585 365 L 610 365" fill="none" stroke="#ec4899" stroke-width="1.8"/>
+        <text x="470" y="125" fill="#f472b6" font-size="8" font-family="monospace">ALUSrc</text>
+
+        <!-- STAGE 3: REGISTER FILE BITCELL NAND GATES -->
+        ${gateSvgAnd(360, 310, "rf_w_and", "W_AND")}
+        ${gateSvgNand(420, 310, "rf_latch_nand1", "RF_LATCH1")}
+        ${gateSvgNand(420, 355, "rf_latch_nand2", "RF_LATCH2")}
+        <!-- Cross-coupled latch wire -->
+        <path d="M 458 324 L 470 324 L 470 345 L 410 345 L 410 362 L 420 362" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+        <path d="M 458 369 L 470 369 L 470 348 L 410 348 L 410 331 L 420 331" fill="none" stroke="#f59e0b" stroke-width="1.5"/>
+
+        <!-- Read Selection Gates -->
+        ${gateSvgAnd(500, 310, "rf_rd1_and", "RD1_AND")}
+        ${gateSvgAnd(500, 360, "rf_rd2_and", "RD2_AND")}
+        <path id="wire_rf_rd1" d="M 532 324 L 620 324 L 620 84 L 700 84" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
+        <text x="540" y="320" fill="#38bdf8" font-size="8" font-family="monospace">RD1 (A)</text>
+
+        <path id="wire_rf_rd2" d="M 532 374 L 600 374 L 600 395 L 630 395" fill="none" stroke="#38bdf8" stroke-width="2"/>
+        <text x="540" y="370" fill="#38bdf8" font-size="8" font-family="monospace">RD2 (B)</text>
+
+        <!-- STAGE 4: ALU SOURCE MUX GATES -->
+        ${gateSvgNot(610, 370, "mux_inv", "MUX_INV")}
+        ${gateSvgAnd(650, 360, "mux_and1", "MUX_AND0")}
+        ${gateSvgAnd(650, 405, "mux_and2", "MUX_AND1")}
+        ${gateSvgOr(705, 382, "mux_or", "MUX_OR")}
+        <path id="wire_alu_b" d="M 741 396 L 760 396 L 760 140 L 700 140" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
+        <text x="745" y="392" fill="#38bdf8" font-size="8" font-family="monospace">Operand B</text>
+
+        <!-- STAGE 4: ALU GATES [HOTSPOT] -->
+        <!-- Red Hotspot Highlight Box -->
+        <rect x="690" y="65" width="345" height="235" rx="6" fill="#1e1014" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 3" filter="drop-shadow(0 0 10px rgba(239, 68, 68, 0.4))"/>
+        <text x="700" y="80" fill="#fca5a5" font-size="9" font-weight="bold" font-family="monospace">🔥 ALU 32b FULL ADDER &amp; LOGIC ARRAY HOTSPOT</text>
+
+        <!-- Bit 0 Carry Adder Gates -->
+        ${gateSvgXor(720, 95, "alu_xor1", "XOR_FA1", true)}
+        ${gateSvgXor(785, 95, "alu_xor2", "XOR_SUM", true)}
+        <path d="M 756 109 L 783 109" fill="none" stroke="#ef4444" stroke-width="2"/>
+
+        ${gateSvgAnd(720, 140, "alu_and1", "AND_G", true)}
+        ${gateSvgAnd(785, 140, "alu_and2", "AND_P", true)}
+        ${gateSvgOr(855, 125, "alu_or1", "OR_COUT", true)}
+        <path d="M 752 154 L 855 132" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+        <path d="M 817 154 L 835 154 L 835 139 L 855 139" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+        <text x="895" y="138" fill="#fca5a5" font-size="7.5" font-family="monospace">Cout_0 [M3 Track]</text>
+
+        <!-- Bitwise Logic Gates -->
+        ${gateSvgAnd(720, 185, "alu_and_op", "AND_BIT")}
+        ${gateSvgOr(720, 225, "alu_or_op", "OR_BIT")}
+        ${gateSvgXor(720, 265, "alu_xor_op", "XOR_BIT")}
+
+        <!-- ALU Operation Multiplexer -->
+        ${gateSvgAnd(830, 195, "alu_sel_and0", "SEL_ADD")}
+        ${gateSvgAnd(830, 235, "alu_sel_and1", "SEL_LOG")}
+        ${gateSvgOr(895, 215, "alu_res_or", "ALU_OUT")}
+
+        <!-- Zero Flag NOR Gate -->
+        ${gateSvgNor(960, 215, "alu_nor_zero", "NOR_ZERO")}
+        <path d="M 931 229 L 960 229" fill="none" stroke="#ef4444" stroke-width="2"/>
+        <text x="1005" y="228" fill="#fcd34d" font-size="8" font-family="monospace">Zero [1]</text>
+
+        <!-- STAGE 5: WRITEBACK GATES & LONG FEEDBACK NET -->
+        ${gateSvgNot(850, 360, "wb_inv", "WB_INV")}
+        ${gateSvgAnd(890, 350, "wb_and0", "WB_AND0")}
+        ${gateSvgAnd(890, 395, "wb_and1", "WB_AND1")}
+        ${gateSvgOr(945, 372, "wb_or", "WB_OR")}
+
+        <!-- Connect ALU Result to Writeback MUX -->
+        <path id="wire_alu_res" d="M 931 229 L 945 229 L 945 364 L 890 364" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+
+        <!-- Writeback Feedback Bus routing back across the bottom to Register File -->
+        <path id="wire_wb_bus" d="M 981 386 L 1020 386 L 1020 515 L 340 515 L 340 331 L 360 331" fill="none" stroke="#a855f7" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <text x="640" y="508" fill="#c084fc" font-size="9" font-family="monospace" font-weight="bold">WRITEBACK BUS [M3/M4 Semi-Global Track Net] ────────►</text>
+      `;
+    }
+
+    // Render ALU 32-bit Carry Adder & Logic Gates View
+    function renderAluDetailedGates() {
+      return `
+        <g font-size="10" font-family="monospace" font-weight="bold" fill="#ef4444">
+          <rect x="25" y="38" width="1010" height="26" rx="4" fill="#1e1014" stroke="#ef4444"/>
+          <text x="35" y="55" fill="#fca5a5">🔥 32-BIT ARITHMETIC LOGIC UNIT (ALU) GATE-LEVEL HOTSPOT ARCHITECTURE</text>
+          <text x="750" y="55" fill="#f87171">PRIMARY DRIVER OF {{ peak_layer }} ({{ peak_val_pct }}%) SATURATION</text>
+        </g>
+
+        <!-- 4 PARALLEL BIT SLICES OF CARRY ADDER & LOGIC -->
+        <!-- BIT 0 SLICE -->
+        <g transform="translate(40, 80)">
+          <rect width="220" height="380" rx="6" fill="#0f172a" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="12" y="22" fill="#f87171" font-size="10" font-weight="bold" font-family="monospace">BIT 0 GATE SLICE (LSB)</text>
+          
+          ${gateSvgXor(20, 45, "alu_xor1", "XOR1 (A0⊕B0)", true)}
+          ${gateSvgXor(120, 45, "alu_xor2", "XOR2 (Sum0)", true)}
+          <path d="M 56 59 L 118 59" fill="none" stroke="#ef4444" stroke-width="2"/>
+
+          ${gateSvgAnd(20, 110, "alu_and1", "AND1 (G0=A0·B0)", true)}
+          ${gateSvgAnd(120, 110, "alu_and2", "AND2 (P0·Cin)", true)}
+          ${gateSvgOr(65, 175, "alu_or1", "OR1 (Cout0)", true)}
+
+          <path d="M 52 124 L 52 189 L 65 189" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+          <path d="M 152 124 L 152 203 L 101 203" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+
+          <!-- Bitwise Logic Gates -->
+          ${gateSvgAnd(20, 240, "b0_and", "AND0 (Logic)")}
+          ${gateSvgOr(90, 240, "b0_or", "OR0 (Logic)")}
+          ${gateSvgXor(160, 240, "b0_xor", "XOR0 (Logic)")}
+
+          <!-- Bit 0 MUX -->
+          ${gateSvgAnd(40, 310, "b0_m_and0", "M_AND0")}
+          ${gateSvgAnd(120, 310, "b0_m_and1", "M_AND1")}
+          ${gateSvgOr(80, 350, "b0_m_or", "Y0 (Out)")}
+
+          <text x="120" y="364" fill="#38bdf8" font-size="8" font-family="monospace">Sum[0]</text>
+        </g>
+
+        <!-- CARRY RIPPLE WIRE FROM BIT 0 TO BIT 1 -->
+        <path d="M 141 269 L 290 269 L 290 139 L 320 139" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="4 2"/>
+        <text x="240" y="200" fill="#fca5a5" font-size="8.5" font-family="monospace" font-weight="bold">Cout0 ──►</text>
+
+        <!-- BIT 1 SLICE -->
+        <g transform="translate(300, 80)">
+          <rect width="220" height="380" rx="6" fill="#0f172a" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="12" y="22" fill="#f87171" font-size="10" font-weight="bold" font-family="monospace">BIT 1 GATE SLICE</text>
+          
+          ${gateSvgXor(20, 45, "b1_xor1", "XOR1 (A1⊕B1)", true)}
+          ${gateSvgXor(120, 45, "b1_xor2", "XOR2 (Sum1)", true)}
+          <path d="M 56 59 L 118 59" fill="none" stroke="#ef4444" stroke-width="2"/>
+
+          ${gateSvgAnd(20, 110, "b1_and1", "AND1 (G1)", true)}
+          ${gateSvgAnd(120, 110, "b1_and2", "AND2 (P1·Cin1)", true)}
+          ${gateSvgOr(65, 175, "b1_or1", "OR1 (Cout1)", true)}
+
+          <path d="M 52 124 L 52 189 L 65 189" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+          <path d="M 152 124 L 152 203 L 101 203" fill="none" stroke="#ef4444" stroke-width="1.8"/>
+
+          ${gateSvgAnd(20, 240, "b1_and", "AND1 (Logic)")}
+          ${gateSvgOr(90, 240, "b1_or", "OR1 (Logic)")}
+          ${gateSvgXor(160, 240, "b1_xor", "XOR1 (Logic)")}
+
+          ${gateSvgAnd(40, 310, "b1_m_and0", "M_AND0")}
+          ${gateSvgAnd(120, 310, "b1_m_and1", "M_AND1")}
+          ${gateSvgOr(80, 350, "b1_m_or", "Y1 (Out)")}
+
+          <text x="120" y="364" fill="#38bdf8" font-size="8" font-family="monospace">Sum[1]</text>
+        </g>
+
+        <!-- CARRY RIPPLE WIRE TO HIGHER BITS -->
+        <path d="M 401 269 L 550 269 L 550 139 L 580 139" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="4 2"/>
+        <text x="500" y="200" fill="#fca5a5" font-size="8.5" font-family="monospace" font-weight="bold">Cout1 ──►</text>
+
+        <!-- BIT 2 TO 30 EXPANSION BOX -->
+        <g transform="translate(560, 80)">
+          <rect width="210" height="380" rx="6" fill="#131b2e" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 2"/>
+          <text x="25" y="140" fill="#94a3b8" font-size="11" font-weight="bold" font-family="monospace">BITS [2 TO 30]</text>
+          <text x="25" y="165" fill="#64748b" font-size="9" font-family="monospace">29 Identical Full-Adder</text>
+          <text x="25" y="180" fill="#64748b" font-size="9" font-family="monospace">&amp; Logic Gate Slices</text>
+          <text x="25" y="210" fill="#ea580c" font-size="9" font-weight="bold" font-family="monospace">232 Additional Gates</text>
+          <text x="25" y="225" fill="#ea580c" font-size="9" font-family="monospace">Connecting on M2/M3</text>
+        </g>
+
+        <!-- BIT 31 (MSB & ZERO DETECTOR) -->
+        <g transform="translate(800, 80)">
+          <rect width="220" height="380" rx="6" fill="#0f172a" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="12" y="22" fill="#f87171" font-size="10" font-weight="bold" font-family="monospace">BIT 31 SLICE &amp; ZERO TREE</text>
+
+          ${gateSvgXor(20, 45, "b31_xor1", "XOR1 (A31⊕B31)", true)}
+          ${gateSvgXor(120, 45, "b31_xor2", "XOR2 (Sum31)", true)}
+          ${gateSvgOr(65, 125, "b31_or1", "Cout31 (Carry Out)", true)}
+
+          <!-- ZERO DETECTOR NOR TREE -->
+          <rect x="15" y="200" width="190" height="150" rx="4" fill="#1e1014" stroke="#f59e0b"/>
+          <text x="25" y="220" fill="#fcd34d" font-size="8.5" font-weight="bold" font-family="monospace">32-INPUT NOR ZERO TREE</text>
+          ${gateSvgNor(70, 250, "alu_nor_zero", "NOR_ZERO")}
+          <text x="125" y="264" fill="#fcd34d" font-size="8.5" font-family="monospace">Zero = 1</text>
+          <text x="25" y="310" fill="#94a3b8" font-size="7.5" font-family="monospace">High if all 32 Sum bits = 0</text>
+        </g>
+
+        <!-- EXPLANATION FOOTER -->
+        <rect x="40" y="480" width="980" height="35" rx="6" fill="#1e1b4b" stroke="#7c3aed"/>
+        <text x="55" y="502" fill="#ddd6fe" font-size="10" font-family="monospace" font-weight="bold">
+          PHYSICAL CELL MAPPING: 1 Bit-Slice = 2x sky130_fd_sc_hd__xor2_1 + 3x and2_1 + 2x or2_1 + 1x mux2_1 = 9 Standard Cells / Bit = 288 Gates Total.
+        </text>
+      `;
+    }
+
+    // Render Master-Slave DFF 8-NAND Gate Circuit View
+    function renderDffNandGates() {
+      return `
+        <g font-size="10" font-family="monospace" font-weight="bold" fill="#a855f7">
+          <rect x="25" y="38" width="1010" height="26" rx="4" fill="#1f102e" stroke="#a855f7"/>
+          <text x="35" y="55" fill="#e9d5ff">💾 8-NAND GATE MASTER-SLAVE D-FLIP-FLOP (POSITIVE EDGE TRIGGERED)</text>
+          <text x="750" y="55" fill="#c084fc">USED IN PC &amp; REGISTER FILE (1,056 TOTAL INSTANCES)</text>
+        </g>
+
+        <!-- CLOCK INVERTER -->
+        ${gateSvgNot(80, 250, "dff_clk_inv", "CLK_INV")}
+        <path d="M 40 264 L 80 264" fill="none" stroke="#38bdf8" stroke-width="2"/>
+        <circle cx="40" cy="264" r="4" fill="#10b981"/>
+        <text x="25" y="255" fill="#10b981" font-size="9" font-family="monospace" font-weight="bold">CLK</text>
+
+        <!-- MASTER STAGE -->
+        <g transform="translate(140, 100)">
+          <rect width="360" height="350" rx="8" fill="#0f172a" stroke="#a855f7" stroke-width="2"/>
+          <text x="20" y="28" fill="#c084fc" font-size="11" font-weight="bold" font-family="monospace">MASTER LATCH STAGE (Opaque when CLK = 1)</text>
+
+          <!-- Input D pin -->
+          <path d="M -60 70 L 30 70" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+          <circle cx="-60" cy="70" r="4" fill="#38bdf8"/>
+          <text x="-80" y="74" fill="#38bdf8" font-size="11" font-family="monospace" font-weight="bold">D</text>
+
+          <!-- Input Inverter for D_bar -->
+          ${gateSvgNot(-20, 180, "d_inv", "D_INV")}
+          <path d="M -35 70 L -35 194 L -20 194" fill="none" stroke="#38bdf8" stroke-width="2"/>
+          <path d="M 10 194 L 30 194" fill="none" stroke="#38bdf8" stroke-width="2"/>
+
+          <!-- NAND 1 & NAND 2 -->
+          ${gateSvgNand(30, 56, "dff_nand1", "NAND1")}
+          ${gateSvgNand(30, 180, "dff_nand2", "NAND2")}
+
+          <!-- Clock connection to NAND1 and NAND2 -->
+          <path d="M -20 150 L 15 150 L 15 77 L 30 77" fill="none" stroke="#10b981" stroke-width="2"/>
+          <path d="M 15 150 L 15 201 L 30 201" fill="none" stroke="#10b981" stroke-width="2"/>
+
+          <!-- NAND 3 & NAND 4 (Cross-Coupled Bi-Stable Storage) -->
+          ${gateSvgNand(180, 56, "dff_nand3", "NAND3 (Storage)")}
+          ${gateSvgNand(180, 180, "dff_nand4", "NAND4 (Storage)")}
+
+          <!-- Cross-coupled feedback wires -->
+          <path d="M 68 70 L 180 70" fill="none" stroke="#a855f7" stroke-width="2"/>
+          <path d="M 68 194 L 180 194" fill="none" stroke="#a855f7" stroke-width="2"/>
+
+          <path d="M 218 70 L 245 70 L 245 120 L 160 120 L 160 187 L 180 187" fill="none" stroke="#c084fc" stroke-width="2"/>
+          <path d="M 218 194 L 245 194 L 245 145 L 160 145 L 160 77 L 180 77" fill="none" stroke="#c084fc" stroke-width="2"/>
+
+          <text x="260" y="65" fill="#e9d5ff" font-size="9" font-family="monospace">Qm</text>
+          <text x="260" y="205" fill="#e9d5ff" font-size="9" font-family="monospace">Qm_bar</text>
+        </g>
+
+        <!-- SLAVE STAGE -->
+        <g transform="translate(560, 100)">
+          <rect width="360" height="350" rx="8" fill="#0f172a" stroke="#a855f7" stroke-width="2"/>
+          <text x="20" y="28" fill="#c084fc" font-size="11" font-weight="bold" font-family="monospace">SLAVE LATCH STAGE (Transparent when CLK = 1)</text>
+
+          <!-- NAND 5 & NAND 6 -->
+          ${gateSvgNand(30, 56, "dff_nand5", "NAND5")}
+          ${gateSvgNand(30, 180, "dff_nand6", "NAND6")}
+
+          <!-- Wires from Master Qm to Slave -->
+          <path d="M -135 70 L 30 70" fill="none" stroke="#c084fc" stroke-width="2"/>
+          <path d="M -135 194 L 30 194" fill="none" stroke="#c084fc" stroke-width="2"/>
+
+          <!-- Inverted Clock connection to NAND5 and NAND6 -->
+          <path d="M -450 164 L -40 164 L -40 77 L 30 77" fill="none" stroke="#38bdf8" stroke-width="2"/>
+          <path d="M -40 164 L -40 201 L 30 201" fill="none" stroke="#38bdf8" stroke-width="2"/>
+
+          <!-- NAND 7 & NAND 8 (Output Storage Latch) -->
+          ${gateSvgNand(180, 56, "dff_nand7", "NAND7 (Output)")}
+          ${gateSvgNand(180, 180, "dff_nand8", "NAND8 (Output)")}
+
+          <!-- Cross-coupled feedback wires for Slave -->
+          <path d="M 68 70 L 180 70" fill="none" stroke="#a855f7" stroke-width="2"/>
+          <path d="M 68 194 L 180 194" fill="none" stroke="#a855f7" stroke-width="2"/>
+
+          <path d="M 218 70 L 250 70 L 250 120 L 160 120 L 160 187 L 180 187" fill="none" stroke="#c084fc" stroke-width="2"/>
+          <path d="M 218 194 L 250 194 L 250 145 L 160 145 L 160 77 L 180 77" fill="none" stroke="#c084fc" stroke-width="2"/>
+
+          <!-- Final Q and Q_bar outputs -->
+          <path d="M 218 70 L 310 70" fill="none" stroke="#10b981" stroke-width="3"/>
+          <circle cx="310" cy="70" r="5" fill="#10b981"/>
+          <text x="325" y="74" fill="#34d399" font-size="12" font-family="monospace" font-weight="bold">Q (Output)</text>
+
+          <path d="M 218 194 L 310 194" fill="none" stroke="#64748b" stroke-width="2"/>
+          <circle cx="310" cy="194" r="4" fill="#64748b"/>
+          <text x="325" y="198" fill="#94a3b8" font-size="10" font-family="monospace">Q_bar</text>
+        </g>
+
+        <!-- FOOTER EXPLAINER -->
+        <rect x="40" y="480" width="980" height="35" rx="6" fill="#1e1b4b" stroke="#7c3aed"/>
+        <text x="55" y="502" fill="#ddd6fe" font-size="10" font-family="monospace" font-weight="bold">
+          WORKING PRINCIPLE: Master latches data when CLK=0; on positive clock edge (0→1), Slave latches data to output Q cleanly without hazards.
+        </text>
+      `;
+    }
+
+    // Render Opcode Decoder Gate Circuit View
+    function renderDecoderGates() {
+      return `
+        <g font-size="10" font-family="monospace" font-weight="bold" fill="#ec4899">
+          <rect x="25" y="38" width="1010" height="26" rx="4" fill="#2d1020" stroke="#ec4899"/>
+          <text x="35" y="55" fill="#fbcfe8">🎛️ RV32I INSTRUCTION DECODER (INVERTERS + 4-INPUT AND/OR GATES)</text>
+          <text x="750" y="55" fill="#f472b6">SYNTHESIZED FROM VERILOG RTL TO SKY130 GATES</text>
+        </g>
+
+        <g transform="translate(60, 90)">
+          <!-- Opcode Input Lines -->
+          <text x="10" y="20" fill="#f472b6" font-size="10" font-weight="bold" font-family="monospace">OPCODE BUS Inst[6:0]</text>
+          <line x1="20" y1="40" x2="20" y2="350" stroke="#f472b6" stroke-width="2"/>
+          <text x="10" y="365" fill="#f472b6" font-size="8" font-family="monospace">Op[6]</text>
+
+          <line x1="50" y1="40" x2="50" y2="350" stroke="#f472b6" stroke-width="2"/>
+          <text x="40" y="365" fill="#f472b6" font-size="8" font-family="monospace">Op[5]</text>
+
+          <line x1="80" y1="40" x2="80" y2="350" stroke="#f472b6" stroke-width="2"/>
+          <text x="70" y="365" fill="#f472b6" font-size="8" font-family="monospace">Op[4]</text>
+
+          <line x1="110" y1="40" x2="110" y2="350" stroke="#f472b6" stroke-width="2"/>
+          <text x="100" y="365" fill="#f472b6" font-size="8" font-family="monospace">Op[3]</text>
+
+          <line x1="140" y1="40" x2="140" y2="350" stroke="#f472b6" stroke-width="2"/>
+          <text x="130" y="365" fill="#f472b6" font-size="8" font-family="monospace">Op[2]</text>
+
+          <!-- Inverter Bank for inverted opcodes -->
+          ${gateSvgNot(170, 50, "inv_op6", "~Op6")}
+          ${gateSvgNot(170, 110, "inv_op5", "~Op5")}
+          ${gateSvgNot(170, 170, "inv_op4", "~Op4")}
+          ${gateSvgNot(170, 230, "inv_op3", "~Op3")}
+          ${gateSvgNot(170, 290, "inv_op2", "~Op2")}
+
+          <!-- Decoding AND Gates -->
+          ${gateSvgAnd(320, 60, "dec_and_r", "AND_R (0110011)")}
+          <text x="370" y="74" fill="#38bdf8" font-size="9" font-family="monospace">is_R_type (ADD/XOR)</text>
+
+          ${gateSvgAnd(320, 120, "dec_and_i", "AND_I (0010011)")}
+          <text x="370" y="134" fill="#38bdf8" font-size="9" font-family="monospace">is_I_type (ADDI)</text>
+
+          ${gateSvgAnd(320, 180, "dec_and_load", "AND_LOAD (0000011)")}
+          <text x="370" y="194" fill="#38bdf8" font-size="9" font-family="monospace">is_Load (LW)</text>
+
+          ${gateSvgAnd(320, 240, "dec_and_store", "AND_STORE (0100011)")}
+          <text x="370" y="254" fill="#38bdf8" font-size="9" font-family="monospace">is_Store (SW)</text>
+
+          ${gateSvgAnd(320, 300, "dec_and_branch", "AND_BRANCH (1100011)")}
+          <text x="370" y="314" fill="#38bdf8" font-size="9" font-family="monospace">is_Branch (BEQ)</text>
+
+          <!-- Control Signal Generation OR Gates -->
+          <g transform="translate(560, 40)">
+            <rect width="360" height="320" rx="8" fill="#0f172a" stroke="#ec4899" stroke-width="1.5"/>
+            <text x="20" y="25" fill="#f472b6" font-size="10" font-weight="bold" font-family="monospace">CONTROL SIGNAL COMBINATIONAL OR GATES</text>
+
+            ${gateSvgOr(40, 50, "or_regwrite", "OR_REGWRITE")}
+            <text x="95" y="64" fill="#10b981" font-size="9" font-family="monospace" font-weight="bold">RegWrite = is_R | is_I | is_Load</text>
+
+            ${gateSvgOr(40, 110, "or_alusrc", "OR_ALUSRC")}
+            <text x="95" y="124" fill="#10b981" font-size="9" font-family="monospace" font-weight="bold">ALUSrc = is_I | is_Load | is_Store</text>
+
+            ${gateSvgOr(40, 170, "or_memread", "OR_MEMREAD")}
+            <text x="95" y="184" fill="#10b981" font-size="9" font-family="monospace" font-weight="bold">MemRead = is_Load</text>
+
+            ${gateSvgOr(40, 230, "or_memwrite", "OR_MEMWRITE")}
+            <text x="95" y="244" fill="#10b981" font-size="9" font-family="monospace" font-weight="bold">MemWrite = is_Store</text>
+          </g>
+        </g>
+      `;
+    }
+
+    // Render 2:1 and 4:1 Multiplexer Gate Circuit View
+    function renderMuxGates() {
+      return `
+        <g font-size="10" font-family="monospace" font-weight="bold" fill="#38bdf8">
+          <rect x="25" y="38" width="1010" height="26" rx="4" fill="#0f1e2e" stroke="#38bdf8"/>
+          <text x="35" y="55" fill="#bae6fd">🔀 DATAPATH 2:1 &amp; 4:1 MULTIPLEXERS (NOT-AND-OR GATE ARCHITECTURE)</text>
+          <text x="750" y="55" fill="#7dd3fc">REPLACES ABSTRACT MUX TRAPEZOIDS</text>
+        </g>
+
+        <!-- 2:1 MULTIPLEXER GATE SCHEMATIC -->
+        <g transform="translate(60, 100)">
+          <rect width="420" height="340" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+          <text x="20" y="28" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace">2-TO-1 MULTIPLEXER (ALUSrc / MemToReg)</text>
+          <text x="20" y="46" fill="#94a3b8" font-size="8.5" font-family="monospace">Equation: Y = (D0 · ~Sel) + (D1 · Sel)</text>
+
+          <!-- Inputs -->
+          <circle cx="20" cy="90" r="4" fill="#10b981"/>
+          <text x="30" y="94" fill="#10b981" font-size="9" font-family="monospace" font-weight="bold">D0 (Reg RD2)</text>
+
+          <circle cx="20" cy="170" r="4" fill="#38bdf8"/>
+          <text x="30" y="174" fill="#38bdf8" font-size="9" font-family="monospace" font-weight="bold">D1 (Immediate Imm)</text>
+
+          <circle cx="20" cy="270" r="4" fill="#ec4899"/>
+          <text x="30" y="274" fill="#ec4899" font-size="9" font-family="monospace" font-weight="bold">Sel (ALUSrc)</text>
+
+          <!-- Select Inverter -->
+          ${gateSvgNot(120, 260, "m2_sel_inv", "INV_SEL")}
+          <path d="M 20 270 L 120 270" fill="none" stroke="#ec4899" stroke-width="2"/>
+
+          <!-- AND0: D0 & ~Sel -->
+          ${gateSvgAnd(200, 80, "mux_and0", "AND0 (D0·~Sel)")}
+          <path d="M 20 90 L 200 90" fill="none" stroke="#10b981" stroke-width="2"/>
+          <path d="M 148 274 L 175 274 L 175 101 L 200 101" fill="none" stroke="#ec4899" stroke-width="2"/>
+
+          <!-- AND1: D1 & Sel -->
+          ${gateSvgAnd(200, 160, "mux_and1", "AND1 (D1·Sel)")}
+          <path d="M 20 170 L 200 170" fill="none" stroke="#38bdf8" stroke-width="2"/>
+          <path d="M 70 270 L 70 181 L 200 181" fill="none" stroke="#ec4899" stroke-width="2"/>
+
+          <!-- OR: Combine Outputs -->
+          ${gateSvgOr(300, 120, "mux_or", "OR (Combine)")}
+          <path d="M 232 94 L 270 94 L 270 127 L 303 127" fill="none" stroke="#38bdf8" stroke-width="2"/>
+          <path d="M 232 174 L 270 174 L 270 141 L 303 141" fill="none" stroke="#38bdf8" stroke-width="2"/>
+
+          <!-- Output Y -->
+          <path d="M 336 134 L 390 134" fill="none" stroke="#10b981" stroke-width="3"/>
+          <circle cx="390" cy="134" r="5" fill="#10b981"/>
+          <text x="350" y="122" fill="#34d399" font-size="10" font-family="monospace" font-weight="bold">Y (To ALU)</text>
+        </g>
+
+        <!-- 4:1 MULTIPLEXER GATE SCHEMATIC -->
+        <g transform="translate(540, 100)">
+          <rect width="460" height="340" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+          <text x="20" y="28" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace">4-TO-1 MULTIPLEXER (ALU Operation Select)</text>
+          <text x="20" y="46" fill="#94a3b8" font-size="8.5" font-family="monospace">Selects ADD (00), SLL (01), XOR (10), OR (11)</text>
+
+          <!-- 4 3-input AND gates -->
+          ${gateSvgAnd(180, 70, "m4_and0", "AND0 (ADD)")}
+          ${gateSvgAnd(180, 130, "m4_and1", "AND1 (SLL)")}
+          ${gateSvgAnd(180, 190, "m4_and2", "AND2 (XOR)")}
+          ${gateSvgAnd(180, 250, "m4_and3", "AND3 (OR)")}
+
+          <!-- 4-input OR gate -->
+          <path d="M 212 84 L 280 84 L 280 145 L 310 145" fill="none" stroke="#38bdf8" stroke-width="1.8"/>
+          <path d="M 212 144 L 270 144 L 270 153 L 310 153" fill="none" stroke="#38bdf8" stroke-width="1.8"/>
+          <path d="M 212 204 L 270 204 L 270 167 L 310 167" fill="none" stroke="#38bdf8" stroke-width="1.8"/>
+          <path d="M 212 264 L 280 264 L 280 175 L 310 175" fill="none" stroke="#38bdf8" stroke-width="1.8"/>
+
+          ${gateSvgOr(310, 145, "m4_or", "OR4 (Result)")}
+          <path d="M 346 159 L 410 159" fill="none" stroke="#ef4444" stroke-width="3"/>
+          <circle cx="410" cy="159" r="5" fill="#ef4444"/>
+          <text x="360" y="145" fill="#fca5a5" font-size="9" font-family="monospace" font-weight="bold">ALU Result</text>
+        </g>
+      `;
+    }
+
+    function switchViewMode(mode) {
+      currentViewMode = mode;
+      document.getElementById("viewModeSelect").value = mode;
+      const group = document.getElementById("gateCanvasGroup");
+      if (!group) return;
+
+      const modeText = document.getElementById("activeModeText");
+
+      if (mode === "full") {
+        group.innerHTML = renderFullProcessorGates();
+        if (modeText) modeText.textContent = "[FULL GATE NETLIST]";
+        selectLogicGate("alu_xor1");
+      } else if (mode === "alu") {
+        group.innerHTML = renderAluDetailedGates();
+        if (modeText) modeText.textContent = "[ALU GATES: HOTSPOT]";
+        selectLogicGate("alu_xor1");
+      } else if (mode === "dff") {
+        group.innerHTML = renderDffNandGates();
+        if (modeText) modeText.textContent = "[8-NAND DFF LATCH]";
+        selectLogicGate("dff_nand3");
+      } else if (mode === "decoder") {
+        group.innerHTML = renderDecoderGates();
+        if (modeText) modeText.textContent = "[DECODER GATES]";
+        selectLogicGate("dec_and_r");
+      } else if (mode === "mux") {
+        group.innerHTML = renderMuxGates();
+        if (modeText) modeText.textContent = "[MULTIPLEXER GATES]";
+        selectLogicGate("mux_and1");
+      }
+
+      loadInstruction(document.getElementById("instSelect").value);
+    }
+
+    function selectLogicGate(gateKey) {
+      selectedGateId = gateKey;
+      const gate = gateDatabase[gateKey] || gateDatabase.alu_xor1;
 
       document.querySelectorAll(".comp-box").forEach(el => el.classList.remove("comp-selected"));
-      const el = document.getElementById("comp_" + compKey);
+      const el = document.getElementById(gateKey);
       if (el) el.classList.add("comp-selected");
 
-      document.getElementById("inspCompTitle").innerText = comp.title;
-      document.getElementById("inspCompSub").innerText = comp.sub;
-      document.getElementById("inspGateCount").innerText = comp.gates;
-      document.getElementById("inspCellPrim").innerText = comp.cells;
-      document.getElementById("inspPinCount").innerText = comp.pins;
-      document.getElementById("inspFanout").innerText = comp.fanout;
-      document.getElementById("inspCongestionImpact").innerHTML = comp.impact;
+      document.getElementById("inspGateName").innerText = gate.name;
+      document.getElementById("inspGateSub").innerText = gate.sub;
+      document.getElementById("inspGateEquation").innerText = gate.eq;
+      document.getElementById("inspGatePins").innerText = gate.pins;
+      document.getElementById("inspCellPrim").innerText = gate.cell;
+      document.getElementById("inspTransistors").innerText = gate.transistors;
+      document.getElementById("inspCongestionImpact").innerHTML = gate.impact;
 
       const badge = document.getElementById("inspGateBadge");
-      if (comp.hotspot) {
-        badge.innerText = "HOTSPOT BLOCK";
+      if (gate.hotspot) {
+        badge.innerText = "HOTSPOT GATE";
         badge.style.background = "#fef2f2";
         badge.style.color = "#dc2626";
         badge.style.borderColor = "#fecaca";
       } else {
-        badge.innerText = "STANDARD CELL";
+        badge.innerText = "STANDARD GATE";
         badge.style.background = "#f0fdf4";
         badge.style.color = "#16a34a";
         badge.style.borderColor = "#bbf7d0";
@@ -1028,38 +1439,18 @@
 
     function loadInstruction(key) {
       currentInst = key;
-      const inst = instructionSet[key] || instructionSet.ADD;
 
-      const elPc = document.getElementById("val_pc_hex"); if (elPc) elPc.textContent = inst.pc;
-      const elAsm = document.getElementById("val_inst_asm"); if (elAsm) elAsm.textContent = inst.asm;
-      const elHex = document.getElementById("val_inst_hex"); if (elHex) elHex.textContent = inst.hex;
-      const elRs1 = document.getElementById("val_rf_rs1"); if (elRs1) elRs1.textContent = inst.rs1;
-      const elRs2 = document.getElementById("val_rf_rs2"); if (elRs2) elRs2.textContent = inst.rs2;
-      const elRd = document.getElementById("val_rf_rd"); if (elRd) elRd.textContent = inst.rd.split(" ")[0];
-      const elImm = document.getElementById("val_imm_out"); if (elImm) elImm.textContent = inst.imm;
-      const elAlu = document.getElementById("val_alu_out"); if (elAlu) elAlu.textContent = inst.aluOut;
-      const elRam = document.getElementById("val_ram_status"); if (elRam) elRam.textContent = inst.ramStatus;
+      // Update gate wire highlighting based on active instruction
+      const activeColor = (key === "ADD" || key === "XOR") ? "#ef4444" : "#38bdf8";
 
-      const elRw = document.getElementById("val_sig_regwrite"); if (elRw) elRw.textContent = inst.regWrite;
-      const elAs = document.getElementById("val_sig_alusrc"); if (elAs) elAs.textContent = inst.aluSrc;
-      const elMr = document.getElementById("val_sig_memread"); if (elMr) elMr.textContent = inst.memRead;
-      const elBr = document.getElementById("val_sig_branch"); if (elBr) elBr.textContent = inst.branch;
-
-      // Update active wires
-      document.querySelectorAll("#wiresLayer path").forEach(p => {
+      // Animate active wires in the current SVG
+      const activePaths = document.querySelectorAll("#wire_pc_d, #wire_pc_q, #wire_rf_rd1, #wire_alu_b, #wire_alu_res, #wire_wb_bus, #wire_ctrl_rw, #wire_ctrl_as");
+      activePaths.forEach(p => {
         p.classList.remove("wire-active", "wire-control-active", "wire-hotspot-active");
-      });
-
-      inst.activeWires.forEach(wId => {
-        const wireEl = document.getElementById(wId);
-        if (wireEl) {
-          if (wId.startsWith("wire_ctrl_")) {
-            wireEl.classList.add("wire-control-active");
-          } else if (inst.hotspotWires && inst.hotspotWires.includes(wId)) {
-            wireEl.classList.add("wire-hotspot-active");
-          } else {
-            wireEl.classList.add("wire-active");
-          }
+        if (key === "ADD") {
+          p.classList.add("wire-hotspot-active");
+        } else {
+          p.classList.add("wire-active");
         }
       });
     }
@@ -1079,6 +1470,7 @@
         if (txt) txt.textContent = `CLK: LOW  | Cycle #${clockCycle}`;
       }
 
+      // Re-trigger pulse animation by refreshing classes
       const active = document.querySelectorAll(".wire-active, .wire-hotspot-active, .wire-control-active");
       active.forEach(el => {
         el.style.animation = 'none';
@@ -1110,9 +1502,7 @@
       clockCycle = 1;
       clockHigh = true;
       stepClockCycle();
-      const sel = document.getElementById("instSelect");
-      loadInstruction(sel ? sel.value : "ADD");
-      selectComponent("alu");
+      switchViewMode(document.getElementById("viewModeSelect").value);
     }
 
     function toggleSchematicView() {
