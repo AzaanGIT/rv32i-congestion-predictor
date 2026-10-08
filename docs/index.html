@@ -775,68 +775,126 @@
         <h3 style="margin: 0; color: #15803d; font-size: 16px; font-weight: 800;" id="modalTitle">Calculated Parameters to Eliminate Congestion</h3>
         <button onclick="closeFixModal()" style="background:transparent; border:none; color:#718096; font-size:18px; cursor:pointer;">✕</button>
       </div>
-      <p style="color: #4a5568; font-size: 12px; margin-bottom: 16px;">
+      <p style="color: #4a5568; font-size: 12px; margin-bottom: 16px;" id="modalDesc">
         Applying these rules will scale routing resources and lower peak wire demand below 80%:
       </p>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-          <span style="color:#718096; font-size:10px; font-weight: 700;">CORE MARGIN (MM)</span>
-          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">3.0 → <span style="color:#15803d;">4.5</span></div>
-        </div>
-        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-          <span style="color:#718096; font-size:10px; font-weight: 700;">TARGET DENSITY</span>
-          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">0.56 → <span style="color:#15803d;">0.42</span></div>
-        </div>
-        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-          <span style="color:#718096; font-size:10px; font-weight: 700;">UTILIZATION</span>
-          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">57.0% → <span style="color:#15803d;">45.6%</span></div>
-        </div>
-        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-          <span style="color:#718096; font-size:10px; font-weight: 700;">M2 AVAILABLE TRACKS</span>
-          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">27540.0 → <span style="color:#15803d;">27540</span></div>
-        </div>
+      <div id="modalContentGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <!-- Dynamically injected via JavaScript -->
       </div>
-      <form action="/predict" method="POST">
-        <input type="hidden" name="utilization" value="45.6">
-        <input type="hidden" name="aspect_ratio" value="1.0">
-        <input type="hidden" name="core_margin" value="4.5">
-        <input type="hidden" name="density" value="0.42">
-        <input type="hidden" name="layer_adjustment" value="0.4">
-        
-        <input type="hidden" name="metal_1" value="0">
-        
-        <input type="hidden" name="metal_2" value="27540">
-        
-        <input type="hidden" name="metal_3" value="37221">
-        
-        <input type="hidden" name="metal_4" value="18450">
-        
-        <input type="hidden" name="metal_5" value="18096">
-        
-        <input type="hidden" name="metal_6" value="18450">
-        
-        <input type="hidden" name="metal_7" value="5699">
-        
-        <input type="hidden" name="metal_8" value="5796">
-        
-        <input type="hidden" name="metal_9" value="2758">
-        
-        <input type="hidden" name="metal_10" value="2772">
-        
-        <div style="display:flex; justify-content:flex-end; gap:10px;">
-          <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
-          <button type="submit" class="btn-3d">Apply Fixes & Re-run</button>
-        </div>
+      <form id="fixForm" action="/predict" method="POST">
+        <!-- Dynamically injected via JavaScript -->
       </form>
     </div>
   </div>
 
   <script>
-    function openFixModal() { document.getElementById('fixModal').style.display = 'flex'; }
+    const allResources = {"M1": 0.0, "M10": 2772.0, "M2": 27540.0, "M3": 37221.0, "M4": 18450.0, "M5": 18096.0, "M6": 18450.0, "M7": 5699.0, "M8": 5796.0, "M9": 2758.0};
+    const allDemands = {"M1": 0.0, "M10": 429.7, "M2": 13979.2, "M3": 17125.2, "M4": 6668.9, "M5": 4556.9, "M6": 4614.4, "M7": 840.0, "M8": 856.9, "M9": 489.5};
+    const allSuggestedResources = {"M1": 0, "M10": 2772, "M2": 27540, "M3": 37221, "M4": 18450, "M5": 18096, "M6": 18450, "M7": 5699, "M8": 5796, "M9": 2758};
+    const allSuggestedParams = {"aspect_ratio": 1.0, "core_margin": 4.5, "density": 0.42, "layer_adjustment": 0.4, "utilization": 45.6};
+    const currentParams = {
+      utilization: 57.0,
+      aspect_ratio: 1.5,
+      core_margin: 3.0,
+      density: 0.56,
+      layer_adjustment: 0.6
+    };
+
     function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
+
+    function openFixModal() {
+      document.getElementById('modalTitle').innerText = 'Calculated Parameters to Eliminate Congestion';
+      document.getElementById('modalDesc').innerText = 'Applying these holistic rules will scale core margin, density, and routing tracks below 80%:';
+      
+      const grid = document.getElementById('modalContentGrid');
+      grid.innerHTML = `
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">CORE MARGIN (MM)</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${currentParams.core_margin} → <span style="color:#15803d;">${allSuggestedParams.core_margin}</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">TARGET DENSITY</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${currentParams.density} → <span style="color:#15803d;">${allSuggestedParams.density}</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">UTILIZATION</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${currentParams.utilization}% → <span style="color:#15803d;">${allSuggestedParams.utilization}%</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">M2 AVAILABLE TRACKS</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${(allResources['M2'] || 0).toLocaleString()} → <span style="color:#15803d;">${(allSuggestedResources['M2'] || 0).toLocaleString()}</span></div>
+        </div>
+      `;
+
+      const form = document.getElementById('fixForm');
+      form.innerHTML = `
+        <input type="hidden" name="utilization" value="${allSuggestedParams.utilization}">
+        <input type="hidden" name="aspect_ratio" value="${allSuggestedParams.aspect_ratio}">
+        <input type="hidden" name="core_margin" value="${allSuggestedParams.core_margin}">
+        <input type="hidden" name="density" value="${allSuggestedParams.density}">
+        <input type="hidden" name="layer_adjustment" value="${allSuggestedParams.layer_adjustment}">
+        ${Object.keys(allSuggestedResources).map(k => `<input type="hidden" name="metal_${k.replace('M','')}" value="${allSuggestedResources[k]}">`).join('')}
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
+          <button type="submit" class="btn-3d">Apply Fixes & Re-run</button>
+        </div>
+      `;
+
+      document.getElementById('fixModal').style.display = 'flex';
+    }
+
     function openSingleLayerFix(layer) {
-      document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer;
-      openFixModal();
+      const curRes = allResources[layer] || 0;
+      const curDemand = allDemands[layer] || 0;
+      const curPct = rawData[layer] || 0;
+      
+      let recRes = allSuggestedResources[layer];
+      if (!recRes || recRes <= curRes) {
+        recRes = curDemand > 0 ? Math.ceil(curDemand / 0.70) : Math.max(1000, Math.ceil(curRes * 1.25));
+      }
+      const estNewPct = recRes > 0 ? Math.min(100.0, Math.round((curDemand / recRes) * 1000) / 10) : 0;
+
+      document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer + ' Only';
+      document.getElementById('modalDesc').innerText = 'Targeted routing track optimization for ' + layer + ' only. Core margin, cell density, utilization, and all other layers remain unchanged:';
+
+      const grid = document.getElementById('modalContentGrid');
+      grid.innerHTML = `
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">${layer} CURRENT CAPACITY</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${curRes.toLocaleString()} <span style="font-size:11px; color:#718096; font-weight:600;">tracks</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">${layer} WIRE PRESSURE</span>
+          <div style="font-size:14px; font-weight:800; color:${curPct >= 85 ? '#dc2626' : '#1a202c'}; margin-top:2px;">${curDemand.toLocaleString()} <span style="font-size:11px; font-weight:600;">(${curPct}% Saturation)</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">RECOMMENDED ${layer} TRACKS</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${curRes.toLocaleString()} → <span style="color:#15803d;">${recRes.toLocaleString()}</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">ESTIMATED NEW SATURATION</span>
+          <div style="font-size:14px; font-weight:800; color:#15803d; margin-top:2px;">${estNewPct}% <span style="font-size:10px; background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px;">OPTIMIZED</span></div>
+        </div>
+      `;
+
+      const form = document.getElementById('fixForm');
+      form.innerHTML = `
+        <input type="hidden" name="utilization" value="${currentParams.utilization}">
+        <input type="hidden" name="aspect_ratio" value="${currentParams.aspect_ratio}">
+        <input type="hidden" name="core_margin" value="${currentParams.core_margin}">
+        <input type="hidden" name="density" value="${currentParams.density}">
+        <input type="hidden" name="layer_adjustment" value="${currentParams.layer_adjustment}">
+        ${Object.keys(allResources).map(k => {
+          const val = (k === layer) ? recRes : allResources[k];
+          return `<input type="hidden" name="metal_${k.replace('M','')}" value="${val}">`;
+        }).join('')}
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
+          <button type="submit" class="btn-3d">Apply ${layer} Fix & Re-run</button>
+        </div>
+      `;
+
+      document.getElementById('fixModal').style.display = 'flex';
     }
 
     const rawData = {"M1": 0.0, "M10": 15.5, "M2": 50.8, "M3": 46.0, "M4": 36.1, "M5": 25.2, "M6": 25.0, "M7": 14.7, "M8": 14.8, "M9": 17.7};
@@ -1421,6 +1479,39 @@
           e.preventDefault();
           triggerAnalysisFromForm();
         });
+      }
+    });
+
+    // Intercept fixForm submission for single layer and global fixes
+    document.addEventListener('submit', (e) => {
+      if (e.target && e.target.id === 'fixForm') {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        
+        if (formData.has('utilization')) {
+          const u = document.getElementById('inp_util'); if (u) u.value = formData.get('utilization');
+        }
+        if (formData.has('aspect_ratio')) {
+          const a = document.getElementById('inp_aspect'); if (a) a.value = formData.get('aspect_ratio');
+        }
+        if (formData.has('core_margin')) {
+          const m = document.getElementById('inp_margin'); if (m) m.value = formData.get('core_margin');
+        }
+        if (formData.has('density')) {
+          const d = document.getElementById('inp_density'); if (d) d.value = formData.get('density');
+        }
+        if (formData.has('layer_adjustment')) {
+          const l = document.getElementById('inp_layer_adj'); if (l) l.value = formData.get('layer_adjustment');
+        }
+        for (let i = 1; i <= 10; i++) {
+          if (formData.has('metal_' + i)) {
+            const inp = document.querySelector(`input[name="metal_${i}"]`);
+            if (inp) inp.value = formData.get('metal_' + i);
+          }
+        }
+
+        if (typeof closeFixModal === 'function') closeFixModal();
+        triggerAnalysisFromForm();
       }
     });
   </script>
