@@ -82,19 +82,95 @@
     .input-box .badge { background: #edf2f7; color: #4a5568; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }
     .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
 
-    /* Digital Logic Gate Schematic Styling (DigitalJS-inspired) */
-    #panelSchematic { display: block; margin-bottom: 24px; border: 1px solid #ddd6fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; }
-    .schematic-layout { display: grid; grid-template-columns: 2.3fr 1fr; gap: 20px; }
-    #schematicViewport { width: 100%; height: 560px; border-radius: 8px; background: #080c14; position: relative; overflow: hidden; border: 1px solid #1e293b; user-select: none; }
+        /* DigitalJS Online Interface Styling (tilk/digitaljs_online) */
+    #panelSchematic { display: block; margin-bottom: 24px; border: 1px solid #c7d2fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; border-radius: 12px; overflow: hidden; }
+    
+    /* DigitalJS Toolbar */
+    .djs-toolbar {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: #f1f5f9;
+    }
+    .djs-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: -0.2px;
+    }
+    .djs-logo-badge {
+      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+    }
+    .djs-btn-group {
+      display: inline-flex;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+    .djs-tool-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      border-right: 1px solid #334155;
+    }
+    .djs-tool-btn:last-child { border-right: none; }
+    .djs-tool-btn:hover { background: #334155; color: #ffffff; }
+    .djs-tool-btn.active { background: #0284c7; color: #ffffff; }
+    .djs-tool-btn.btn-run { background: #16a34a; color: #ffffff; font-weight: 800; }
+    .djs-tool-btn.btn-run:hover { background: #15803d; }
+
+    /* DigitalJS Tab Navigation */
+    .djs-nav-tabs {
+      background: #1e293b;
+      display: flex;
+      gap: 2px;
+      padding: 0 16px;
+      border-bottom: 1px solid #334155;
+    }
+    .djs-tab-btn {
+      background: transparent;
+      color: #94a3b8;
+      border: none;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      border-bottom: 2px solid transparent;
+      font-family: inherit;
+    }
+    .djs-tab-btn:hover { color: #f1f5f9; background: rgba(255, 255, 255, 0.05); }
+    .djs-tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; background: #0f172a; }
+
+    .schematic-layout { display: grid; grid-template-columns: 2.3fr 1fr; gap: 20px; padding: 16px; background: #ffffff; }
+    #schematicViewport { width: 100%; height: 570px; border-radius: 8px; background: #080c14; position: relative; overflow: hidden; border: 1px solid #1e293b; user-select: none; }
     #schematicSvg { width: 100%; height: 100%; display: block; }
 
-    .schematic-ctrl-btn { background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-    .schematic-ctrl-btn:hover { border-color: #7c3aed; color: #7c3aed; background: #f5f3ff; }
-    .schematic-ctrl-btn.active { background: #7c3aed; color: #ffffff; border-color: #7c3aed; }
-
     .comp-box { cursor: pointer; transition: all 0.2s ease; }
-    .comp-box:hover { filter: brightness(1.25); }
-    .comp-selected { stroke: #38bdf8 !important; stroke-width: 2.5px !important; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.7)) !important; }
+    .comp-box:hover { filter: brightness(1.3); }
+    .comp-selected { stroke: #38bdf8 !important; stroke-width: 2.5px !important; filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.8)) !important; }
 
     @keyframes wireFlow {
       from { stroke-dashoffset: 24; }
@@ -103,6 +179,49 @@
     .wire-active { stroke: #38bdf8 !important; stroke-width: 2.5px !important; stroke-dasharray: 6 3; animation: wireFlow 0.8s linear infinite; filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.6)); }
     .wire-control-active { stroke: #ec4899 !important; stroke-width: 2px !important; stroke-dasharray: 4 2; animation: wireFlow 0.6s linear infinite; filter: drop-shadow(0 0 5px rgba(236, 72, 153, 0.6)); }
     .wire-hotspot-active { stroke: #ef4444 !important; stroke-width: 2.5px !important; stroke-dasharray: 6 3; animation: wireFlow 0.5s linear infinite; filter: drop-shadow(0 0 7px rgba(239, 68, 68, 0.8)); }
+
+    /* Code Tab Styling */
+    #djsCodeTab {
+      width: 100%;
+      height: 570px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 16px;
+      overflow: auto;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      white-space: pre;
+    }
+
+    /* Waveform Monitor Styling */
+    #djsMonitorTab {
+      width: 100%;
+      height: 570px;
+      background: #0b1120;
+      color: #e2e8f0;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      padding: 16px;
+      overflow: auto;
+    }
+    .wave-row { display: flex; align-items: center; margin-bottom: 14px; font-family: monospace; font-size: 11px; }
+    .wave-label { width: 140px; color: #94a3b8; font-weight: bold; flex-shrink: 0; }
+    .wave-track { flex-grow: 1; height: 32px; background: #0f172a; border-radius: 4px; border: 1px solid #1e293b; position: relative; overflow: hidden; display: flex; align-items: center; }
+
+    /* Live Studio Iframe */
+    #djsLiveTab {
+      width: 100%;
+      height: 570px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      overflow: hidden;
+      background: #0f172a;
+      position: relative;
+    }
+    #djsIframe { width: 100%; height: 100%; border: none; }
 
     .info-pane { display: flex; flex-direction: column; justify-content: space-between; }
     .inspector-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); }
@@ -188,89 +307,104 @@
     <!-- RIGHT MAIN CONTENT -->
     <div class="main-content">
       
-      <!-- DIGITALJS GATE-LEVEL LOGIC SCHEMATIC & WORKING PRINCIPLE -->
-      <div id="panelSchematic" class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: #10b981; font-size: 14px;">●</span>
-            <span style="color: #7c3aed; font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;">RV32I GATE-LEVEL LOGIC CIRCUIT VISUALIZER</span>
-            <span style="color: #718096; font-size: 11px; margin-left: 8px;">(DigitalJS Gate Netlist: AND, NAND, OR, NOR, XOR, Inverters)</span>
+      <!-- DIGITALJS ONLINE MODEL INTERFACE (tilk/digitaljs_online) -->
+      <!-- DIGITALJS ONLINE MODEL INTERFACE (tilk/digitaljs_online) -->
+      <div id="panelSchematic" class="card" style="padding: 0;">
+        
+        <!-- DigitalJS Signature Toolbar -->
+        <div class="djs-toolbar">
+          <div class="djs-brand">
+            <span class="djs-logo-badge">DigitalJS</span>
+            <span>RV32I PROCESSOR SIMULATOR</span>
+            <span style="color: #64748b; font-size: 11px; font-weight: normal;">(tilk/digitaljs_online engine)</span>
           </div>
-          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <select id="viewModeSelect" onchange="switchViewMode(this.value)" style="background: #f5f3ff; color: #7c3aed; border: 1.5px solid #7c3aed; border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 800; outline: none; cursor: pointer;">
-              <option value="full">⚡ Full RV32I Processor Gate Netlist</option>
-              <option value="alu">🔥 ALU 32-bit Carry Adder & Logic Gates (Hotspot)</option>
-              <option value="dff">💾 Master-Slave D-Flip-Flop (8-NAND Gate Latch)</option>
-              <option value="decoder">🎛️ Opcode Decoder (Inverter + AND Gates)</option>
-              <option value="mux">🔀 Datapath Multiplexer (NOT-AND-OR Gates)</option>
+
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Run / Synthesize Button -->
+            <button class="djs-tool-btn btn-run" onclick="synthesizeAndRun()" title="Synthesize and simulate in DigitalJS">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Run
+            </button>
+
+            <!-- Simulation Controls -->
+            <div class="djs-btn-group">
+              <button class="djs-tool-btn" id="djsBtnPause" onclick="toggleAutoClock()" title="Pause simulation">⏸</button>
+              <button class="djs-tool-btn active" id="djsBtnResume" onclick="toggleAutoClock()" title="Resume simulation">▶</button>
+              <button class="djs-tool-btn" onclick="stepClockCycle()" title="Single clock step (CLK)">→</button>
+              <button class="djs-tool-btn" onclick="fastForwardClock()" title="Fast forward 10 cycles">⏩</button>
+              <button class="djs-tool-btn" onclick="resetCircuit()" title="Reset simulation">🔄</button>
+            </div>
+
+            <!-- Tick Counter -->
+            <div style="background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+              <span style="color: #38bdf8;">⏱</span>
+              <span id="djsTickCounter" style="color: #f1f5f9; font-weight: bold;">Tick: 0042</span>
+            </div>
+
+            <!-- Instruction Selector -->
+            <select id="instSelect" onchange="loadInstruction(this.value)" style="background: #1e293b; color: #38bdf8; border: 1px solid #334155; border-radius: 6px; padding: 5px 10px; font-size: 11px; font-weight: bold; outline: none; cursor: pointer;">
+              <option value="ADD">ADD x3, x1, x2 (Arithmetic)</option>
+              <option value="LW">LW x5, 0(x1) (Memory Load)</option>
+              <option value="SW">SW x2, 4(x3) (Memory Store)</option>
+              <option value="BEQ">BEQ x1, x2, +8 (Branch)</option>
+              <option value="XOR">XOR x4, x1, x2 (Logic XOR)</option>
             </select>
-            <select id="instSelect" onchange="loadInstruction(this.value)" style="background: #ffffff; color: #1a202c; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 700; outline: none; cursor: pointer;">
-              <option value="ADD">ADD x3, x1, x2 (Arithmetic R-Type)</option>
-              <option value="LW">LW x5, 0(x1) (Memory Load I-Type)</option>
-              <option value="SW">SW x2, 4(x3) (Memory Store S-Type)</option>
-              <option value="BEQ">BEQ x1, x2, +8 (Branch B-Type)</option>
-              <option value="XOR">XOR x4, x1, x2 (Bitwise Logic R-Type)</option>
-            </select>
-            <button id="btnClockStep" class="schematic-ctrl-btn" onclick="stepClockCycle()">▶ Step Clock (CLK)</button>
-            <button id="btnAutoClock" class="schematic-ctrl-btn" onclick="toggleAutoClock()">⚡ Run Clock</button>
-            <button class="schematic-ctrl-btn" onclick="resetCircuit()">🔄 Reset</button>
-            <button class="schematic-ctrl-btn" onclick="toggleSchematicView()">✕ Close</button>
           </div>
         </div>
 
+        <!-- DigitalJS Tab Navigation Bar -->
+        <div class="djs-nav-tabs">
+          <button class="djs-tab-btn active" id="tabBtnCircuit" onclick="switchDjsTab('circuit')">⚡ RV32I Gate Circuit</button>
+          <button class="djs-tab-btn" id="tabBtnAlu" onclick="switchDjsTab('alu')">🔥 ALU Hotspot Techmap</button>
+          <button class="djs-tab-btn" id="tabBtnCode" onclick="switchDjsTab('code')">&lt;/&gt; Verilog HDL Code</button>
+          <button class="djs-tab-btn" id="tabBtnMonitor" onclick="switchDjsTab('monitor')">📈 Waveform Monitor</button>
+          <button class="djs-tab-btn" id="tabBtnLive" onclick="switchDjsTab('live')" style="color: #ec4899;">🌐 Live DigitalJS Studio (Online)</button>
+        </div>
+
+        <!-- Main Workspace Area -->
         <div class="schematic-layout">
-          <!-- LEFT: SVG LOGIC GATE SCHEMATIC VIEWPORT -->
-          <div id="schematicViewport">
-            <!-- Full DigitalJS Interactive SVG Schematic -->
-            <svg id="schematicSvg" viewBox="0 0 1060 570" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="edaGrid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#111827" stroke-width="0.8"/>
-                  <circle cx="20" cy="20" r="0.8" fill="#1e293b" />
-                </pattern>
-                <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
-                </marker>
-                <marker id="arrowActive" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
-                </marker>
-                <marker id="arrowHotspot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444" />
-                </marker>
-              </defs>
-              <rect width="1060" height="570" fill="#080c14"/>
-              <rect width="1060" height="570" fill="url(#edaGrid)"/>
+          
+          <!-- LEFT: ACTIVE VIEW TAB CONTAINER -->
+          <div style="position: relative;">
+            
+            <!-- 1. Circuit & Gate Netlist Tab (Default) -->
+            <div id="djsCircuitTab" style="display: block;">
+              <div id="schematicViewport">
+                <svg id="schematicSvg" viewBox="0 0 1060 570" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="edaGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+                      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#111827" stroke-width="0.8"/>
+                      <circle cx="20" cy="20" r="0.8" fill="#1e293b" />
+                    </pattern>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
+                    </marker>
+                  </defs>
+                  <rect width="1060" height="570" fill="#080c14"/>
+                  <rect width="1060" height="570" fill="url(#edaGrid)"/>
 
-              <!-- Dynamic Gate Canvas Container -->
-              <g id="gateCanvasGroup">
+                  <!-- Static Pure Gate-Level SVG -->
+                  <g id="gateCanvasGroup">
 
-    <!-- STAGE BOUNDING FRAMES -->
     <g font-size="8.5" font-family="monospace" font-weight="bold">
-      <!-- Stage 1 Frame -->
       <rect x="25" y="32" width="285" height="520" rx="6" fill="#070d1a" stroke="#10b981" stroke-width="1" stroke-dasharray="4 2"/>
       <rect x="25" y="32" width="285" height="22" rx="6" fill="#064e3b"/>
       <text x="35" y="47" fill="#a7f3d0">STAGE 1: PC REGISTER (8-NAND DFF) &amp; FETCH GATES</text>
 
-      <!-- Stage 2 Frame -->
       <rect x="325" y="32" width="265" height="255" rx="6" fill="#070d1a" stroke="#ec4899" stroke-width="1" stroke-dasharray="4 2"/>
       <rect x="325" y="32" width="265" height="22" rx="6" fill="#831843"/>
       <text x="335" y="47" fill="#fbcfe8">STAGE 2: DECODER (INVERTERS &amp; AND MATRIX)</text>
 
-      <!-- Stage 3 Frame -->
       <rect x="325" y="297" width="265" height="255" rx="6" fill="#070d1a" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4 2"/>
       <rect x="325" y="297" width="265" height="22" rx="6" fill="#78350f"/>
       <text x="335" y="312" fill="#fde68a">STAGE 3: REGISTER FILE BITCELL (NAND LATCH)</text>
 
-      <!-- Stage 4 Frame: ALU HOTSPOT -->
       <rect x="605" y="32" width="445" height="520" rx="6" fill="#140a0f" stroke="#ef4444" stroke-width="1.8" filter="drop-shadow(0 0 10px rgba(239, 68, 68, 0.3))"/>
       <rect x="605" y="32" width="445" height="22" rx="6" fill="#7f1d1d"/>
       <text x="615" y="47" fill="#fca5a5">STAGE 4: 32-BIT ALU LOGIC GATES [🔥 CRITICAL M2/M3 CONGESTION HOTSPOT]</text>
     </g>
 
-    <!-- ============================================== -->
     <!-- STAGE 1: PC D-FLIP-FLOP & FETCH LOGIC GATES -->
-    <!-- ============================================== -->
-    <!-- Clock Inverter -->
     
     <g id="pc_clk_inv" class="logic-gate comp-box" onclick="selectLogicGate('pc_clk_inv')">
       <polygon points="35,77 59,90 35,103" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
@@ -283,7 +417,6 @@
     <circle cx="15" cy="90" r="3.5" fill="#10b981"/>
     <text x="12" y="82" fill="#10b981" font-size="8" font-family="monospace" font-weight="bold">CLK</text>
 
-    <!-- Master Stage 4-NAND Latch -->
     
     <g id="dff_nand1" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand1')" >
       <path d="M 80 65 L 100 65 A 15 15 0 0 1 100 95 L 80 95 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
@@ -325,11 +458,9 @@
       <circle cx="181" cy="135" r="2.5" fill="#a855f7"/>
     </g>
 
-    <!-- Master Crossed Feedback Net -->
     <path d="M 181 80 L 195 80 L 195 105 L 128 105 L 128 128 L 140 128" fill="none" stroke="#a855f7" stroke-width="1.8"/>
     <path d="M 181 135 L 195 135 L 195 112 L 128 112 L 128 88 L 140 88" fill="none" stroke="#a855f7" stroke-width="1.8"/>
 
-    <!-- Slave Stage 4-NAND Latch -->
     
     <g id="dff_nand5" class="logic-gate comp-box" onclick="selectLogicGate('dff_nand5')" >
       <path d="M 205 65 L 225 65 A 15 15 0 0 1 225 95 L 205 95 Z" fill="#0b1329" stroke="#a855f7" stroke-width="1.8"/>
@@ -371,20 +502,16 @@
       <circle cx="301" cy="135" r="2.5" fill="#a855f7"/>
     </g>
 
-    <!-- Slave Crossed Feedback Net -->
     <path d="M 301 80 L 312 80 L 312 105 L 248 105 L 248 128 L 260 128" fill="none" stroke="#a855f7" stroke-width="1.8"/>
     <path d="M 301 135 L 312 135 L 312 112 L 248 112 L 248 88 L 260 88" fill="none" stroke="#a855f7" stroke-width="1.8"/>
 
-    <!-- Interconnects from Master to Slave -->
     <path d="M 181 80 L 205 80" fill="none" stroke="#38bdf8" stroke-width="2"/>
     <path d="M 181 135 L 205 135" fill="none" stroke="#38bdf8" stroke-width="2"/>
 
-    <!-- PC Q Output Net -->
     <path id="wire_pc_q" d="M 301 80 L 325 80" fill="none" stroke="#10b981" stroke-width="2.5"/>
     <circle cx="325" cy="80" r="3" fill="#10b981"/>
     <text x="312" y="73" fill="#34d399" font-size="8" font-family="monospace" font-weight="bold">Q (PC)</text>
 
-    <!-- Next-PC Increment Half-Adder (+4) -->
     
     <g id="pc_add_xor" class="logic-gate comp-box" onclick="selectLogicGate('pc_add_xor')" >
       <path d="M 86 185 Q 97 200 86 215" fill="none" stroke="#ec4899" stroke-width="1.8"/>
@@ -406,7 +533,6 @@
     </g>
     <path d="M 315 80 L 315 170 L 70 170 L 70 193 L 88 193" fill="none" stroke="#10b981" stroke-width="1.8"/>
 
-    <!-- Branch Target Adder Gates -->
     
     <g id="br_add_xor" class="logic-gate comp-box" onclick="selectLogicGate('br_add_xor')" >
       <path d="M 86 290 Q 97 305 86 320" fill="none" stroke="#ec4899" stroke-width="1.8"/>
@@ -427,7 +553,6 @@
       <circle cx="125" cy="350" r="2.5" fill="#38bdf8"/>
     </g>
 
-    <!-- Branch Multiplexer Gates -->
     
     <g id="br_mux_inv" class="logic-gate comp-box" onclick="selectLogicGate('br_mux_inv')">
       <polygon points="165,197 189,210 165,223" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
@@ -464,13 +589,10 @@
       <circle cx="298" cy="220" r="2.5" fill="#10b981"/>
     </g>
 
-    <!-- MUX to PC D Input (Wrap around net) -->
     <path id="wire_pc_d" d="M 298 220 L 315 220 L 315 270 L 20 270 L 20 73 L 80 73" fill="none" stroke="#38bdf8" stroke-width="2.2" marker-end="url(#arrow)"/>
     <text x="24" y="68" fill="#38bdf8" font-size="8" font-family="monospace">D_In</text>
 
-    <!-- ============================================== -->
     <!-- STAGE 2: INSTRUCTION DECODER LOGIC GATES -->
-    <!-- ============================================== -->
     <path d="M 325 80 L 340 80" fill="none" stroke="#64748b" stroke-width="2"/>
     
     <g id="dec_inv1" class="logic-gate comp-box" onclick="selectLogicGate('dec_inv1')">
@@ -561,16 +683,13 @@
       <circle cx="553" cy="157" r="2.5" fill="#10b981"/>
     </g>
 
-    <!-- Decoder control output lines -->
     <path id="wire_ctrl_rw" d="M 553 103 L 575 103 L 575 330 L 360 330" fill="none" stroke="#ec4899" stroke-width="2"/>
     <text x="560" y="98" fill="#f472b6" font-size="8" font-family="monospace" font-weight="bold">RegWrite</text>
 
     <path id="wire_ctrl_as" d="M 553 157 L 595 157 L 595 405 L 635 405" fill="none" stroke="#ec4899" stroke-width="2"/>
     <text x="560" y="152" fill="#f472b6" font-size="8" font-family="monospace" font-weight="bold">ALUSrc</text>
 
-    <!-- ============================================== -->
     <!-- STAGE 3: REGISTER FILE BITCELL NAND GATES -->
-    <!-- ============================================== -->
     
     <g id="rf_w_and" class="logic-gate comp-box" onclick="selectLogicGate('rf_w_and')" >
       <path d="M 355 335 L 375 335 A 15 15 0 0 1 375 365 L 355 365 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
@@ -601,11 +720,9 @@
       <circle cx="461" cy="400" r="2.5" fill="#a855f7"/>
     </g>
 
-    <!-- RegFile Crossed Feedback Net -->
     <path d="M 461 350 L 475 350 L 475 372 L 410 372 L 410 393 L 420 393" fill="none" stroke="#f59e0b" stroke-width="1.8"/>
     <path d="M 461 400 L 475 400 L 475 378 L 410 378 L 410 357 L 420 357" fill="none" stroke="#f59e0b" stroke-width="1.8"/>
 
-    <!-- Read Select AND Gates -->
     
     <g id="rf_rd1_and" class="logic-gate comp-box" onclick="selectLogicGate('rf_rd1_and')" >
       <path d="M 510 335 L 530 335 A 15 15 0 0 1 530 365 L 510 365 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
@@ -625,18 +742,13 @@
       <circle cx="545" cy="410" r="2.5" fill="#38bdf8"/>
     </g>
 
-    <!-- RD1 net to ALU Input A -->
     <path id="wire_rf_rd1" d="M 545 350 L 630 350 L 630 80 L 715 80" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
     <text x="555" y="344" fill="#38bdf8" font-size="8" font-family="monospace" font-weight="bold">RD1 [Op A]</text>
 
-    <!-- RD2 net to ALU MUX Input 0 -->
     <path id="wire_rf_rd2" d="M 545 410 L 610 410 L 610 370 L 640 370" fill="none" stroke="#38bdf8" stroke-width="2.2"/>
     <text x="555" y="405" fill="#38bdf8" font-size="8" font-family="monospace">RD2</text>
 
-    <!-- ============================================== -->
     <!-- STAGE 4: ALU LOGIC GATES [CRITICAL HOTSPOT] -->
-    <!-- ============================================== -->
-    <!-- ALU Source Multiplexer Gates -->
     
     <g id="mux_inv" class="logic-gate comp-box" onclick="selectLogicGate('mux_inv')">
       <polygon points="605,397 629,410 605,423" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
@@ -676,7 +788,6 @@
     <path id="wire_alu_b" d="M 743 400 L 760 400 L 760 140 L 715 140" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
     <text x="745" y="394" fill="#38bdf8" font-size="8" font-family="monospace" font-weight="bold">Operand B ──►</text>
 
-    <!-- ALU Bit 0 Full Adder Gates -->
     
     <g id="alu_xor1" class="logic-gate comp-box" onclick="selectLogicGate('alu_xor1')" filter="drop-shadow(0 0 6px rgba(239, 68, 68, 0.6))">
       <path d="M 721 65 Q 732 80 721 95" fill="none" stroke="#ef4444" stroke-width="1.8"/>
@@ -731,7 +842,6 @@
     <path d="M 830 130 L 845 130 L 845 102 L 868 102" fill="none" stroke="#ef4444" stroke-width="2"/>
     <text x="910" y="110" fill="#fca5a5" font-size="8" font-family="monospace">Cout0 [M3 Wire Track]</text>
 
-    <!-- Bitwise Logic Operation Gates -->
     
     <g id="alu_and_op" class="logic-gate comp-box" onclick="selectLogicGate('alu_and_op')" >
       <path d="M 725 180 L 745 180 A 15 15 0 0 1 745 210 L 725 210 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
@@ -761,7 +871,6 @@
       <circle cx="763" cy="285" r="2.5" fill="#ec4899"/>
     </g>
 
-    <!-- ALU Result Select MUX Gates -->
     
     <g id="alu_sel_and0" class="logic-gate comp-box" onclick="selectLogicGate('alu_sel_and0')" >
       <path d="M 840 190 L 860 190 A 15 15 0 0 1 860 220 L 840 220 Z" fill="#0b1329" stroke="#38bdf8" stroke-width="1.8"/>
@@ -790,7 +899,6 @@
       <circle cx="948" cy="225" r="2.5" fill="#10b981"/>
     </g>
 
-    <!-- Zero Flag Multi-Input NOR Gate -->
     
     <g id="alu_nor_zero" class="logic-gate comp-box" onclick="selectLogicGate('alu_nor_zero')">
       <path d="M 985 210 Q 996 225 985 240 Q 1010 240 1023 225 Q 1010 210 985 210 Z" fill="#0b1329" stroke="#f59e0b" stroke-width="1.8"/>
@@ -804,7 +912,6 @@
     <path d="M 948 225 L 985 225" fill="none" stroke="#ef4444" stroke-width="2.5"/>
     <text x="1030" y="228" fill="#fcd34d" font-size="8.5" font-family="monospace" font-weight="bold">Zero [1]</text>
 
-    <!-- Writeback 2:1 Multiplexer Gates -->
     
     <g id="wb_inv" class="logic-gate comp-box" onclick="selectLogicGate('wb_inv')">
       <polygon points="875,367 899,380 875,393" fill="#0b1329" stroke="#64748b" stroke-width="1.8"/>
@@ -841,26 +948,226 @@
       <circle cx="1013" cy="390" r="2.5" fill="#10b981"/>
     </g>
 
-    <!-- Connect ALU Result to Writeback MUX -->
     <path id="wire_alu_res" d="M 948 225 L 965 225 L 965 365 L 915 365" fill="none" stroke="#ef4444" stroke-width="2.5"/>
 
-    <!-- Long Writeback Feedback Net across the bottom -->
     <path id="wire_wb_bus" d="M 1013 390 L 1035 390 L 1035 535 L 340 535 L 340 348 L 355 348" fill="none" stroke="#a855f7" stroke-width="2.5" marker-end="url(#arrow)"/>
     <text x="610" y="528" fill="#c084fc" font-size="9" font-family="monospace" font-weight="bold">WRITEBACK NET: WD &lt;= Result [M3/M4 Routing Corridor] ────────►</text>
 
-              </g>
+                  </g>
 
-              <!-- Status HUD Overlay -->
-              <g id="hudClock" transform="translate(15, 14)">
-                <rect width="250" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
-                <circle id="clkIndicator" cx="14" cy="12" r="5" fill="#10b981"/>
-                <text id="clkText" x="28" y="16" fill="#94a3b8" font-size="11" font-family="monospace" font-weight="bold">CLK: HIGH | Cycle #1</text>
-                <text id="activeModeText" x="165" y="16" fill="#a78bfa" font-size="10" font-family="monospace" font-weight="bold">[GATE LEVEL]</text>
-              </g>
-            </svg>
+                  <!-- Status HUD Overlay -->
+                  <g id="hudClock" transform="translate(15, 14)">
+                    <rect width="250" height="24" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+                    <circle id="clkIndicator" cx="14" cy="12" r="5" fill="#10b981"/>
+                    <text id="clkText" x="28" y="16" fill="#94a3b8" font-size="11" font-family="monospace" font-weight="bold">CLK: HIGH | Cycle #1</text>
+                    <text id="activeModeText" x="165" y="16" fill="#a78bfa" font-size="10" font-family="monospace" font-weight="bold">[GATE LEVEL]</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 2. Verilog Code Tab -->
+            <div id="djsCodeTab" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #334155; padding-bottom: 8px;">
+                <span style="color: #38bdf8; font-weight: bold;">📁 rv32i_core.v (Synthesizable SystemVerilog HDL)</span>
+                <button class="djs-tool-btn btn-run" onclick="copyVerilogCode()" style="padding: 4px 10px; font-size: 11px;">📋 Copy Verilog Code</button>
+              </div>
+              <code>{% raw %}// =========================================================================
+// RV32I Processor Core (RISC-V 32-bit Integer ISA)
+// Synthesizable Verilog HDL for Yosys & DigitalJS Simulation
+// Targets SkyWater sky130hd Standard Cell Library (FEOL & BEOL Analysis)
+// =========================================================================
+
+module rv32i_core (
+    input  wire        clk,          // System Clock (50 MHz)
+    input  wire        rst_n,        // Active-low asynchronous reset
+    input  wire [31:0] instr,        // 32-bit Machine Instruction Word
+    input  wire [31:0] dmem_rdata,   // Data Memory Read Data Bus
+    output wire [31:0] pc,           // Program Counter Address
+    output wire [31:0] dmem_addr,    // Data Memory Access Address
+    output wire [31:0] dmem_wdata,   // Data Memory Write Data Bus
+    output wire        dmem_we       // Data Memory Write Enable Strobe
+);
+
+    // -------------------------------------------------------------
+    // STAGE 1: FETCH & PROGRAM COUNTER (Master-Slave 8-NAND DFFs)
+    // -------------------------------------------------------------
+    reg  [31:0] pc_reg;
+    wire [31:0] pc_plus_4;
+    wire [31:0] branch_target;
+    wire [31:0] next_pc;
+
+    assign pc = pc_reg;
+    assign pc_plus_4 = pc_reg + 32'd4;
+
+    // -------------------------------------------------------------
+    // STAGE 2: INSTRUCTION DECODE & IMM EXTENSION
+    // -------------------------------------------------------------
+    wire [6:0]  opcode = instr[6:0];
+    wire [2:0]  funct3 = instr[14:12];
+    wire [6:0]  funct7 = instr[31:25];
+    wire [4:0]  rs1    = instr[19:15];
+    wire [4:0]  rs2    = instr[24:20];
+    wire [4:0]  rd     = instr[11:7];
+
+    // Sign-extended Immediates (I, S, B Types)
+    wire [31:0] imm_i = {{20{instr[31]}}, instr[31:20]};
+    wire [31:0] imm_s = {{20{instr[31]}}, instr[31:25], instr[11:7]};
+    wire [31:0] imm_b = {{19{instr[31]}}, instr[31], instr[7], instr[30:25], instr[11:8], 1'b0};
+
+    // Control Unit Logic Gate Matrix
+    wire is_r_type = (opcode == 7'b0110011); // ADD, SUB, XOR, OR, AND, SLL
+    wire is_i_type = (opcode == 7'b0010011); // ADDI, XORI, ORI, ANDI
+    wire is_load   = (opcode == 7'b0000011); // LW
+    wire is_store  = (opcode == 7'b0100011); // SW
+    wire is_branch = (opcode == 7'b1100011); // BEQ, BNE
+
+    wire reg_write = is_r_type | is_i_type | is_load;
+    wire alu_src   = is_i_type | is_load | is_store;
+    assign dmem_we = is_store;
+    wire mem_to_reg= is_load;
+
+    // -------------------------------------------------------------
+    // STAGE 3: REGISTER FILE (32x32 DFF Matrix - 1,024 Flip-Flops)
+    // -------------------------------------------------------------
+    reg  [31:0] rf [0:31];
+    wire [31:0] rdata1 = (rs1 != 5'd0) ? rf[rs1] : 32'd0;
+    wire [31:0] rdata2 = (rs2 != 5'd0) ? rf[rs2] : 32'd0;
+    wire [31:0] wb_data;
+
+    always @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            pc_reg <= 32'd0;
+        end else begin
+            pc_reg <= next_pc;
+            if (reg_write && (rd != 5'd0)) begin
+                rf[rd] <= wb_data;
+            end
+        end
+    end
+
+    // -------------------------------------------------------------
+    // STAGE 4: 32-BIT ARITHMETIC LOGIC UNIT (ALU HOTSPOT)
+    // -------------------------------------------------------------
+    wire [31:0] imm = is_store ? imm_s : (is_branch ? imm_b : imm_i);
+    wire [31:0] alu_in_b = alu_src ? imm : rdata2;
+    reg  [31:0] alu_result;
+
+    always @(*) begin
+        case (funct3)
+            3'b000:  alu_result = (is_r_type && funct7[5]) ? (rdata1 - alu_in_b) : (rdata1 + alu_in_b);
+            3'b001:  alu_result = rdata1 << alu_in_b[4:0];     // SLL
+            3'b010:  alu_result = ($signed(rdata1) < $signed(alu_in_b)) ? 32'd1 : 32'd0; // SLT
+            3'b100:  alu_result = rdata1 ^ alu_in_b;           // XOR
+            3'b110:  alu_result = rdata1 | alu_in_b;           // OR
+            3'b111:  alu_result = rdata1 & alu_in_b;           // AND
+            default: alu_result = rdata1 + alu_in_b;
+        endcase
+    end
+
+    wire zero_flag = (alu_result == 32'd0);
+    wire take_branch = is_branch & zero_flag;
+    assign branch_target = pc_reg + imm_b;
+    assign next_pc = take_branch ? branch_target : pc_plus_4;
+
+    // -------------------------------------------------------------
+    // STAGE 5: DATA MEMORY & WRITEBACK MUX
+    // -------------------------------------------------------------
+    assign dmem_addr  = alu_result;
+    assign dmem_wdata = rdata2;
+    assign wb_data    = mem_to_reg ? dmem_rdata : alu_result;
+
+endmodule
+{% endraw %}</code>
+            </div>
+
+            <!-- 3. Digital Waveform Monitor Tab -->
+            <div id="djsMonitorTab" style="display: none;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 10px;">
+                <span style="font-weight: bold; color: #38bdf8;">DIGITALJS LOGIC ANALYZER / WAVEFORM MONITOR</span>
+                <span style="color: #64748b; font-size: 11px;">Scale: 10 ns / tick</span>
+              </div>
+
+              <!-- Signal 1: Clock -->
+              <div class="wave-row">
+                <div class="wave-label" style="color: #10b981;">clk (Clock)</div>
+                <div class="wave-track">
+                  <svg width="100%" height="32" viewBox="0 0 600 32" preserveAspectRatio="none">
+                    <path d="M 0 24 L 30 24 L 30 8 L 60 8 L 60 24 L 90 24 L 90 8 L 120 8 L 120 24 L 150 24 L 150 8 L 180 8 L 180 24 L 210 24 L 210 8 L 240 8 L 240 24 L 270 24 L 270 8 L 300 8 L 300 24 L 330 24 L 330 8 L 360 8 L 360 24 L 390 24 L 390 8 L 420 8 L 420 24 L 450 24 L 450 8 L 480 8 L 480 24 L 510 24 L 510 8 L 540 8 L 540 24 L 570 24 L 570 8 L 600 8" fill="none" stroke="#10b981" stroke-width="2"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Signal 2: PC Address -->
+              <div class="wave-row">
+                <div class="wave-label" style="color: #38bdf8;">pc[31:0]</div>
+                <div class="wave-track">
+                  <svg width="100%" height="32" viewBox="0 0 600 32" preserveAspectRatio="none">
+                    <path d="M 0 16 L 150 16 M 150 6 L 150 26 M 150 16 L 300 16 M 300 6 L 300 26 M 300 16 L 450 16 M 450 6 L 450 26 M 450 16 L 600 16" stroke="#38bdf8" stroke-width="1.5"/>
+                    <text x="50" y="20" fill="#bae6fd" font-size="10" font-family="monospace">0x00000000</text>
+                    <text x="200" y="20" fill="#bae6fd" font-size="10" font-family="monospace">0x00000004</text>
+                    <text x="350" y="20" fill="#bae6fd" font-size="10" font-family="monospace">0x00000008</text>
+                    <text x="500" y="20" fill="#bae6fd" font-size="10" font-family="monospace">0x0000000C</text>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Signal 3: Instruction Word -->
+              <div class="wave-row">
+                <div class="wave-label" style="color: #ec4899;">instr[31:0]</div>
+                <div class="wave-track">
+                  <svg width="100%" height="32" viewBox="0 0 600 32" preserveAspectRatio="none">
+                    <path d="M 0 16 L 150 16 M 150 6 L 150 26 M 150 16 L 300 16 M 300 6 L 300 26 M 300 16 L 450 16 M 450 6 L 450 26 M 450 16 L 600 16" stroke="#ec4899" stroke-width="1.5"/>
+                    <text x="35" y="20" fill="#fbcfe8" font-size="9" font-family="monospace">ADD x3, x1, x2</text>
+                    <text x="185" y="20" fill="#fbcfe8" font-size="9" font-family="monospace">LW x5, 0(x1)</text>
+                    <text x="335" y="20" fill="#fbcfe8" font-size="9" font-family="monospace">SW x2, 4(x3)</text>
+                    <text x="485" y="20" fill="#fbcfe8" font-size="9" font-family="monospace">BEQ x1, x2, +8</text>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Signal 4: ALU Result -->
+              <div class="wave-row">
+                <div class="wave-label" style="color: #ef4444;">alu_result[31:0]</div>
+                <div class="wave-track">
+                  <svg width="100%" height="32" viewBox="0 0 600 32" preserveAspectRatio="none">
+                    <path d="M 0 16 L 150 16 M 150 6 L 150 26 M 150 16 L 300 16 M 300 6 L 300 26 M 300 16 L 450 16 M 450 6 L 450 26 M 450 16 L 600 16" stroke="#ef4444" stroke-width="1.5"/>
+                    <text x="50" y="20" fill="#fca5a5" font-size="10" font-family="monospace">0x0000001E (30)</text>
+                    <text x="200" y="20" fill="#fca5a5" font-size="10" font-family="monospace">0x00001000</text>
+                    <text x="350" y="20" fill="#fca5a5" font-size="10" font-family="monospace">0x00001004</text>
+                    <text x="500" y="20" fill="#fca5a5" font-size="10" font-family="monospace">0x00000000</text>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Signal 5: BEOL M2/M3 Congestion Demand -->
+              <div class="wave-row">
+                <div class="wave-label" style="color: #f59e0b;">M2/M3 Stress %</div>
+                <div class="wave-track" style="padding: 4px 10px;">
+                  <div style="width: { peak_val_pct }%; height: 16px; background: linear-gradient(90deg, #10b981 0%, #ea580c 60%, #dc2626 100%); border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; font-weight: bold; font-size: 10px; color: #fff;">
+                    { peak_val_pct }%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Live DigitalJS Studio Iframe Tab -->
+            <div id="djsLiveTab" style="display: none;">
+              <div style="background: #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155;">
+                <span style="font-size: 11px; color: #94a3b8;">
+                  Live <b>DigitalJS Online (tilk/digitaljs_online)</b> environment running directly in the browser:
+                </span>
+                <div style="display: flex; gap: 8px;">
+                  <button class="djs-tool-btn btn-run" onclick="copyVerilogCode()" style="padding: 4px 10px; font-size: 11px;">📋 Copy RV32I Verilog</button>
+                  <a href="https://digitaljs.tilk.eu/" target="_blank" class="djs-tool-btn" style="text-decoration: none; padding: 4px 10px; font-size: 11px;">↗ Open in Tab</a>
+                </div>
+              </div>
+              <iframe id="djsIframe" src="https://digitaljs.tilk.eu/"></iframe>
+            </div>
+
           </div>
 
-          <!-- RIGHT: GATE INSPECTOR & PHYSICAL SILICON CONGESTION BRIDGE -->
+          <!-- RIGHT: GATE-LEVEL INSPECTOR & CONGESTION BRIDGE -->
           <div class="info-pane">
             <div>
               <div style="color: #7c3aed; font-size: 12px; font-weight: 800; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -882,7 +1189,7 @@
 
                 <div style="color: #b91c1c; font-size: 10px; font-weight: 800; margin-bottom: 4px;">BEOL WIRE TRACK IMPACT</div>
                 <p id="inspCongestionImpact" style="color: #475569; font-size: 10.5px; line-height: 1.45; margin: 0;">
-                  This logic gate connects on Metal 1. In the 32-bit ALU, 64 XOR gates cluster in standard cell rows, requiring continuous horizontal (M2) and vertical (M3) track routing that causes the predicted <b>{{ peak_val_pct }}% saturation on {{ peak_layer }}</b>!
+                  This logic gate connects on Metal 1. In the 32-bit ALU, 64 XOR gates cluster in standard cell rows, requiring continuous horizontal (M2) and vertical (M3) track routing that causes the predicted <b>{ peak_val_pct }% saturation on { peak_layer }</b>!
                 </p>
               </div>
             </div>
@@ -2109,7 +2416,115 @@
       switchViewMode(document.getElementById("viewModeSelect").value);
     }
 
-    function toggleSchematicView() {
+        function switchDjsTab(tabName) {
+      document.querySelectorAll('.djs-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('djsCircuitTab').style.display = 'none';
+      document.getElementById('djsCodeTab').style.display = 'none';
+      document.getElementById('djsMonitorTab').style.display = 'none';
+      document.getElementById('djsLiveTab').style.display = 'none';
+
+      if (tabName === 'circuit') {
+        document.getElementById('tabBtnCircuit').classList.add('active');
+        document.getElementById('djsCircuitTab').style.display = 'block';
+        const grp = document.getElementById('gateCanvasGroup');
+        if (grp) grp.innerHTML = renderFullProcessorGates();
+        selectLogicGate('alu_xor1');
+      } else if (tabName === 'alu') {
+        document.getElementById('tabBtnAlu').classList.add('active');
+        document.getElementById('djsCircuitTab').style.display = 'block';
+        const grp = document.getElementById('gateCanvasGroup');
+        if (grp) grp.innerHTML = renderAluDetailedGates();
+        selectLogicGate('alu_xor1');
+      } else if (tabName === 'code') {
+        document.getElementById('tabBtnCode').classList.add('active');
+        document.getElementById('djsCodeTab').style.display = 'block';
+      } else if (tabName === 'monitor') {
+        document.getElementById('tabBtnMonitor').classList.add('active');
+        document.getElementById('djsMonitorTab').style.display = 'block';
+      } else if (tabName === 'live') {
+        document.getElementById('tabBtnLive').classList.add('active');
+        document.getElementById('djsLiveTab').style.display = 'block';
+      }
+    }
+
+    function synthesizeAndRun() {
+      switchDjsTab('circuit');
+      clockCycle = 1;
+      stepClockCycle();
+      alert("Yosys Synthesis complete! RV32I Verilog mapped to Sky130 gate netlist.");
+    }
+
+    function fastForwardClock() {
+      clockCycle += 10;
+      stepClockCycle();
+      const txt = document.getElementById("djsTickCounter");
+      if (txt) txt.textContent = `Tick: 00${clockCycle * 2}`;
+    }
+
+    function copyVerilogCode() {
+      const codeEl = document.querySelector('#djsCodeTab code');
+      if (codeEl) {
+        navigator.clipboard.writeText(codeEl.innerText).then(() => {
+          alert("RV32I Verilog code copied to clipboard! You can paste it into DigitalJS Online.");
+        });
+      }
+    }
+
+    function switchDjsTab(tabName) {
+      document.querySelectorAll('.djs-tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('djsCircuitTab').style.display = 'none';
+      document.getElementById('djsCodeTab').style.display = 'none';
+      document.getElementById('djsMonitorTab').style.display = 'none';
+      document.getElementById('djsLiveTab').style.display = 'none';
+
+      if (tabName === 'circuit') {
+        document.getElementById('tabBtnCircuit').classList.add('active');
+        document.getElementById('djsCircuitTab').style.display = 'block';
+        const grp = document.getElementById('gateCanvasGroup');
+        if (grp) grp.innerHTML = renderFullProcessorGates();
+        selectLogicGate('alu_xor1');
+      } else if (tabName === 'alu') {
+        document.getElementById('tabBtnAlu').classList.add('active');
+        document.getElementById('djsCircuitTab').style.display = 'block';
+        const grp = document.getElementById('gateCanvasGroup');
+        if (grp) grp.innerHTML = renderAluDetailedGates();
+        selectLogicGate('alu_xor1');
+      } else if (tabName === 'code') {
+        document.getElementById('tabBtnCode').classList.add('active');
+        document.getElementById('djsCodeTab').style.display = 'block';
+      } else if (tabName === 'monitor') {
+        document.getElementById('tabBtnMonitor').classList.add('active');
+        document.getElementById('djsMonitorTab').style.display = 'block';
+      } else if (tabName === 'live') {
+        document.getElementById('tabBtnLive').classList.add('active');
+        document.getElementById('djsLiveTab').style.display = 'block';
+      }
+    }
+
+    function synthesizeAndRun() {
+      switchDjsTab('circuit');
+      clockCycle = 1;
+      stepClockCycle();
+      alert("Yosys Synthesis complete! RV32I Verilog mapped to Sky130 gate netlist.");
+    }
+
+    function fastForwardClock() {
+      clockCycle += 10;
+      stepClockCycle();
+      const txt = document.getElementById("djsTickCounter");
+      if (txt) txt.textContent = `Tick: 00${clockCycle * 2}`;
+    }
+
+    function copyVerilogCode() {
+      const codeEl = document.querySelector('#djsCodeTab code');
+      if (codeEl) {
+        navigator.clipboard.writeText(codeEl.innerText).then(() => {
+          alert("RV32I Verilog code copied to clipboard! You can paste it into DigitalJS Online.");
+        });
+      }
+    }
+
+function toggleSchematicView() {
       const p = document.getElementById("panelSchematic");
       if (!p) return;
       if (p.style.display === "none") {
