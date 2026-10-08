@@ -186,6 +186,7 @@
               {% endfor %}
             </select>
             <button id="btnIsolate" onclick="toggleIsolationMode()" style="background: #0284c7; color: #fff; font-weight: bold; border: none; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">Show Full Stack</button>
+            <button onclick="reset3DView()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">🎯 Reset View</button>
             <button id="btnExplode" onclick="toggleExplodeMode()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s; display: none;">Explode Stack</button>
             <button onclick="toggle3DView()" style="background: #ffffff; color: #4a5568; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: 0.2s;">✕ Close 3D</button>
           </div>
@@ -531,6 +532,18 @@
       'M10': 'Metal 10 (met10): Top thick Redistribution Layer (RDL) featuring C4 solder bumps and IO Pad Ring (DOUT, CLK_REF, VDD, VSS).'
     };
 
+    function reset3DView() {
+      if (globalControls && globalCamera) {
+        globalControls.target.set(0, 0, 0);
+        if (isIsolated) {
+          globalCamera.position.set(6.5, 5.2, 6.5);
+        } else {
+          globalCamera.position.set(8.5, 6.5, 8.5);
+        }
+        globalControls.update();
+      }
+    }
+
     function update3DCanvasSize() {
       const cont = document.getElementById("viewport3D");
       if (!cont) return;
@@ -546,6 +559,10 @@
         globalCamera.aspect = w / h;
         globalCamera.updateProjectionMatrix();
         globalRenderer.setSize(w, h);
+        if (globalControls) {
+          globalControls.target.set(0, 0, 0);
+          globalControls.update();
+        }
       }
     }
 
@@ -555,6 +572,7 @@
         p.style.display = "block";
         setTimeout(update3DCanvasSize, 50);
         setTimeout(update3DCanvasSize, 250);
+        setTimeout(reset3DView, 300);
       } else {
         p.style.display = "none";
       }
@@ -910,17 +928,25 @@
         }
         
         if (isIsolated) {
-          hudLine.style.display = "block"; hudDot1.style.display = "block"; hudDot2.style.display = "block"; hudLabel.style.display = "block";
           const p1 = new THREE.Vector3(0.0, 0.15, 0.0);
           const p2 = new THREE.Vector3(0.6, 0.15, -0.6);
-          const v1 = p1.clone().project(globalCamera); const v2 = p2.clone().project(globalCamera);
-          const s1 = { x: (v1.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v1.y * 0.5) + 0.5) * cont.clientHeight };
-          const s2 = { x: (v2.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v2.y * 0.5) + 0.5) * cont.clientHeight };
+          const v1 = p1.clone().project(globalCamera);
+          const v2 = p2.clone().project(globalCamera);
 
-          hudLine.setAttribute("points", `${s2.x},${s2.y} ${s2.x + 90},${s2.y - 65} ${s2.x + 160},${s2.y - 65}`);
-          hudDot1.setAttribute("cx", s1.x); hudDot1.setAttribute("cy", s1.y);
-          hudDot2.setAttribute("cx", s2.x); hudDot2.setAttribute("cy", s2.y);
-          hudLabel.style.left = `${s2.x + 172}px`; hudLabel.style.top = `${s2.y - 79}px`;
+          const inFrustum = (v1.z < 1.0 && v2.z < 1.0 && Math.abs(v1.x) <= 1.0 && Math.abs(v1.y) <= 1.0 && Math.abs(v2.x) <= 1.0 && Math.abs(v2.y) <= 1.0);
+
+          if (inFrustum) {
+            hudLine.style.display = "block"; hudDot1.style.display = "block"; hudDot2.style.display = "block"; hudLabel.style.display = "block";
+            const s1 = { x: (v1.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v1.y * 0.5) + 0.5) * cont.clientHeight };
+            const s2 = { x: (v2.x * 0.5 + 0.5) * cont.clientWidth, y: (-(v2.y * 0.5) + 0.5) * cont.clientHeight };
+
+            hudLine.setAttribute("points", `${s2.x},${s2.y} ${s2.x + 90},${s2.y - 65} ${s2.x + 160},${s2.y - 65}`);
+            hudDot1.setAttribute("cx", s1.x); hudDot1.setAttribute("cy", s1.y);
+            hudDot2.setAttribute("cx", s2.x); hudDot2.setAttribute("cy", s2.y);
+            hudLabel.style.left = `${s2.x + 172}px`; hudLabel.style.top = `${s2.y - 79}px`;
+          } else {
+            hudLine.style.display = "none"; hudDot1.style.display = "none"; hudDot2.style.display = "none"; hudLabel.style.display = "none";
+          }
         } else {
           hudLine.style.display = "none"; hudDot1.style.display = "none"; hudDot2.style.display = "none"; hudLabel.style.display = "none";
         }
