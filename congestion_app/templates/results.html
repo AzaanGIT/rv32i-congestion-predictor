@@ -244,6 +244,17 @@
 
 
 
+    .djs-line-highlighted {
+      background-color: #fef08a !important;
+      color: #1e293b !important;
+      font-weight: 700 !important;
+      border-left: 3px solid #eab308 !important;
+      border-radius: 2px;
+    }
+    .djs-draggable {
+      user-select: none;
+    }
+
     #fixModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
     .modal-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border-radius: 12px; width: 600px; max-width: 90%; padding: 24px; color: #1a202c; }
   </style>
@@ -389,13 +400,21 @@
           <!-- TOP ROW: CODE EDITOR & SETUP / IO TABS -->
           <div id="djsEditorContainer" style="background: #ffffff; display: flex; flex-direction: column; height: 270px; flex-shrink: 0; overflow: hidden; width: 100%;">
             
-            <!-- Nav Tabs (Setup | I/O | rv32i_core.sv ☁️ ✕) -->
+            <!-- Nav Tabs (Setup | I/O | rv32i_core.sv | dff_master_slave.sv | rv32i_alu.sv) -->
             <nav style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 6px 8px 0 8px;">
               <div class="nav nav-tabs" style="display: flex; gap: 4px; align-items: flex-end; border-bottom: none;">
                 <button type="button" id="djsSubTabSetup" onclick="switchDjsLeftTab('setup')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">Setup</button>
                 <button type="button" id="djsSubTabIo" onclick="switchDjsLeftTab('io')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">I/O</button>
-                <button type="button" id="djsSubTabCode" onclick="switchDjsLeftTab('code')" class="nav-item nav-link active" style="background: #ffffff; border: 1px solid #dee2e6; border-bottom: 1px solid #ffffff; color: #495057; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px;">
+                <button type="button" id="djsSubTabCode_rv32i" onclick="djsSelectModule('rv32i_core.sv')" class="nav-item nav-link active" style="background: #ffffff; border: 1px solid #dee2e6; border-bottom: 1px solid #ffffff; color: #495057; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px;">
                   <span id="djsActiveFileTabName">rv32i_core.sv</span>
+                  <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
+                </button>
+                <button type="button" id="djsSubTabCode_dff" onclick="djsSelectModule('dff_master_slave.sv')" class="nav-item nav-link" style="background: transparent; border: 1px solid transparent; color: #0d6efd; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>dff_master_slave.sv</span>
+                  <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
+                </button>
+                <button type="button" id="djsSubTabCode_alu" onclick="djsSelectModule('rv32i_alu.sv')" class="nav-item nav-link" style="background: transparent; border: 1px solid transparent; color: #0d6efd; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; display: inline-flex; align-items: center; gap: 6px;">
+                  <span>rv32i_alu.sv</span>
                   <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
                 </button>
               </div>
@@ -408,12 +427,12 @@
                 <div id="djsCodeGutter" style="background: #f8f9fa; color: #adb5bd; padding: 10px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; text-align: right; width: 34px; flex-shrink: 0; border-right: 1px solid #dee2e6; user-select: none;">
                   1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22
                 </div>
-                <!-- Code Area with Syntax Highlighting -->
-                <pre id="djsCodeDisplay" style="margin: 0; padding: 10px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; color: #212529; overflow-x: auto; flex: 1; white-space: pre; background: #ffffff;"></pre>
+                <!-- Code Area with Syntax Highlighting & Direct Editable Capability -->
+                <div id="djsCodeDisplay" contenteditable="true" spellcheck="false" oninput="onDjsCodeInput()" style="margin: 0; padding: 10px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; color: #212529; overflow-x: auto; flex: 1; white-space: pre; background: #ffffff; outline: none;"></div>
               </div>
               <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 4px 12px; font-size: 10px; color: #6c757d; display: flex; justify-content: space-between; align-items: center;">
-                <span>SystemVerilog HDL | Synthesized</span>
-                <button type="button" onclick="djsEditCodePrompt()" style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 600; color: #495057; cursor: pointer;">✏️ Edit</button>
+                <span>SystemVerilog HDL | Synthesizable (Click <b>Run</b> to synthesize and simulate)</span>
+                <span style="color: #16a34a; font-weight: 700;">● DigitalJS Engine Active</span>
               </div>
             </div>
 
@@ -462,7 +481,7 @@
 
             <!-- SVG Circuit Viewport (White Paper) -->
             <div id="djsCanvasViewport" style="flex: 1; width: 100%; height: 100%; overflow: auto; display: flex; align-items: center; justify-content: center; background: #ffffff;">
-              <svg id="djsCircuitSvg" viewBox="0 0 960 560" style="width: 100%; height: 100%; min-width: 650px; min-height: 520px; display: block; background: #ffffff;" xmlns="http://www.w3.org/2000/svg">
+              <svg id="djsCircuitSvg" viewBox="0 0 960 560" onmousemove="djsSvgMouseMove(event)" onmouseup="djsSvgMouseUp(event)" onmouseleave="djsSvgMouseUp(event)" style="width: 100%; height: 100%; min-width: 650px; min-height: 520px; display: block; background: #ffffff; cursor: default;" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <pattern id="edaGridDjs" width="20" height="20" patternUnits="userSpaceOnUse">
                     <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="0.8"/>
@@ -1114,7 +1133,7 @@
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // 1. HDL PRESETS & MODULE DEFINITIONS (Matches DigitalJS Online)
+    // 1. HDL PRESETS & MODULE DEFINITIONS (Matches DigitalJS Online Exactly)
     // ═════════════════════════════════════════════════════════════════════════
     const HDL_PRESETS = {
       "rv32i_core.sv": `// RV32I Single-Cycle Processor Core (Gate-Level Synthesizable)
@@ -1161,6 +1180,29 @@ module rv32i_core(
   assign mem_write = is_store;
   assign wdata = alu_b;
 
+endmodule`,
+
+      "dff_master_slave.sv": `// D Flip-Flop Master-Slave using D Latches
+module d_latch(
+  input clk, d,
+  output q, nq
+);
+  wire clkn, d1, d2;
+  not (clkn, clk);
+  and (d1, clk, d);
+  and (d2, clk, ~d);
+  nor (q, d2, nq);
+  nor (nq, d1, q);
+endmodule
+
+module dff_master_slave(
+  input clk, d,
+  output q, nq
+);
+  wire qm, nclk;
+  not g1nclk(nclk, clk);
+  d_latch dl1(nclk, d, qm);
+  d_latch dl2(clk, qm, q, nq);
 endmodule`,
 
       "rv32i_alu.sv": `// 32-Bit RV32I Arithmetic Logic Unit (ALU Hotspot)
@@ -1220,24 +1262,11 @@ module full_adder(
   and g4(a2, x1, cin);
   or  g5(cout, a1, a2);
 
-endmodule`,
-
-      "custom.sv": `// Custom SystemVerilog / Verilog HDL Module
-module custom_rv32i_submodule(
-  input clk,
-  input reset,
-  input [31:0] data_in,
-  output [31:0] data_out
-);
-
-  // Write your logic or instantiate gates here
-  assign data_out = data_in;
-
 endmodule`
     };
 
     // ═════════════════════════════════════════════════════════════════════════
-    // 2. SIMULATION STATE & REGISTERS
+    // 2. SIMULATION STATE, INTERACTIVE DRAG COORDINATES & SUB-CIRCUIT EXPANSIONS
     // ═════════════════════════════════════════════════════════════════════════
     let currentModule = "{{ selected_hdl_filename or 'rv32i_core.sv' }}";
     let isSimRunning = true;
@@ -1246,9 +1275,33 @@ endmodule`
     let simClock = 0;
     let simZoom = 1.0;
 
+    // Subcircuit hierarchy expand/collapse states ([+] / [-])
+    const expandedBlocks = {
+      dl1: false,
+      dl2: false,
+      rv_if: false,
+      rv_id: false,
+      rv_reg: false,
+      rv_ex: false
+    };
+
     // Pin logic values for interactive circuits
     const pinState = {
-      // SR latch
+      // DFF Master-Slave
+      dff_d: 1,
+      dff_clk: 0,
+      dff_qm: 0,
+      dff_q: 0,
+      dff_nq: 1,
+      // Processor Core
+      pc_val: 0x00000000,
+      instr_name: "ADD",
+      alu_out: 0x00000008,
+      reg_we: 1,
+      alu_src: 0,
+      clk_val: 0,
+      rv_reset: 0,
+      // SR Latch
       ns: 1,
       nr: 1,
       q: 1,
@@ -1256,39 +1309,114 @@ endmodule`
       // Full Adder
       fa_a: 1,
       fa_b: 1,
-      fa_cin: 0,
-      // Processor Core
-      pc_val: 0x00000000,
-      instr_name: "ADD",
-      alu_out: 0x00000008,
-      reg_we: 1,
-      alu_src: 0,
-      clk_val: 0
+      fa_cin: 0
     };
 
-    // Gate Database for Inspector
+    // Draggable element positions: nodePos[id] = {x, y}
+    const nodePos = {
+      // DFF Circuit Elements (From Video)
+      dff_in_d: { x: 50, y: 130 },
+      dff_in_clk: { x: 50, y: 270 },
+      dff_g1nclk: { x: 170, y: 310 },
+      dff_dl1: { x: 280, y: 140 },
+      dff_dl2: { x: 530, y: 140 },
+      dff_out_q: { x: 840, y: 130 },
+      dff_out_nq: { x: 840, y: 250 },
+
+      // RV32I Processor Stages
+      rv_in_clk: { x: 30, y: 80 },
+      rv_in_reset: { x: 30, y: 180 },
+      rv_in_op: { x: 30, y: 280 },
+      rv_if_stage: { x: 130, y: 60 },
+      rv_id_stage: { x: 330, y: 60 },
+      rv_reg_stage: { x: 520, y: 60 },
+      rv_ex_stage: { x: 700, y: 60 },
+      rv_out_pc: { x: 330, y: 440 },
+      rv_out_alu: { x: 700, y: 440 }
+    };
+
+    // Drag-and-drop state variables
+    let activeDrag = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    // Gate & Submodule Database for Inspector
     const gateDatabase = {
-      sr_nand1: {
-        name: "2-Input NAND Gate (NAND2)",
-        sub: "g1 (SR Latch Forward Path)",
-        eq: "Q = ~(ns & nq)",
-        pins: () => `ns=${pinState.ns}, nq=${pinState.nq} → Q=${pinState.q}`,
-        cell: "sky130_fd_sc_hd__nand2_1",
-        cellPins: "3 Pins (ns, nq on M1, Q on M1)",
-        transistors: "4 CMOS FETs (2 NMOS, 2 PMOS)",
-        badge: "LATCH BITCELL GATE",
-        impact: "Cross-coupled feedback loop routes on Metal 1 and Metal 2. In 32-bit register files with 1,024 latch cells, dense parallel feedback routing causes peak track saturation."
+      dff_dl1: {
+        name: "D-Latch Master Subcircuit (dl1)",
+        sub: "dl1 (Master Latch: transparent on nclk HIGH)",
+        eq: "qm <= d when nclk=1; holds when nclk=0",
+        pins: () => `clk=${pinState.dff_clk ? 0 : 1}, d=${pinState.dff_d} → qm=${pinState.dff_qm}`,
+        cell: "sky130_fd_sc_hd__dlxtp_1",
+        cellPins: "4 Pins (clk, d on M1, q, nq on M1)",
+        transistors: "12 CMOS FETs",
+        badge: "MASTER LATCH",
+        impact: "Transparent when CLK is LOW. In physical layout, connects adjacent feedback loops on Metal 2."
       },
-      sr_nand2: {
-        name: "2-Input NAND Gate (NAND2)",
-        sub: "g2 (SR Latch Feedback Path)",
-        eq: "nq = ~(nr & q)",
-        pins: () => `nr=${pinState.nr}, q=${pinState.q} → nq=${pinState.nq}`,
-        cell: "sky130_fd_sc_hd__nand2_1",
-        cellPins: "3 Pins (nr, q on M1, nq on M1)",
-        transistors: "4 CMOS FETs (2 NMOS, 2 PMOS)",
-        badge: "LATCH BITCELL GATE",
-        impact: "Forms cross-coupled bistable element. In physical layout, feedback nets cross adjacent cell rows on Metal 2."
+      dff_dl2: {
+        name: "D-Latch Slave Subcircuit (dl2)",
+        sub: "dl2 (Slave Latch: transparent on clk HIGH)",
+        eq: "q <= qm when clk=1; holds when clk=0",
+        pins: () => `clk=${pinState.dff_clk}, d=${pinState.dff_qm} → q=${pinState.dff_q}, nq=${pinState.dff_nq}`,
+        cell: "sky130_fd_sc_hd__dlxtp_1",
+        cellPins: "4 Pins (clk, d on M1, q, nq on M1)",
+        transistors: "12 CMOS FETs",
+        badge: "SLAVE LATCH",
+        impact: "Click [+] to expand into internal AND & NOR gate latch structure. Connects on Metal 1 with M2 feedback."
+      },
+      dff_g1nclk: {
+        name: "Inverter Gate (NOT)",
+        sub: "g1nclk: not g1nclk(nclk, clk)",
+        eq: "nclk = ~clk",
+        pins: () => `clk=${pinState.dff_clk} → nclk=${pinState.dff_clk ? 0 : 1}`,
+        cell: "sky130_fd_sc_hd__inv_2",
+        cellPins: "2 Pins (A on M1, Y on M1)",
+        transistors: "2 CMOS FETs (1 NMOS, 1 PMOS)",
+        badge: "CLOCK INVERTER",
+        impact: "Drives master clock inversion phase directly on Metal 1 local interconnect."
+      },
+      rv_if_stage: {
+        name: "Stage 1: Program Counter Fetch Register",
+        sub: "U_PC_FETCH (32 DFF Bitcells + PC+4 Adder)",
+        eq: "PC <= reset ? 0 : PC + 4",
+        pins: () => `clk=${pinState.clk_val}, rst=${pinState.rv_reset} → PC=0x${(pinState.pc_val||0).toString(16).padStart(8,'0')}`,
+        cell: "sky130_fd_sc_hd__dfxtp_1 [x32]",
+        cellPins: "32 Data In, 32 Data Out on M1",
+        transistors: "768 CMOS FETs (32 DFF latches)",
+        badge: "SEQUENTIAL STAGE",
+        impact: "Requires balanced H-Tree clock tree distribution on Metal 4 & Metal 5."
+      },
+      rv_id_stage: {
+        name: "Stage 2: Instruction Opcode Decoder",
+        sub: "U_DEC_RTYPE (AND / Inverter Control Matrix)",
+        eq: "is_r_type = (opcode == 7'b0110011)",
+        pins: () => `instr=${pinState.instr_name} → is_r_type=${pinState.instr_name === 'ADD' || pinState.instr_name === 'SUB' || pinState.instr_name === 'XOR' ? 1 : 0}`,
+        cell: "sky130_fd_sc_hd__and4_1",
+        cellPins: "18 Control Pins on M1/M2",
+        transistors: "48 CMOS FETs",
+        badge: "CONTROL DECODER",
+        impact: "Control lines fan out across the entire datapath onto horizontal Metal 2 channels."
+      },
+      rv_reg_stage: {
+        name: "Stage 3: Dual-Port Register File",
+        sub: "U_REGFILE (32 x 32-bit SRAM Latches)",
+        eq: "rdata1 = R[rs1], rdata2 = R[rs2]",
+        pins: () => `rs1=5, rs2=3 → rdata1=0x5, rdata2=0x3`,
+        cell: "sky130_fd_sc_hd__dlxtp_1 [x1024]",
+        cellPins: "Dual read ports, single write port",
+        transistors: "8,192 CMOS FETs",
+        badge: "STORAGE ARRAY",
+        impact: "Dense parallel bitlines run vertically on Metal 3, cross-coupled wordlines on Metal 2."
+      },
+      rv_ex_stage: {
+        name: "Stage 4: 32-Bit Arithmetic Logic Unit (ALU)",
+        sub: "U_ALU_HOTSPOT (32 XOR Gates + Carry Tree)",
+        eq: "ALU_OUT = A op B",
+        pins: () => `A=0x5, B=0x3, op=${pinState.instr_name} → Out=0x${(pinState.alu_out||8).toString(16).padStart(8,'0')}`,
+        cell: "sky130_fd_sc_hd__xor2_1 [Hotspot Cluster]",
+        cellPins: "64 XOR inputs on M1",
+        transistors: "1,240 CMOS FETs",
+        badge: "HOTSPOT STAGE",
+        impact: "Primary cause of {{ peak_layer }} ({{ peak_val_pct }}%) track congestion! 64 clustered XOR gates require continuous horizontal (M2) and vertical (M3) track routing."
       },
       alu_xor1: {
         name: "2-Input XOR Gate (XOR2)",
@@ -1301,335 +1429,469 @@ endmodule`
         badge: "HOTSPOT GATE",
         impact: "This logic gate connects on Metal 1. In the 32-bit ALU, 64 XOR gates cluster in standard cell rows, requiring continuous horizontal (M2) and vertical (M3) track routing that causes the predicted {{ peak_val_pct }}% saturation on {{ peak_layer }}!"
       },
-      alu_xor2: {
-        name: "2-Input XOR Gate (XOR2)",
-        sub: "U_ALU_XOR2 (ALU Sum Slice)",
-        eq: "Sum = (A⊕B) ⊕ Cin",
-        pins: () => `P0=0, Cin=0 → Sum=0`,
-        cell: "sky130_fd_sc_hd__xor2_1",
-        cellPins: "3 Pins (P, Cin on M1, Sum on M1)",
-        transistors: "8 CMOS FETs (4 NMOS, 4 PMOS)",
-        badge: "HOTSPOT GATE",
-        impact: "Drives the 32-bit ALU sum bus directly onto Metal 2 and Metal 3 routing channels."
-      },
-      alu_and1: {
-        name: "2-Input AND Gate (AND2)",
-        sub: "U_ALU_AND1 (Carry Generate G=A·B)",
-        eq: "G = A & B",
-        pins: () => `A=1, B=1 → G=1`,
-        cell: "sky130_fd_sc_hd__and2_1",
-        cellPins: "3 Pins (A, B on M1, G on M1)",
-        transistors: "6 CMOS FETs (3 NMOS, 3 PMOS)",
-        badge: "CARRY PATH GATE",
-        impact: "Part of the carry-lookahead generator tree requiring dense inter-bit connections on M2."
-      },
-      alu_or1: {
-        name: "2-Input OR Gate (OR2)",
-        sub: "U_ALU_OR1 (Carry Out Cout=G+P·Cin)",
-        eq: "Cout = G | (P & Cin)",
-        pins: () => `G=1, Prop=0 → Cout=1`,
-        cell: "sky130_fd_sc_hd__or2_1",
-        cellPins: "3 Pins (G, P·Cin on M1, Cout on M1)",
-        transistors: "6 CMOS FETs (3 NMOS, 3 PMOS)",
-        badge: "CRITICAL PATH GATE",
-        impact: "Carry ripple wire traverses across all 32 standard cell columns on Metal 3 wire tracks."
-      },
-      dff_pc: {
-        name: "Positive Edge-Triggered D-Flip-Flop",
-        sub: "U_PC_REG (Program Counter Bit 0)",
-        eq: "Q <= D on posedge CLK",
-        pins: () => `D=0, CLK=${pinState.clk_val} → Q=${pinState.pc_val & 1}`,
-        cell: "sky130_fd_sc_hd__dfxtp_1",
-        cellPins: "4 Pins (D, CLK on M1, Q on M1, RESET on M1)",
-        transistors: "24 CMOS FETs (Master-Slave Latch Pair)",
-        badge: "SEQUENTIAL STORAGE",
-        impact: "Clock tree distribution to 32 PC DFFs requires dedicated clock routing buffers on Metal 4 & Metal 5."
-      },
-      dec_and1: {
-        name: "4-Input AND Gate (AND4)",
-        sub: "U_DEC_RTYPE (Instruction Opcode Decoder)",
-        eq: "is_r_type = (opcode == 7'b0110011)",
-        pins: () => `op[6:0]=0110011 → match=1`,
-        cell: "sky130_fd_sc_hd__and4_1",
-        cellPins: "5 Pins (4 Inputs on M1, 1 Out on M1)",
-        transistors: "10 CMOS FETs",
-        badge: "CONTROL DECODER",
-        impact: "Control lines fan out globally to the register file and ALU multiplexers."
+      sr_nand1: {
+        name: "2-Input NAND Gate (NAND2)",
+        sub: "g1 (SR Latch Forward Path)",
+        eq: "Q = ~(ns & nq)",
+        pins: () => `ns=${pinState.ns}, nq=${pinState.nq} → Q=${pinState.q}`,
+        cell: "sky130_fd_sc_hd__nand2_1",
+        cellPins: "3 Pins (ns, nq on M1, Q on M1)",
+        transistors: "4 CMOS FETs (2 NMOS, 2 PMOS)",
+        badge: "LATCH GATE",
+        impact: "Cross-coupled feedback loop routes on Metal 1 and Metal 2."
       }
     };
 
     // ═════════════════════════════════════════════════════════════════════════
-    // 3. SVG GATE SHAPES (DigitalJS White Theme & IEEE Standard Symbols)
+    // 3. SVG GATE SHAPES, DRAGGABLE BOXES & ORTHOGONAL WIRE ROUTER
     // ═════════════════════════════════════════════════════════════════════════
-    function svgNandGate(x, y, id, label) {
-      return `
-        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <!-- Body -->
-          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
-          <!-- Inversion bubble -->
-          <circle cx="${x+45}" cy="${y+18}" r="3.5" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
-          <text x="${x+14}" y="${y+22}" fill="#0f172a" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
-          <text x="${x+6}" y="${y+50}" fill="#64748b" font-size="8.5" font-family="monospace">${label}</text>
-        </g>
-      `;
+
+    function getSvgCoords(evt) {
+      const svg = document.getElementById("djsCircuitSvg");
+      if (!svg) return { x: 0, y: 0 };
+      const pt = svg.createSVGPoint();
+      pt.x = evt.clientX;
+      pt.y = evt.clientY;
+      const globalPoint = pt.matrixTransform(svg.getScreenCTM().inverse());
+      return { x: globalPoint.x, y: globalPoint.y };
     }
 
-    function svgAndGate(x, y, id, label, isHotspot=false) {
-      const stroke = isHotspot ? "#ef4444" : "#1e293b";
-      const fill = isHotspot ? "#fff5f5" : "#ffffff";
-      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
-      const labelFill = isHotspot ? "#ef4444" : "#64748b";
-      return `
-        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
-          <text x="${x+14}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
-          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
-        </g>
-      `;
+    function djsStartDrag(evt, elementId) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      activeDrag = elementId;
+      const pt = getSvgCoords(evt);
+      if (!nodePos[elementId]) {
+        nodePos[elementId] = { x: 100, y: 100 };
+      }
+      dragOffset.x = pt.x - nodePos[elementId].x;
+      dragOffset.y = pt.y - nodePos[elementId].y;
+
+      const el = document.getElementById("elem-" + elementId);
+      if (el) el.style.cursor = "grabbing";
     }
 
-    function svgOrGate(x, y, id, label, isHotspot=false) {
-      const stroke = isHotspot ? "#ef4444" : "#1e293b";
-      const fill = isHotspot ? "#fff5f5" : "#ffffff";
-      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
-      const labelFill = isHotspot ? "#ef4444" : "#64748b";
-      return `
-        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
-          <text x="${x+16}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">≥</text>
-          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
-        </g>
-      `;
+    function djsSvgMouseMove(evt) {
+      if (!activeDrag) return;
+      const pt = getSvgCoords(evt);
+      const newX = Math.round(pt.x - dragOffset.x);
+      const newY = Math.round(pt.y - dragOffset.y);
+      nodePos[activeDrag].x = newX;
+      nodePos[activeDrag].y = newY;
+
+      const grp = document.getElementById("elem-" + activeDrag);
+      if (grp) {
+        grp.setAttribute("transform", `translate(${newX}, ${newY})`);
+      }
+      updateCircuitWires();
     }
 
-    function svgXorGate(x, y, id, label, isHotspot=false) {
-      const stroke = isHotspot ? "#ef4444" : "#1e293b";
-      const fill = isHotspot ? "#fff5f5" : "#ffffff";
-      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
-      const labelFill = isHotspot ? "#ef4444" : "#64748b";
-      return `
-        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <!-- Rear arc -->
-          <path d="M ${x-6} ${y} Q ${x+6} ${y+18} ${x-6} ${y+36}" fill="none" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
-          <!-- Front body -->
-          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
-          <text x="${x+16}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">=1</text>
-          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
-        </g>
-      `;
+    function djsSvgMouseUp(evt) {
+      if (activeDrag) {
+        const el = document.getElementById("elem-" + activeDrag);
+        if (el) el.style.cursor = "grab";
+        activeDrag = null;
+        renderCurrentCircuit();
+      }
     }
 
-    function svgNotGate(x, y, id, label) {
-      return `
-        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <polygon points="${x},${y} ${x+28},${y+14} ${x},${y+28}" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
-          <circle cx="${x+33}" cy="${y+14}" r="3" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
-          <text x="${x+4}" y="${y+42}" fill="#64748b" font-size="8.5" font-family="monospace">${label}</text>
-        </g>
-      `;
+    function orthoWirePath(x1, y1, x2, y2) {
+      if (x2 >= x1) {
+        const midX = Math.round((x1 + x2) / 2);
+        return `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+      } else {
+        const midX = x1 + 25;
+        const loopX = x2 - 25;
+        const midY = Math.max(y1, y2) + 40;
+        return `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${midY} L ${loopX} ${midY} L ${loopX} ${y2} L ${x2} ${y2}`;
+      }
     }
 
-    function svgButtonInput(x, y, label, pinKey) {
+    function svgWire(wireId, pathD, isHigh=false, isPulse=true) {
+      const color = isHigh ? "#22c55e" : "#0284c7";
+      const strokeWidth = isHigh ? "2.5" : "1.8";
+      const dash = isPulse && isHigh ? 'stroke-dasharray="6 3" class="wire-active"' : "";
+      return `<path id="${wireId}" d="${pathD}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" ${dash}/>`;
+    }
+
+    function svgButtonInput(id, x, y, label, pinKey, lineNums=[]) {
       const val = pinState[pinKey] || 0;
       const fillColor = val ? "#dcfce7" : "#f8fafc";
       const textColor = val ? "#15803d" : "#334155";
       const strokeColor = val ? "#16a34a" : "#94a3b8";
       return `
-        <g class="comp-box" onclick="togglePin('${pinKey}')" style="cursor: pointer;">
-          <rect x="${x}" y="${y}" width="38" height="36" rx="5" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.8"/>
-          <circle cx="${x+19}" cy="${y+18}" r="7" fill="${val ? '#22c55e' : '#cbd5e1'}"/>
-          <text x="${x+19}" y="${y+15}" fill="${textColor}" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">${label}</text>
-          <text x="${x+19}" y="${y+30}" fill="${textColor}" font-size="8" font-family="monospace" text-anchor="middle">[${val}]</text>
+        <g id="elem-${id}" class="djs-draggable comp-box" transform="translate(${x}, ${y})" style="cursor: grab;">
+          <rect x="0" y="0" width="46" height="40" rx="5" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.8"
+            onmousedown="djsStartDrag(event, '${id}')"
+            onclick="togglePin('${pinKey}')"
+            onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})"
+            onmouseleave="clearCodeHighlight()"/>
+          <circle cx="23" cy="18" r="7.5" fill="${val ? '#22c55e' : '#cbd5e1'}" onclick="togglePin('${pinKey}')"/>
+          <text x="23" y="15" fill="${textColor}" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle" onclick="togglePin('${pinKey}')">${label}</text>
+          <text x="23" y="32" fill="${textColor}" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle" onclick="togglePin('${pinKey}')">[${val}]</text>
         </g>
       `;
     }
 
-    function svgLampOutput(x, y, label, val) {
+    function svgLampOutput(id, x, y, label, val, lineNums=[]) {
       const active = val ? true : false;
       const lampColor = active ? "#22c55e" : "#f1f5f9";
       const glow = active ? `filter="drop-shadow(0 0 5px rgba(34, 197, 94, 0.6))"` : "";
       return `
-        <g ${glow}>
-          <rect x="${x}" y="${y}" width="38" height="36" rx="5" fill="#ffffff" stroke="${active ? '#16a34a' : '#94a3b8'}" stroke-width="1.8"/>
-          <circle cx="${x+19}" cy="${y+18}" r="8" fill="${lampColor}" stroke="${active ? '#15803d' : '#cbd5e1'}" stroke-width="1"/>
-          <text x="${x+19}" y="${y+14}" fill="${active ? '#15803d' : '#64748b'}" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">${label}</text>
-          <text x="${x+19}" y="${y+30}" fill="${active ? '#15803d' : '#94a3b8'}" font-size="8" font-family="monospace" text-anchor="middle">${active ? 'HIGH' : 'LOW'}</text>
+        <g id="elem-${id}" class="djs-draggable comp-box" transform="translate(${x}, ${y})" style="cursor: grab;" ${glow}>
+          <rect x="0" y="0" width="46" height="40" rx="5" fill="#ffffff" stroke="${active ? '#16a34a' : '#94a3b8'}" stroke-width="1.8"
+            onmousedown="djsStartDrag(event, '${id}')"
+            onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})"
+            onmouseleave="clearCodeHighlight()"/>
+          <circle cx="23" cy="18" r="8" fill="${lampColor}" stroke="${active ? '#15803d' : '#cbd5e1'}" stroke-width="1"/>
+          <text x="23" y="14" fill="${active ? '#15803d' : '#64748b'}" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">${label}</text>
+          <text x="23" y="32" fill="${active ? '#15803d' : '#94a3b8'}" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle">${active ? 'HIGH' : 'LOW'}</text>
         </g>
       `;
     }
 
-    function svgWire(pathD, isHigh=false, isPulse=true) {
-      const color = isHigh ? "#16a34a" : "#0284c7";
-      const strokeWidth = isHigh ? "2.2" : "1.8";
-      const dash = isPulse && isHigh ? 'stroke-dasharray="6 3" class="wire-active"' : "";
-      return `<path d="${pathD}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" ${dash}/>`;
+    function svgNotGate(id, x, y, label, lineNums=[]) {
+      return `
+        <g id="elem-${id}" class="djs-gate djs-draggable comp-box" transform="translate(${x}, ${y})" style="cursor: grab;">
+          <polygon points="0,0 28,14 0,28" fill="#ffffff" stroke="#1e293b" stroke-width="2"
+            onmousedown="djsStartDrag(event, '${id}')"
+            onclick="selectGate('${id}')"
+            onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})"
+            onmouseleave="clearCodeHighlight()"/>
+          <circle cx="33" cy="14" r="3" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <text x="4" y="42" fill="#64748b" font-size="8.5" font-family="monospace">${label}</text>
+        </g>
+      `;
+    }
+
+    function renderSubcircuitBox(id, label, modType, isExpanded, w, h, x, y, lineNums, innerSvgHtml, inputs, outputs) {
+      return `
+        <g id="elem-${id}" class="djs-draggable comp-box" transform="translate(${x}, ${y})" style="cursor: grab;">
+          <!-- Main Container Box -->
+          <rect x="0" y="0" width="${w}" height="${h}" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="2" />
+          
+          <!-- Header Bar for Dragging -->
+          <rect x="0" y="0" width="${w}" height="24" rx="6" fill="#f8fafc" stroke="#1e293b" stroke-width="2" onmousedown="djsStartDrag(event, '${id}')" style="cursor: grab;" />
+          <text x="10" y="16" fill="#0f172a" font-size="11" font-family="monospace" font-weight="bold" onmousedown="djsStartDrag(event, '${id}')">${label} (${modType})</text>
+          
+          <!-- Expand / Collapse Button [+] / [-] (From Screen Recording) -->
+          <g onclick="toggleSubcircuit('${id}')" style="cursor: pointer;" transform="translate(${w - 22}, 3)">
+            <rect width="18" height="18" rx="3" fill="${isExpanded ? '#ef4444' : '#0d6efd'}" />
+            <text x="9" y="13" fill="#ffffff" font-size="12" font-family="monospace" font-weight="bold" text-anchor="middle">${isExpanded ? '–' : '+'}</text>
+          </g>
+          
+          <!-- Hover zone for code cross-highlighting & Gate selection -->
+          <rect x="0" y="24" width="${w}" height="${h-24}" fill="transparent" 
+            onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)}); selectGate('${id}')" 
+            onmouseleave="clearCodeHighlight()" 
+            onmousedown="djsStartDrag(event, '${id}')" />
+
+          <!-- Input pin terminals on left -->
+          ${inputs.map(inp => `
+            <circle cx="0" cy="${inp.y}" r="3.5" fill="#1e293b" />
+            <text x="6" y="${inp.y + 3.5}" fill="#64748b" font-size="9" font-family="monospace">${inp.name}</text>
+          `).join('')}
+
+          <!-- Output pin terminals on right -->
+          ${outputs.map(out => `
+            <circle cx="${w}" cy="${out.y}" r="3.5" fill="#1e293b" />
+            <text x="${w - 6}" y="${out.y + 3.5}" fill="#64748b" font-size="9" font-family="monospace" text-anchor="end">${out.name}</text>
+          `).join('')}
+
+          <!-- Inner gate layout when expanded -->
+          ${isExpanded ? `<g transform="translate(10, 30)">${innerSvgHtml}</g>` : ''}
+        </g>
+      `;
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // 4. CIRCUIT RENDERERS: SR LATCH, PROCESSOR CORE, ALU HOTSPOT, FULL ADDER
+    // 4. CIRCUIT RENDERERS: DFF MASTER-SLAVE, RV32I PROCESSOR CORE, ALU HOTSPOT
     // ═════════════════════════════════════════════════════════════════════════
 
-    // (A) SR Latch with Negated Inputs
-    function renderSrLatchCircuit() {
-      const ns = pinState.ns;
-      const nr = pinState.nr;
-      if (ns === 0 && nr === 1) {
-        pinState.q = 1; pinState.nq = 0;
-      } else if (ns === 1 && nr === 0) {
-        pinState.q = 0; pinState.nq = 1;
-      } else if (ns === 0 && nr === 0) {
-        pinState.q = 1; pinState.nq = 1; // Forbidden
-      }
+    // (A) DFF Master-Slave Circuit (Direct implementation of Screen Recording)
+    function renderDffMasterSlaveCircuit() {
+      const p = nodePos;
+      p.dff_in_d = p.dff_in_d || { x: 50, y: 130 };
+      p.dff_in_clk = p.dff_in_clk || { x: 50, y: 270 };
+      p.dff_g1nclk = p.dff_g1nclk || { x: 170, y: 310 };
+      p.dff_dl1 = p.dff_dl1 || { x: 280, y: 140 };
+      p.dff_dl2 = p.dff_dl2 || { x: 530, y: 140 };
+      p.dff_out_q = p.dff_out_q || { x: 840, y: 130 };
+      p.dff_out_nq = p.dff_out_nq || { x: 840, y: 250 };
 
-      const q = pinState.q;
-      const nq = pinState.nq;
+      // Live Logic Evaluation
+      const d = pinState.dff_d ?? 1;
+      const clk = pinState.dff_clk ?? 0;
+      const nclk = clk ? 0 : 1;
+
+      // Master transparent on nclk=1 (clk=0)
+      if (nclk === 1) {
+        pinState.dff_qm = d;
+      }
+      const qm = pinState.dff_qm ?? d;
+
+      // Slave transparent on clk=1
+      if (clk === 1) {
+        pinState.dff_q = qm;
+        pinState.dff_nq = qm ? 0 : 1;
+      }
+      const q = pinState.dff_q ?? 0;
+      const nq = pinState.dff_nq ?? 1;
+
+      // Internal latch gate SVG for dl2 (matching video 0:25 when expanded)
+      const dl2InnerHtml = `
+        <rect width="250" height="190" fill="#f8fafc" rx="4" stroke="#cbd5e1"/>
+        <text x="10" y="16" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">// dl2 internal gate netlist</text>
+        
+        <!-- Not gate -->
+        <polygon points="20,30 45,42 20,54" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <circle cx="50" cy="42" r="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <text x="15" y="70" fill="#64748b" font-size="8" font-family="monospace">not(clkn,clk)</text>
+
+        <!-- AND gate 1 -->
+        <path d="M 80 30 L 100 30 A 15 15 0 0 1 100 60 L 80 60 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <text x="88" y="48" fill="#0f172a" font-size="9" font-weight="bold">&amp;</text>
+        <text x="75" y="75" fill="#64748b" font-size="8" font-family="monospace">and d1</text>
+
+        <!-- AND gate 2 -->
+        <path d="M 80 110 L 100 110 A 15 15 0 0 1 100 140 L 80 140 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <text x="88" y="128" fill="#0f172a" font-size="9" font-weight="bold">&amp;</text>
+        <text x="75" y="155" fill="#64748b" font-size="8" font-family="monospace">and d2</text>
+
+        <!-- NOR gate 1 -->
+        <path d="M 160 30 Q 170 45 160 60 Q 180 60 195 45 Q 180 30 160 30 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <circle cx="199" cy="45" r="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <text x="168" y="48" fill="#0f172a" font-size="9" font-weight="bold">≥1</text>
+        <text x="155" y="75" fill="#64748b" font-size="8" font-family="monospace">nor q</text>
+
+        <!-- NOR gate 2 -->
+        <path d="M 160 110 Q 170 125 160 140 Q 180 140 195 125 Q 180 110 160 110 Z" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <circle cx="199" cy="125" r="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+        <text x="168" y="128" fill="#0f172a" font-size="9" font-weight="bold">≥1</text>
+        <text x="155" y="155" fill="#64748b" font-size="8" font-family="monospace">nor nq</text>
+
+        <!-- Cross feedback lines -->
+        <path d="M 202 45 L 220 45 L 220 95 L 145 95 L 145 118 L 160 118" fill="none" stroke="${q ? '#22c55e' : '#0284c7'}" stroke-width="1.8"/>
+        <path d="M 202 125 L 230 125 L 230 75 L 150 75 L 150 52 L 160 52" fill="none" stroke="${nq ? '#22c55e' : '#0284c7'}" stroke-width="1.8"/>
+      `;
+
+      // Dimensions based on expanded states
+      const dl1W = expandedBlocks.dl1 ? 270 : 120;
+      const dl1H = expandedBlocks.dl1 ? 230 : 85;
+      const dl2W = expandedBlocks.dl2 ? 270 : 120;
+      const dl2H = expandedBlocks.dl2 ? 230 : 85;
+
+      const dl1InY_clk = expandedBlocks.dl1 ? 60 : 35;
+      const dl1InY_d   = expandedBlocks.dl1 ? 120 : 60;
+      const dl1OutY_q  = expandedBlocks.dl1 ? 75 : 42;
+
+      const dl2InY_clk = expandedBlocks.dl2 ? 60 : 35;
+      const dl2InY_d   = expandedBlocks.dl2 ? 120 : 60;
+      const dl2OutY_q  = expandedBlocks.dl2 ? 75 : 35;
+      const dl2OutY_nq = expandedBlocks.dl2 ? 155 : 62;
+
+      // Orthogonal Wires (Rubber-Banding)
+      const wD_to_dl1    = orthoWirePath(p.dff_in_d.x + 46, p.dff_in_d.y + 20, p.dff_dl1.x, p.dff_dl1.y + dl1InY_d);
+      const wClk_to_g1   = orthoWirePath(p.dff_in_clk.x + 46, p.dff_in_clk.y + 20, p.dff_g1nclk.x, p.dff_g1nclk.y + 14);
+      const wClk_to_dl2  = orthoWirePath(p.dff_in_clk.x + 46, p.dff_in_clk.y + 20, p.dff_dl2.x, p.dff_dl2.y + dl2InY_clk);
+      const wNclk_to_dl1 = orthoWirePath(p.dff_g1nclk.x + 33, p.dff_g1nclk.y + 14, p.dff_dl1.x, p.dff_dl1.y + dl1InY_clk);
+      const wDl1_to_dl2  = orthoWirePath(p.dff_dl1.x + dl1W, p.dff_dl1.y + dl1OutY_q, p.dff_dl2.x, p.dff_dl2.y + dl2InY_d);
+      const wDl2_to_q    = orthoWirePath(p.dff_dl2.x + dl2W, p.dff_dl2.y + dl2OutY_q, p.dff_out_q.x, p.dff_out_q.y + 20);
+      const wDl2_to_nq   = orthoWirePath(p.dff_dl2.x + dl2W, p.dff_dl2.y + dl2OutY_nq, p.dff_out_nq.x, p.dff_out_nq.y + 20);
 
       return `
-        <!-- Title Banner -->
+        <!-- Title & Subcircuit Help Banner -->
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#0284c7">// SR latch with negated inputs (gate model - digitaljs.tilk.eu)</text>
-          <text x="60" y="65" fill="#64748b">module sr_neg_latch: nand g1(q, ns, nq); nand g2(nq, nr, q);</text>
+          <text x="50" y="30" fill="#0284c7">// D Flip-Flop Master-Slave using D Latches (Screen Recording Simulation)</text>
+          <text x="50" y="48" fill="#64748b">module dff_master_slave: dl1(nclk, d, qm); dl2(clk, qm, q, nq); Click [+] to expand subcircuits!</text>
         </g>
 
-        <!-- Input Button: ns (Set) -->
-        ${svgButtonInput(70, 110, "ns", "ns")}
-        <text x="120" y="132" fill="#64748b" font-size="10" font-family="monospace">ns</text>
+        <!-- Dynamic Rubber-Banding Wires Container -->
+        <g id="djsWiresGroup">
+          ${svgWire("wire_d_dl1", wD_to_dl1, d === 1)}
+          ${svgWire("wire_clk_g1", wClk_to_g1, clk === 1)}
+          ${svgWire("wire_clk_dl2", wClk_to_dl2, clk === 1)}
+          ${svgWire("wire_nclk_dl1", wNclk_to_dl1, nclk === 1)}
+          ${svgWire("wire_dl1_dl2", wDl1_to_dl2, qm === 1)}
+          ${svgWire("wire_dl2_q", wDl2_to_q, q === 1)}
+          ${svgWire("wire_dl2_nq", wDl2_to_nq, nq === 1)}
+        </g>
 
-        <!-- Input Button: nr (Reset) -->
-        ${svgButtonInput(70, 240, "nr", "nr")}
-        <text x="120" y="262" fill="#64748b" font-size="10" font-family="monospace">nr</text>
+        <!-- 1. Input: d -->
+        ${svgButtonInput("dff_in_d", p.dff_in_d.x, p.dff_in_d.y, "d", "dff_d", [15])}
+        
+        <!-- 2. Input: clk -->
+        ${svgButtonInput("dff_in_clk", p.dff_in_clk.x, p.dff_in_clk.y, "clk", "dff_clk", [15])}
 
-        <!-- Wire from ns into NAND1 pin 1 -->
-        ${svgWire("M 108 128 L 320 128", ns === 1)}
+        <!-- 3. Inverter: g1nclk -->
+        ${svgNotGate("dff_g1nclk", p.dff_g1nclk.x, p.dff_g1nclk.y, "g1nclk", [19])}
 
-        <!-- Wire from nr into NAND2 pin 2 -->
-        ${svgWire("M 108 258 L 260 258", nr === 1)}
+        <!-- 4. Subcircuit: dl1 (Master Latch) -->
+        ${renderSubcircuitBox(
+          "dff_dl1", "dl1", "d_latch", expandedBlocks.dl1, dl1W, dl1H, p.dff_dl1.x, p.dff_dl1.y, [20, 2, 3, 4, 5],
+          dl2InnerHtml,
+          [{ name: "clk", y: dl1InY_clk }, { name: "d", y: dl1InY_d }],
+          [{ name: "q", y: dl1OutY_q }]
+        )}
 
-        <!-- NAND Gate 1 (Top) -->
-        ${svgNandGate(320, 110, "sr_nand1", "g1 ($nand:7$1)")}
+        <!-- 5. Subcircuit: dl2 (Slave Latch - Exact expand/collapse like video) -->
+        ${renderSubcircuitBox(
+          "dff_dl2", "dl2", "d_latch", expandedBlocks.dl2, dl2W, dl2H, p.dff_dl2.x, p.dff_dl2.y, [21, 2, 3, 4, 5],
+          dl2InnerHtml,
+          [{ name: "clk", y: dl2InY_clk }, { name: "d", y: dl2InY_d }],
+          [{ name: "q", y: dl2OutY_q }, { name: "nq", y: dl2OutY_nq }]
+        )}
 
-        <!-- NAND Gate 2 (Bottom) -->
-        ${svgNandGate(260, 240, "sr_nand2", "g2 ($nand:8$2)")}
+        <!-- 6. Output Lamp: q -->
+        ${svgLampOutput("dff_out_q", p.dff_out_q.x, p.dff_out_q.y, "q", q, [16])}
 
-        <!-- Cross-Coupled Feedback Wire 1: From Q (NAND1 out) down and into NAND2 pin 1 -->
-        ${svgWire("M 368 128 L 440 128 L 440 210 L 220 210 L 220 245 L 260 245", q === 1)}
-        <text x="330" y="205" fill="${q ? '#15803d' : '#0284c7'}" font-size="9" font-family="monospace" font-weight="bold">q (feedback)</text>
+        <!-- 7. Output Lamp: nq -->
+        ${svgLampOutput("dff_out_nq", p.dff_out_nq.x, p.dff_out_nq.y, "nq", nq, [16])}
 
-        <!-- Cross-Coupled Feedback Wire 2: From nq (NAND2 out) up and into NAND1 pin 2 -->
-        ${svgWire("M 308 258 L 400 258 L 400 170 L 280 170 L 280 143 L 320 143", nq === 1)}
-        <text x="330" y="165" fill="${nq ? '#15803d' : '#0284c7'}" font-size="9" font-family="monospace" font-weight="bold">nq (feedback)</text>
-
-        <!-- Wire from NAND1 out to Lamp Q -->
-        ${svgWire("M 368 128 L 560 128", q === 1)}
-
-        <!-- Wire from NAND2 out to Lamp nq -->
-        ${svgWire("M 308 258 L 560 258", nq === 1)}
-
-        <!-- Output Lamp: Q -->
-        ${svgLampOutput(560, 110, "q", q)}
-
-        <!-- Output Lamp: nq -->
-        ${svgLampOutput(560, 240, "nq", nq)}
-
-        <!-- Status Box -->
-        <g transform="translate(70, 340)">
-          <rect width="528" height="60" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
-          <text x="14" y="22" fill="#0284c7" font-size="11" font-weight="bold" font-family="monospace">TRUTH TABLE / LOGIC EVALUATION:</text>
-          <text x="14" y="44" fill="${(ns===0&&nr===0) ? '#dc2626' : '#15803d'}" font-size="11" font-family="monospace">
-            ns=${ns}, nr=${nr} ──► Q=${q}, Q̄=${nq} (${(ns===0&&nr===1)?'SET: Q latched HIGH':(ns===1&&nr===0)?'RESET: Q latched LOW':(ns===1&&nr===1)?'HOLD: Latch retaining previous state':'FORBIDDEN: ns=0, nr=0 (Metastable)'})
+        <!-- Live Signal Info Banner -->
+        <g transform="translate(50, 480)">
+          <rect width="840" height="50" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="16" y="20" fill="#0284c7" font-size="11" font-weight="bold" font-family="monospace">LIVE FLIP-FLOP PROPAGATION STATUS:</text>
+          <text x="16" y="38" fill="${q ? '#15803d' : '#0284c7'}" font-size="11" font-family="monospace">
+            d=${d} | clk=${clk} (nclk=${nclk}) ──► Master Latch qm=${qm} ──► Slave Latch Output: Q=${q}, Q̄=${nq} | Drag blocks or click [+] to inspect gates!
           </text>
         </g>
       `;
     }
 
-    // (B) RV32I Complete Processor Core Gate Netlist (White Paper Theme)
+    // (B) RV32I Complete Processor Core Netlist (White Paper Theme with Draggable Stages)
     function renderProcessorCoreCircuit() {
+      const p = nodePos;
+      p.rv_in_clk = p.rv_in_clk || { x: 30, y: 70 };
+      p.rv_in_reset = p.rv_in_reset || { x: 30, y: 180 };
+      p.rv_if_stage = p.rv_if_stage || { x: 120, y: 60 };
+      p.rv_id_stage = p.rv_id_stage || { x: 330, y: 60 };
+      p.rv_reg_stage = p.rv_reg_stage || { x: 530, y: 60 };
+      p.rv_ex_stage = p.rv_ex_stage || { x: 730, y: 60 };
+      p.rv_out_pc = p.rv_out_pc || { x: 330, y: 440 };
+      p.rv_out_alu = p.rv_out_alu || { x: 730, y: 440 };
+
+      const ifW = expandedBlocks.rv_if ? 270 : 180;
+      const ifH = expandedBlocks.rv_if ? 320 : 150;
+      const idW = expandedBlocks.rv_id ? 270 : 170;
+      const idH = expandedBlocks.rv_id ? 320 : 150;
+      const regW = expandedBlocks.rv_reg ? 270 : 170;
+      const regH = expandedBlocks.rv_reg ? 320 : 150;
+      const exW = expandedBlocks.rv_ex ? 320 : 200;
+      const exH = expandedBlocks.rv_ex ? 340 : 170;
+
+      const ifInner = `
+        <rect width="250" height="280" fill="#f8fafc" rx="4" stroke="#0284c7"/>
+        <text x="10" y="16" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">32-Bit PC Register Latch Array</text>
+        ${svgNotGate("pc_inv", 20, 30, "CLK_INV", [15])}
+        ${svgNandGate(80, 30, "dff_pc0", "PC_DFF0", [16])}
+        ${svgNandGate(80, 100, "dff_pc1", "PC_DFF1", [16])}
+        ${svgXorGate(20, 180, "pc_adder_xor", "PC+4_ADD", true)}
+        <text x="10" y="260" fill="#64748b" font-size="8.5" font-family="monospace">PC: 0x${(pinState.pc_val||0).toString(16).padStart(8,'0')}</text>
+      `;
+
+      const idInner = `
+        <rect width="250" height="280" fill="#f8fafc" rx="4" stroke="#7c3aed"/>
+        <text x="10" y="16" fill="#7c3aed" font-size="9" font-family="monospace" font-weight="bold">Instruction Decoder AND/INV Matrix</text>
+        ${svgAndGate(20, 30, "dec_and_r", "AND_R (R-Type)", false)}
+        ${svgAndGate(20, 100, "dec_and_lw", "AND_LW (Load)", false)}
+        ${svgAndGate(20, 170, "dec_and_sw", "AND_SW (Store)", false)}
+        <text x="10" y="260" fill="#64748b" font-size="8.5" font-family="monospace">Opcode: 0x33 (${pinState.instr_name})</text>
+      `;
+
+      const regInner = `
+        <rect width="250" height="280" fill="#f8fafc" rx="4" stroke="#d97706"/>
+        <text x="10" y="16" fill="#d97706" font-size="9" font-family="monospace" font-weight="bold">32x32 Dual-Port Register Bitcells</text>
+        ${svgNandGate(30, 40, "rf_latch1", "RF_CELL1", [28])}
+        ${svgNandGate(30, 110, "rf_latch2", "RF_CELL2", [28])}
+        ${svgAndGate(120, 75, "rf_rd_and", "RD_SELECT", false)}
+        <text x="10" y="260" fill="#b45309" font-size="8.5" font-family="monospace">rs1: 0x5 | rs2: 0x3</text>
+      `;
+
+      const exInner = `
+        <rect width="300" height="300" fill="#fff5f5" rx="4" stroke="#ef4444" stroke-width="1.8"/>
+        <text x="10" y="16" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">32-Bit ALU [🔥 {{ peak_layer }} HOTSPOT GATES]</text>
+        ${svgXorGate(20, 35, "alu_xor1", "XOR1 (A⊕B)", true)}
+        ${svgXorGate(110, 35, "alu_xor2", "XOR2 (Sum)", true)}
+        ${svgOrGate(200, 35, "alu_or1", "OR_COUT", true)}
+        ${svgAndGate(20, 115, "alu_and1", "AND1 (Logic)", false)}
+        ${svgOrGate(110, 115, "alu_or_log", "OR1 (Logic)", false)}
+        ${svgAndGate(70, 195, "alu_mux_and", "MUX_SELECT", false)}
+        ${svgOrGate(160, 195, "alu_mux_or", "ALU_OUT", true)}
+        <text x="10" y="275" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">Out: 0x${(pinState.alu_out||8).toString(16).padStart(8,'0')} | Peak wire pressure on {{ peak_layer }}</text>
+      `;
+
+      // Inter-stage Wires
+      const wIf_to_id   = orthoWirePath(p.rv_if_stage.x + ifW, p.rv_if_stage.y + 60, p.rv_id_stage.x, p.rv_id_stage.y + 60);
+      const wId_to_reg  = orthoWirePath(p.rv_id_stage.x + idW, p.rv_id_stage.y + 60, p.rv_reg_stage.x, p.rv_reg_stage.y + 60);
+      const wReg_to_ex  = orthoWirePath(p.rv_reg_stage.x + regW, p.rv_reg_stage.y + 60, p.rv_ex_stage.x, p.rv_ex_stage.y + 60);
+      const wEx_to_wb   = orthoWirePath(p.rv_ex_stage.x + exW, p.rv_ex_stage.y + 80, p.rv_out_alu.x, p.rv_out_alu.y + 20);
+      const wWb_loop    = orthoWirePath(p.rv_out_alu.x + 20, p.rv_out_alu.y + 40, p.rv_reg_stage.x + 40, p.rv_reg_stage.y + regH);
+
       return `
         <!-- Title & Clock Banner -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="25" y="25" fill="#0284c7">⚡ RV32I SINGLE-CYCLE CPU GATE NETLIST | 5-STAGE PIPELINE ROUTING DEMAND</text>
+          <text x="30" y="25" fill="#0284c7">⚡ RV32I PROCESSOR CORE GATE NETLIST | 5 PIPELINE STAGES WITH DIGITALJS INTERACTIVITY</text>
         </g>
 
-        <!-- STAGE 1: PC REGISTER (8-NAND DFF LATCHES) -->
-        <g transform="translate(20, 45)">
-          <rect width="190" height="480" rx="6" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
-          <text x="10" y="20" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">STAGE 1: PC FETCH (DFF)</text>
-          
-          ${svgNotGate(15, 40, "pc_clk_inv", "CLK_INV")}
-          ${svgNandGate(70, 40, "dff_pc", "DFF_PC0")}
-          ${svgNandGate(70, 110, "dff_pc1", "DFF_PC1")}
-          ${svgNandGate(70, 180, "dff_pc2", "DFF_PC2")}
-          
-          <!-- Next PC Adder -->
-          ${svgXorGate(20, 260, "pc_xor", "PC_ADD0")}
-          ${svgAndGate(80, 260, "pc_and", "PC_AND0")}
-          ${svgOrGate(140, 260, "pc_or", "PC_OR0")}
-
-          <text x="15" y="340" fill="#64748b" font-size="8.5" font-family="monospace">PC: 0x00000004</text>
+        <!-- Dynamic Rubber-Banding Inter-Stage Wires -->
+        <g id="djsWiresGroup">
+          ${svgWire("wire_if_id", wIf_to_id, true)}
+          ${svgWire("wire_id_reg", wId_to_reg, true)}
+          ${svgWire("wire_reg_ex", wReg_to_ex, true)}
+          ${svgWire("wire_ex_wb", wEx_to_wb, true)}
+          ${svgWire("wire_wb_loop", wWb_loop, true)}
         </g>
 
-        <!-- STAGE 2: INSTRUCTION DECODER (AND/INV MATRIX) -->
-        <g transform="translate(225, 45)">
-          <rect width="175" height="480" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
-          <text x="10" y="20" fill="#7c3aed" font-size="9" font-family="monospace" font-weight="bold">STAGE 2: DECODER GATES</text>
-          
-          ${svgNotGate(15, 40, "dec_inv1", "INV_OP5")}
-          ${svgNotGate(15, 100, "dec_inv2", "INV_OP6")}
-          ${svgNotGate(15, 160, "dec_inv3", "INV_F3")}
+        <!-- Inputs: clk & reset -->
+        ${svgButtonInput("rv_in_clk", p.rv_in_clk.x, p.rv_in_clk.y, "clk", "clk_val", [3, 15])}
+        ${svgButtonInput("rv_in_reset", p.rv_in_reset.x, p.rv_in_reset.y, "reset", "rv_reset", [4, 16])}
 
-          ${svgAndGate(85, 40, "dec_and1", "AND_R (R-Type)")}
-          ${svgAndGate(85, 100, "dec_and2", "AND_LOAD (LW)")}
-          ${svgAndGate(85, 160, "dec_and3", "AND_STORE (SW)")}
-          ${svgAndGate(85, 220, "dec_and4", "AND_BEQ (Branch)")}
+        <!-- STAGE 1: PC FETCH -->
+        ${renderSubcircuitBox(
+          "rv_if_stage", "STAGE 1", "PC_FETCH", expandedBlocks.rv_if, ifW, ifH, p.rv_if_stage.x, p.rv_if_stage.y, [13, 14, 15, 16, 17, 18, 19],
+          ifInner,
+          [{ name: "clk", y: 45 }, { name: "rst", y: 75 }],
+          [{ name: "pc", y: 60 }]
+        )}
 
-          ${svgOrGate(85, 290, "dec_or1", "OR_REGWRITE")}
+        <!-- STAGE 2: INSTRUCTION DECODER -->
+        ${renderSubcircuitBox(
+          "rv_id_stage", "STAGE 2", "DECODER", expandedBlocks.rv_id, idW, idH, p.rv_id_stage.x, p.rv_id_stage.y, [21, 22, 23, 24, 25, 26],
+          idInner,
+          [{ name: "instr", y: 60 }],
+          [{ name: "ctrl", y: 60 }]
+        )}
+
+        <!-- STAGE 3: REGISTER FILE -->
+        ${renderSubcircuitBox(
+          "rv_reg_stage", "STAGE 3", "REGFILE", expandedBlocks.rv_reg, regW, regH, p.rv_reg_stage.x, p.rv_reg_stage.y, [28, 29, 30, 31],
+          regInner,
+          [{ name: "rs1", y: 50 }, { name: "rs2", y: 75 }],
+          [{ name: "rdata1", y: 50 }, { name: "rdata2", y: 75 }]
+        )}
+
+        <!-- STAGE 4: 32-BIT ALU HOTSPOT -->
+        ${renderSubcircuitBox(
+          "rv_ex_stage", "STAGE 4", "ALU_HOTSPOT", expandedBlocks.rv_ex, exW, exH, p.rv_ex_stage.x, p.rv_ex_stage.y, [33, 34, 35, 36, 37, 38, 39, 41],
+          exInner,
+          [{ name: "A", y: 50 }, { name: "B", y: 75 }],
+          [{ name: "alu_out", y: 80 }]
+        )}
+
+        <!-- Output Display: PC -->
+        <g id="elem-rv_out_pc" class="djs-draggable comp-box" transform="translate(${p.rv_out_pc.x}, ${p.rv_out_pc.y})" style="cursor: grab;">
+          <rect width="160" height="40" rx="5" fill="#f8fafc" stroke="#0284c7" stroke-width="1.8" onmousedown="djsStartDrag(event, 'rv_out_pc')"/>
+          <text x="10" y="16" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">PC REGISTER OUT</text>
+          <text x="10" y="32" fill="#0f172a" font-size="11" font-family="monospace" font-weight="bold">0x${(pinState.pc_val||0).toString(16).padStart(8,'0')}</text>
         </g>
 
-        <!-- STAGE 3: REGISTER FILE BITCELL (NAND LATCHES) -->
-        <g transform="translate(415, 45)">
-          <rect width="180" height="480" rx="6" fill="#ffffff" stroke="#d97706" stroke-width="1.5"/>
-          <text x="10" y="20" fill="#d97706" font-size="9" font-family="monospace" font-weight="bold">STAGE 3: REGFILE BITCELLS</text>
-          
-          ${svgAndGate(20, 50, "rf_and1", "RD_EN1")}
-          ${svgNandGate(90, 50, "rf_nand1", "RF_LATCH1")}
-          ${svgNandGate(90, 120, "rf_nand2", "RF_LATCH2")}
-          ${svgAndGate(20, 190, "rf_and2", "RD_EN2")}
-
-          <text x="15" y="270" fill="#b45309" font-size="8.5" font-family="monospace">rs1 data: 0x0005</text>
-          <text x="15" y="290" fill="#b45309" font-size="8.5" font-family="monospace">rs2 data: 0x0003</text>
+        <!-- Output Display: ALU OUT -->
+        <g id="elem-rv_out_alu" class="djs-draggable comp-box" transform="translate(${p.rv_out_alu.x}, ${p.rv_out_alu.y})" style="cursor: grab;">
+          <rect width="180" height="40" rx="5" fill="#fff5f5" stroke="#ef4444" stroke-width="2" onmousedown="djsStartDrag(event, 'rv_out_alu')"/>
+          <text x="10" y="16" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">ALU HOTSPOT RESULT</text>
+          <text x="10" y="32" fill="#b91c1c" font-size="11" font-family="monospace" font-weight="bold">0x${(pinState.alu_out||8).toString(16).padStart(8,'0')}</text>
         </g>
-
-        <!-- STAGE 4: 32-BIT ALU LOGIC GATES (CRITICAL CONGESTION HOTSPOT) -->
-        <g transform="translate(610, 45)">
-          <rect width="330" height="480" rx="6" fill="#fff5f5" stroke="#ef4444" stroke-width="2"/>
-          <text x="10" y="20" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">STAGE 4: 32-BIT ALU [🔥 {{ peak_layer }} HOTSPOT]</text>
-          
-          ${svgXorGate(20, 50, "alu_xor1", "XOR1 (A⊕B)", true)}
-          ${svgXorGate(110, 50, "alu_xor2", "XOR2 (Sum)", true)}
-          ${svgOrGate(200, 50, "alu_or1", "OR_COUT", true)}
-
-          ${svgAndGate(20, 130, "alu_and1", "AND1 (Logic)")}
-          ${svgOrGate(110, 130, "alu_or_log", "OR1 (Logic)")}
-          ${svgXorGate(200, 130, "alu_xor_log", "XOR1 (Logic)")}
-
-          <!-- ALU Result MUX -->
-          ${svgAndGate(70, 220, "alu_mux_and", "MUX_AND")}
-          ${svgOrGate(160, 220, "alu_mux_or", "ALU_OUT", true)}
-
-          <!-- Writeback Driver -->
-          ${svgNotGate(30, 310, "wb_inv", "WB_INV")}
-          ${svgAndGate(110, 310, "wb_and", "WB_AND")}
-
-          <text x="15" y="380" fill="#b91c1c" font-size="9" font-family="monospace">ALU Out: 0x00000008 (ADD result)</text>
-          <text x="15" y="400" fill="#ef4444" font-size="8.5" font-family="monospace" font-weight="bold">64 XOR Cells Cluster on M1 ──► M2/M3 Saturated</text>
-        </g>
-
-        <!-- Inter-Stage Connecting Wires -->
-        ${svgWire("M 210 130 L 225 130", true)}
-        ${svgWire("M 400 130 L 415 130", true)}
-        ${svgWire("M 595 130 L 610 130", true)}
-        <!-- Writeback Bus -->
-        ${svgWire("M 800 380 L 800 515 L 430 515 L 430 400", true)}
       `;
     }
 
@@ -1645,25 +1907,25 @@ endmodule`
         <g transform="translate(40, 80)">
           <rect width="260" height="380" rx="6" fill="#fff5f5" stroke="#ef4444" stroke-width="1.5"/>
           <text x="12" y="24" fill="#b91c1c" font-size="10" font-family="monospace" font-weight="bold">BIT 0 GATE SLICE (LSB)</text>
-          ${svgXorGate(20, 50, "alu_xor1", "XOR1 (A0⊕B0)", true)}
-          ${svgXorGate(140, 50, "alu_xor2", "XOR2 (Sum0)", true)}
-          ${svgAndGate(20, 130, "alu_and1", "AND1 (G0)", true)}
-          ${svgAndGate(140, 130, "alu_and2", "AND2 (P0·Cin)", true)}
-          ${svgOrGate(80, 210, "alu_or1", "OR1 (Cout0)", true)}
+          ${svgXorGate(20, 50, "alu_xor1", "XOR1 (A0⊕B0)", true, [11])}
+          ${svgXorGate(140, 50, "alu_xor2", "XOR2 (Sum0)", true, [12])}
+          ${svgAndGate(20, 130, "alu_and1", "AND1 (G0)", true, [13])}
+          ${svgAndGate(140, 130, "alu_and2", "AND2 (P0·Cin)", true, [14])}
+          ${svgOrGate(80, 210, "alu_or1", "OR1 (Cout0)", true, [15])}
         </g>
 
         <g transform="translate(330, 80)">
           <rect width="260" height="380" rx="6" fill="#fff5f5" stroke="#ef4444" stroke-width="1.5"/>
           <text x="12" y="24" fill="#b91c1c" font-size="10" font-family="monospace" font-weight="bold">BIT 1 GATE SLICE</text>
-          ${svgXorGate(20, 50, "b1_xor1", "XOR1 (A1⊕B1)", true)}
-          ${svgXorGate(140, 50, "b1_xor2", "XOR2 (Sum1)", true)}
-          ${svgAndGate(20, 130, "b1_and1", "AND1 (G1)", true)}
-          ${svgAndGate(140, 130, "b1_and2", "AND2 (P1·Cin)", true)}
-          ${svgOrGate(80, 210, "b1_or1", "OR1 (Cout1)", true)}
+          ${svgXorGate(20, 50, "b1_xor1", "XOR1 (A1⊕B1)", true, [11])}
+          ${svgXorGate(140, 50, "b1_xor2", "XOR2 (Sum1)", true, [12])}
+          ${svgAndGate(20, 130, "b1_and1", "AND1 (G1)", true, [13])}
+          ${svgAndGate(140, 130, "b1_and2", "AND2 (P1·Cin)", true, [14])}
+          ${svgOrGate(80, 210, "b1_or1", "OR1 (Cout1)", true, [15])}
         </g>
 
         <!-- Carry Ripple wire -->
-        ${svgWire("M 200 290 L 330 290 L 330 210 L 350 210", true)}
+        ${svgWire("wire_carry_ripple", "M 200 290 L 330 290 L 330 210 L 350 210", true)}
 
         <g transform="translate(620, 80)">
           <rect width="290" height="380" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
@@ -1676,57 +1938,105 @@ endmodule`
       `;
     }
 
-    // (D) 1-Bit Full Adder Netlist
-    function renderFullAdderCircuit() {
-      const a = pinState.fa_a;
-      const b = pinState.fa_b;
-      const cin = pinState.fa_cin;
-      const x1 = a ^ b;
-      const sum = x1 ^ cin;
-      const a1 = a & b;
-      const a2 = x1 & cin;
-      const cout = a1 | a2;
+    // (D) SR Latch with Negated Inputs
+    function renderSrLatchCircuit() {
+      const ns = pinState.ns;
+      const nr = pinState.nr;
+      if (ns === 0 && nr === 1) {
+        pinState.q = 1; pinState.nq = 0;
+      } else if (ns === 1 && nr === 0) {
+        pinState.q = 0; pinState.nq = 1;
+      } else if (ns === 0 && nr === 0) {
+        pinState.q = 1; pinState.nq = 1;
+      }
+      const q = pinState.q;
+      const nq = pinState.nq;
 
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#0284c7">// 1-Bit Full Adder Gate Netlist (xor g1, g2; and g3, g4; or g5)</text>
-          <text x="60" y="65" fill="#64748b">Computes Sum = A ⊕ B ⊕ Cin, Carry Out = AB + BCin + ACin</text>
+          <text x="60" y="45" fill="#0284c7">// SR latch with negated inputs (gate model - digitaljs.tilk.eu)</text>
+          <text x="60" y="65" fill="#64748b">module sr_neg_latch: nand g1(q, ns, nq); nand g2(nq, nr, q);</text>
         </g>
+        ${svgButtonInput("elem_ns", 70, 110, "ns", "ns", [3])}
+        ${svgButtonInput("elem_nr", 70, 240, "nr", "nr", [3])}
+        ${svgWire("wire_ns_g1", "M 116 130 L 320 130", ns === 1)}
+        ${svgWire("wire_nr_g2", "M 116 260 L 260 260", nr === 1)}
+        ${svgNandGate(320, 110, "sr_nand1", "g1 ($nand:7$1)", [7])}
+        ${svgNandGate(260, 240, "sr_nand2", "g2 ($nand:8$2)", [8])}
+        ${svgWire("wire_q_fb", "M 368 128 L 440 128 L 440 210 L 220 210 L 220 245 L 260 245", q === 1)}
+        ${svgWire("wire_nq_fb", "M 308 258 L 400 258 L 400 170 L 280 170 L 280 143 L 320 143", nq === 1)}
+        ${svgWire("wire_g1_q", "M 368 128 L 560 128", q === 1)}
+        ${svgWire("wire_g2_nq", "M 308 258 L 560 258", nq === 1)}
+        ${svgLampOutput("elem_q", 560, 110, "q", q, [4])}
+        ${svgLampOutput("elem_nq", 560, 240, "nq", nq, [4])}
+      `;
+    }
 
-        <!-- Inputs -->
-        ${svgButtonInput(70, 100, "A", "fa_a")}
-        ${svgButtonInput(70, 180, "B", "fa_b")}
-        ${svgButtonInput(70, 260, "Cin", "fa_cin")}
+    // Helper functions for SVG basic gates
+    function svgNandGate(x, y, id, label, lineNums=[]) {
+      return `
+        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" 
+          onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" 
+          onmouseleave="clearCodeHighlight()" style="cursor: pointer;">
+          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <circle cx="${x+45}" cy="${y+18}" r="3.5" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <text x="${x+14}" y="${y+22}" fill="#0f172a" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
+          <text x="${x+6}" y="${y+50}" fill="#64748b" font-size="8.5" font-family="monospace">${label}</text>
+        </g>
+      `;
+    }
 
-        <!-- XOR1 (A ⊕ B) -->
-        ${svgXorGate(220, 110, "alu_xor1", "XOR1 (A⊕B)", true)}
-        <!-- XOR2 (Sum) -->
-        ${svgXorGate(400, 110, "alu_xor2", "XOR2 (Sum)", true)}
+    function svgAndGate(x, y, id, label, isHotspot=false, lineNums=[]) {
+      const stroke = isHotspot ? "#ef4444" : "#1e293b";
+      const fill = isHotspot ? "#fff5f5" : "#ffffff";
+      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
+      const labelFill = isHotspot ? "#ef4444" : "#64748b";
+      return `
+        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" 
+          onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" 
+          onmouseleave="clearCodeHighlight()" style="cursor: pointer;">
+          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <text x="${x+14}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
+          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
+        </g>
+      `;
+    }
 
-        <!-- AND1 (A & B) -->
-        ${svgAndGate(220, 200, "alu_and1", "AND1 (A·B)")}
-        <!-- AND2 (X1 & Cin) -->
-        ${svgAndGate(400, 200, "alu_and2", "AND2 (X1·Cin)")}
+    function svgOrGate(x, y, id, label, isHotspot=false, lineNums=[]) {
+      const stroke = isHotspot ? "#ef4444" : "#1e293b";
+      const fill = isHotspot ? "#fff5f5" : "#ffffff";
+      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
+      const labelFill = isHotspot ? "#ef4444" : "#64748b";
+      return `
+        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" 
+          onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" 
+          onmouseleave="clearCodeHighlight()" style="cursor: pointer;">
+          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <text x="${x+16}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">≥</text>
+          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
+        </g>
+      `;
+    }
 
-        <!-- OR1 (Cout) -->
-        ${svgOrGate(550, 200, "alu_or1", "OR1 (Cout)")}
-
-        <!-- Outputs -->
-        ${svgLampOutput(700, 110, "Sum", sum)}
-        ${svgLampOutput(700, 200, "Cout", cout)}
-
-        <!-- Wires -->
-        ${svgWire("M 108 118 L 220 118", a === 1)}
-        ${svgWire("M 108 198 L 180 198 L 180 135 L 220 135", b === 1)}
-        ${svgWire("M 268 128 L 400 128", x1 === 1)}
-        ${svgWire("M 108 278 L 340 278 L 340 135 L 400 135", cin === 1)}
-        ${svgWire("M 448 128 L 700 128", sum === 1)}
-        ${svgWire("M 598 218 L 700 218", cout === 1)}
+    function svgXorGate(x, y, id, label, isHotspot=false, lineNums=[]) {
+      const stroke = isHotspot ? "#ef4444" : "#1e293b";
+      const fill = isHotspot ? "#fff5f5" : "#ffffff";
+      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
+      const labelFill = isHotspot ? "#ef4444" : "#64748b";
+      return `
+        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" 
+          onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" 
+          onmouseleave="clearCodeHighlight()" style="cursor: pointer;">
+          <path d="M ${x-6} ${y} Q ${x+6} ${y+18} ${x-6} ${y+36}" fill="none" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <text x="${x+16}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">=1</text>
+          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
+        </g>
       `;
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // 5. DIGITALJS CORE CONTROLLER FUNCTIONS
+    // 5. DIGITALJS CORE CONTROLLER, SYNTAX HIGHLIGHTING & CODE CROSS-HIGHLIGHTING
     // ═════════════════════════════════════════════════════════════════════════
 
     function renderCurrentCircuit() {
@@ -1735,7 +2045,11 @@ endmodule`
 
       const badge = document.getElementById("djsHudModeBadge");
 
-      if (currentModule === "sr_neg_gate.sv") {
+      if (currentModule === "dff_master_slave.sv") {
+        container.innerHTML = renderDffMasterSlaveCircuit();
+        if (badge) badge.textContent = "[DFF MASTER-SLAVE LATCH ENGINE]";
+        selectGate("dff_dl2");
+      } else if (currentModule === "sr_neg_gate.sv") {
         container.innerHTML = renderSrLatchCircuit();
         if (badge) badge.textContent = "[SR LATCH GATE MODEL]";
         selectGate("sr_nand1");
@@ -1743,17 +2057,30 @@ endmodule`
         container.innerHTML = renderAluCircuit();
         if (badge) badge.textContent = "[32-BIT ALU HOTSPOT]";
         selectGate("alu_xor1");
-      } else if (currentModule === "fulladder.sv") {
-        container.innerHTML = renderFullAdderCircuit();
-        if (badge) badge.textContent = "[FULL ADDER GATE MODEL]";
-        selectGate("alu_xor1");
       } else {
         container.innerHTML = renderProcessorCoreCircuit();
         if (badge) badge.textContent = "[RV32I GATE NETLIST]";
-        selectGate("alu_xor1");
+        selectGate("rv_ex_stage");
       }
 
       updateSignalHud();
+    }
+
+    function updateCircuitWires() {
+      // Re-renders during smooth mouse drag without full DOM recreation
+      renderCurrentCircuit();
+    }
+
+    function toggleSubcircuit(stageId) {
+      // Extracts subcircuit key ('dl1', 'dl2', 'rv_if', 'rv_id', 'rv_reg', 'rv_ex')
+      const cleanKey = stageId.replace('dff_', '').replace('_stage', '');
+      expandedBlocks[cleanKey] = !expandedBlocks[cleanKey];
+      renderCurrentCircuit();
+    }
+
+    function togglePin(pinKey) {
+      pinState[pinKey] = pinState[pinKey] ? 0 : 1;
+      renderCurrentCircuit();
     }
 
     function escapeHtml(text) {
@@ -1763,13 +2090,16 @@ endmodule`
         .replace(/>/g, "&gt;");
     }
 
-    function syntaxHighlightVerilog(code) {
+    // Code formatter with syntax highlighting and individual line wrappers for yellow cross-highlighting
+    function syntaxHighlightVerilogLines(code) {
       const lines = code.split("\n");
       const keywordRegex = /\b(module|endmodule|input|output|inout|wire|reg|logic|assign|always|always_ff|always_comb|begin|end|case|endcase|if|else|parameter|localparam|posedge|negedge)\b/g;
       const gateRegex = /\b(and|nand|or|nor|xor|xnor|not|buf)\b/g;
       const numRegex = /\b(\d+'[bBoOdDhH][0-9a-fA-F_]+|\d+)\b/g;
 
-      return lines.map(line => {
+      return lines.map((line, idx) => {
+        const lineNum = idx + 1;
+        let lineHtml = "";
         const commentIdx = line.indexOf("//");
         if (commentIdx !== -1) {
           const codePart = line.substring(0, commentIdx);
@@ -1778,34 +2108,77 @@ endmodule`
             .replace(keywordRegex, '<span style="color: #6f42c1; font-weight: 600;">$1</span>')
             .replace(gateRegex, '<span style="color: #0284c7; font-weight: 600;">$1</span>')
             .replace(numRegex, '<span style="color: #0550ae;">$1</span>');
-          return highlightedCode + `<span style="color: #b45309; font-style: italic;">${escapeHtml(commentPart)}</span>`;
+          lineHtml = highlightedCode + `<span style="color: #b45309; font-style: italic;">${escapeHtml(commentPart)}</span>`;
         } else {
-          return escapeHtml(line)
+          lineHtml = escapeHtml(line)
             .replace(keywordRegex, '<span style="color: #6f42c1; font-weight: 600;">$1</span>')
             .replace(gateRegex, '<span style="color: #0284c7; font-weight: 600;">$1</span>')
             .replace(numRegex, '<span style="color: #0550ae;">$1</span>');
         }
-      }).join("\n");
+        return `<div id="djs-line-${lineNum}" class="djs-code-line" style="padding: 0 4px; border-left: 3px solid transparent; transition: background 0.15s ease; min-height: 17px;">${lineHtml || ' '}</div>`;
+      }).join("");
+    }
+
+    // Two-Way Code Cross-Highlighting (Yellow highlight matching video recording)
+    function highlightCodeLines(lineNums) {
+      clearCodeHighlight();
+      if (!lineNums || !lineNums.length) return;
+      lineNums.forEach(num => {
+        const el = document.getElementById("djs-line-" + num);
+        if (el) el.classList.add("djs-line-highlighted");
+      });
+      const firstEl = document.getElementById("djs-line-" + lineNums[0]);
+      if (firstEl) {
+        firstEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function clearCodeHighlight() {
+      document.querySelectorAll(".djs-line-highlighted").forEach(el => {
+        el.classList.remove("djs-line-highlighted");
+      });
     }
 
     function djsSelectModule(filename) {
       currentModule = filename;
 
+      // Update active tab styles
+      ["rv32i", "dff", "alu"].forEach(key => {
+        const tab = document.getElementById("djsSubTabCode_" + key);
+        if (tab) {
+          const isTarget = (key === "rv32i" && filename === "rv32i_core.sv") ||
+                           (key === "dff" && filename === "dff_master_slave.sv") ||
+                           (key === "alu" && filename === "rv32i_alu.sv");
+          if (isTarget) {
+            tab.classList.add("active");
+            tab.style.background = "#ffffff";
+            tab.style.border = "1px solid #dee2e6";
+            tab.style.borderBottom = "1px solid #ffffff";
+            tab.style.color = "#495057";
+          } else {
+            tab.classList.remove("active");
+            tab.style.background = "transparent";
+            tab.style.border = "1px solid transparent";
+            tab.style.color = "#0d6efd";
+          }
+        }
+      });
+
       // Update active tab label
       const tabLabel = document.getElementById("djsActiveFileTabName");
       if (tabLabel) tabLabel.textContent = filename;
 
-      // Update Code display with syntax highlighting
+      // Update Code display
       const code = HDL_PRESETS[filename] || HDL_PRESETS["rv32i_core.sv"];
       const codeEl = document.getElementById("djsCodeDisplay");
-      if (codeEl) codeEl.innerHTML = syntaxHighlightVerilog(code);
+      if (codeEl) codeEl.innerHTML = syntaxHighlightVerilogLines(code);
 
-      // Update Line numbers
+      // Update Line numbers gutter
       const gutter = document.getElementById("djsCodeGutter");
       if (gutter) {
         const lines = code.split("\n").length;
         let numbersHtml = "";
-        for (let i = 1; i <= Math.max(lines, 20); i++) numbersHtml += i + "<br>";
+        for (let i = 1; i <= Math.max(lines, 24); i++) numbersHtml += i + "<br>";
         gutter.innerHTML = numbersHtml;
       }
 
@@ -1814,6 +2187,19 @@ endmodule`
 
       // Render the gate schematic
       renderCurrentCircuit();
+    }
+
+    function onDjsCodeInput() {
+      const codeEl = document.getElementById("djsCodeDisplay");
+      if (!codeEl) return;
+      const text = codeEl.innerText || codeEl.textContent;
+      const lines = text.split("\n").length;
+      const gutter = document.getElementById("djsCodeGutter");
+      if (gutter) {
+        let numbersHtml = "";
+        for (let i = 1; i <= Math.max(lines, 24); i++) numbersHtml += i + "<br>";
+        gutter.innerHTML = numbersHtml;
+      }
     }
 
     function switchDjsLeftTab(tabName) {
@@ -1842,13 +2228,8 @@ endmodule`
       return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
-    function togglePin(pinKey) {
-      pinState[pinKey] = pinState[pinKey] ? 0 : 1;
-      renderCurrentCircuit();
-    }
-
     function selectGate(gateKey) {
-      const g = gateDatabase[gateKey] || gateDatabase.alu_xor1;
+      const g = gateDatabase[gateKey] || gateDatabase.rv_ex_stage || gateDatabase.alu_xor1;
       
       const badge = document.getElementById("inspGateBadge");
       const name = document.getElementById("inspGateName");
@@ -1872,16 +2253,33 @@ endmodule`
 
       // Visual highlight on canvas
       document.querySelectorAll(".comp-box").forEach(el => el.classList.remove("comp-selected"));
-      const target = document.getElementById(gateKey);
+      const target = document.getElementById("elem-" + gateKey) || document.getElementById(gateKey);
       if (target) target.classList.add("comp-selected");
     }
 
     function djsToggleRun() {
-      if (isSimRunning) {
-        djsPauseSim();
-      } else {
-        djsResumeSim();
+      // Re-synthesize code currently in editor
+      const codeEl = document.getElementById("djsCodeDisplay");
+      if (codeEl) {
+        const rawCode = codeEl.innerText || codeEl.textContent;
+        if (rawCode && rawCode.trim().length > 10) {
+          HDL_PRESETS[currentModule] = rawCode;
+          if (rawCode.includes("dff_master_slave") || rawCode.includes("d_latch")) {
+            currentModule = "dff_master_slave.sv";
+          } else if (rawCode.includes("rv32i_core")) {
+            currentModule = "rv32i_core.sv";
+          } else if (rawCode.includes("rv32i_alu")) {
+            currentModule = "rv32i_alu.sv";
+          }
+        }
       }
+
+      if (!isSimRunning) {
+        djsResumeSim();
+      } else {
+        advanceTick();
+      }
+      renderCurrentCircuit();
     }
 
     function djsPauseSim() {
@@ -1897,8 +2295,8 @@ endmodule`
       isSimRunning = true;
       const btn = document.getElementById("djsRunBtn");
       const txt = document.getElementById("djsRunBtnText");
-      if (btn) btn.style.background = "#0d6efd";
-      if (txt) txt.textContent = "Run";
+      if (btn) btn.style.background = "#16a34a";
+      if (txt) txt.textContent = "Running...";
       startSimLoop();
     }
 
@@ -1917,8 +2315,8 @@ endmodule`
     function djsResetSim() {
       simTick = 32351;
       simClock = 0;
-      pinState.ns = 1;
-      pinState.nr = 1;
+      pinState.dff_d = 1;
+      pinState.dff_clk = 0;
       pinState.pc_val = 0;
       updateTickDisplay();
       renderCurrentCircuit();
@@ -1928,8 +2326,12 @@ endmodule`
       simTick++;
       simClock = 1 - simClock;
       pinState.clk_val = simClock;
-      if (simClock === 1) {
-        pinState.pc_val = (pinState.pc_val + 4) & 0xFFFFFF;
+      if (currentModule === "dff_master_slave.sv") {
+        pinState.dff_clk = simClock;
+      } else {
+        if (simClock === 1) {
+          pinState.pc_val = (pinState.pc_val + 4) & 0xFFFFFF;
+        }
       }
       updateTickDisplay();
       updateHudClock();
@@ -1949,13 +2351,15 @@ endmodule`
     function updateSignalHud() {
       const hud = document.getElementById("djsSignalHud");
       if (!hud) return;
-      if (currentModule === "sr_neg_gate.sv") {
-        hud.textContent = `ns=${pinState.ns} | nr=${pinState.nr} | Q=${pinState.q} | Q̄=${pinState.nq} | Tick=${simTick}`;
+      if (currentModule === "dff_master_slave.sv") {
+        hud.textContent = `d=${pinState.dff_d} | clk=${pinState.dff_clk} | qm=${pinState.dff_qm} | Q=${pinState.dff_q} | Q̄=${pinState.dff_nq} | ⏱ Tick=${simTick}`;
+      } else if (currentModule === "sr_neg_gate.sv") {
+        hud.textContent = `ns=${pinState.ns} | nr=${pinState.nr} | Q=${pinState.q} | Q̄=${pinState.nq} | ⏱ Tick=${simTick}`;
       } else if (currentModule === "fulladder.sv") {
         const sum = pinState.fa_a ^ pinState.fa_b ^ pinState.fa_cin;
-        hud.textContent = `A=${pinState.fa_a} | B=${pinState.fa_b} | Cin=${pinState.fa_cin} | Sum=${sum} | Tick=${simTick}`;
+        hud.textContent = `A=${pinState.fa_a} | B=${pinState.fa_b} | Cin=${pinState.fa_cin} | Sum=${sum} | ⏱ Tick=${simTick}`;
       } else {
-        hud.textContent = `clk=${simClock} | pc=0x00000004 | instr=00000033 (ADD) | alu_out=00000008 | Cout=0 | Tick=${simTick}`;
+        hud.textContent = `clk=${simClock} | pc=0x${(pinState.pc_val||0).toString(16).padStart(8,'0')} | instr=ADD | alu_out=0x00000008 | Cout=0 | ⏱ Tick=${simTick}`;
       }
     }
 
@@ -2098,7 +2502,26 @@ endmodule`
       const list = document.getElementById("djsIoControlsList");
       if (!list) return;
 
-      if (filename === "sr_neg_gate.sv") {
+      if (filename === "dff_master_slave.sv") {
+        list.innerHTML = `
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+            <div style="font-weight: 800; font-size: 11px; margin-bottom: 6px;">INPUT BUTTONS:</div>
+            <button onclick="togglePin('dff_d')" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; margin-right: 6px;">Toggle d</button>
+            <button onclick="togglePin('dff_clk')" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">Toggle clk</button>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; font-size: 11px;">
+            <b>OUTPUT LAMPS:</b><br>
+            • q: <b style="color: #10b981;">HIGH when latched</b><br>
+            • nq: <b style="color: #ef4444;">LOW when inverted</b>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; font-size: 11px; line-height: 1.5;">
+            <b>INTERACTIVE ACTIONS:</b><br>
+            • Drag any gate or block with mouse<br>
+            • Click <b>[+]</b> on dl2 to expand internal logic gates<br>
+            • Hover gates to highlight Verilog HDL code in yellow
+          </div>
+        `;
+      } else if (filename === "sr_neg_gate.sv") {
         list.innerHTML = `
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
             <div style="font-weight: 800; font-size: 11px; margin-bottom: 6px;">INPUT BUTTONS:</div>
@@ -2122,13 +2545,23 @@ endmodule`
         `;
       } else {
         list.innerHTML = `
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+            <div style="font-weight: 800; font-size: 11px; margin-bottom: 6px;">CORE CONTROLS:</div>
+            <button onclick="advanceTick()" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; margin-right: 6px;">Step Clock (CLK)</button>
+            <button onclick="togglePin('rv_reset')" style="background: #dc2626; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">Reset Core</button>
+          </div>
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; font-size: 11px; line-height: 1.6;">
-            <b>PROCESSOR SIGNALS:</b><br>
-            • clk [1 bit] - Driven by Auto-Clock Generator<br>
-            • reset [1 bit] - Sync Reset<br>
-            • instr [32-bit] - Current Opcode 0x00000033<br>
-            • alu_out [32-bit] - Arithmetic Result<br>
-            • mem_write [1 bit] - RAM write enable
+            <b>INSTRUCTION SELECTOR:</b><br>
+            <button onclick="pinState.instr_name='ADD'; pinState.alu_out=8; renderCurrentCircuit();" style="margin: 2px; padding: 2px 6px; font-size: 10px; cursor: pointer;">ADD</button>
+            <button onclick="pinState.instr_name='SUB'; pinState.alu_out=2; renderCurrentCircuit();" style="margin: 2px; padding: 2px 6px; font-size: 10px; cursor: pointer;">SUB</button>
+            <button onclick="pinState.instr_name='XOR'; pinState.alu_out=6; renderCurrentCircuit();" style="margin: 2px; padding: 2px 6px; font-size: 10px; cursor: pointer;">XOR</button>
+            <button onclick="pinState.instr_name='LW'; pinState.alu_out=9; renderCurrentCircuit();" style="margin: 2px; padding: 2px 6px; font-size: 10px; cursor: pointer;">LW</button>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; font-size: 11px; line-height: 1.5;">
+            <b>INTERACTIVE ACTIONS:</b><br>
+            • Drag stages (IF, ID, REG, EX ALU) with mouse<br>
+            • Click <b>[+]</b> on any stage to expand internal gate netlist<br>
+            • Hover gates to highlight Verilog HDL code lines in yellow
           </div>
         `;
       }

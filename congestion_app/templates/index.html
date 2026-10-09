@@ -416,8 +416,12 @@
           <div style="background: #7c3aed; color: #ffffff; font-weight: 900; font-size: 11px; padding: 4px 9px; border-radius: 5px; margin-right: 8px; letter-spacing: 0.5px;">DigitalJS</div>
           <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">Setup</button>
           <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">I/O</button>
-          <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #0f172a; color: #38bdf8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid #38bdf8; display: flex; align-items: center; gap: 6px;">
-            <span id="tabFilenameLabel">rv32i_core.sv</span>
+          <button type="button" class="djs-tab-btn active" id="tab_editor_code_rv32i" onclick="selectHdlPreset('rv32i_core.sv')" style="background: #0f172a; color: #38bdf8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid #38bdf8; display: flex; align-items: center; gap: 6px;">
+            <span>rv32i_core.sv</span>
+            <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
+          </button>
+          <button type="button" class="djs-tab-btn" id="tab_editor_code_dff" onclick="selectHdlPreset('dff_master_slave.sv')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 6px;">
+            <span>dff_master_slave.sv</span>
             <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
           </button>
         </div>
@@ -672,6 +676,29 @@ module rv32i_core(
 
 endmodule`,
 
+      "dff_master_slave.sv": `// D Flip-Flop Master-Slave using D Latches
+module d_latch(
+  input clk, d,
+  output q, nq
+);
+  wire clkn, d1, d2;
+  not (clkn, clk);
+  and (d1, clk, d);
+  and (d2, clk, ~d);
+  nor (q, d2, nq);
+  nor (nq, d1, q);
+endmodule
+
+module dff_master_slave(
+  input clk, d,
+  output q, nq
+);
+  wire qm, nclk;
+  not g1nclk(nclk, clk);
+  d_latch dl1(nclk, d, qm);
+  d_latch dl2(clk, qm, q, nq);
+endmodule`,
+
       "rv32i_alu.sv": `// 32-Bit RV32I Arithmetic Logic Unit (ALU Hotspot)
 module rv32i_alu(
   input [31:0] a,
@@ -757,6 +784,20 @@ endmodule`
 
       updateLineNumbers();
       updateIoPortList(filename);
+    }
+
+    function selectHdlPreset(filename) {
+      loadHdlPreset(filename);
+      switchHdlTab('code');
+      const tabRv = document.getElementById("tab_editor_code_rv32i");
+      const tabDff = document.getElementById("tab_editor_code_dff");
+      if (filename === "dff_master_slave.sv") {
+        if (tabDff) { tabDff.classList.add("active"); tabDff.style.background = "#0f172a"; tabDff.style.color = "#38bdf8"; tabDff.style.borderBottom = "2px solid #38bdf8"; }
+        if (tabRv) { tabRv.classList.remove("active"); tabRv.style.background = "transparent"; tabRv.style.color = "#94a3b8"; tabRv.style.borderBottom = "none"; }
+      } else {
+        if (tabRv) { tabRv.classList.add("active"); tabRv.style.background = "#0f172a"; tabRv.style.color = "#38bdf8"; tabRv.style.borderBottom = "2px solid #38bdf8"; }
+        if (tabDff) { tabDff.classList.remove("active"); tabDff.style.background = "transparent"; tabDff.style.color = "#94a3b8"; tabDff.style.borderBottom = "none"; }
+      }
     }
 
     function switchHdlTab(tabName) {
