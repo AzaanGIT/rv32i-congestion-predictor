@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261009-v2.9';
+      const BUILD_VER = '20261009-v3.0';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1153,9 +1153,9 @@ endmodule`
               </div>
             </div>
 
-            <!-- LIVE DIGITALJS EMBEDDED ENGINE (REAL ENGINE RUNNING IN BACKGROUND) -->
+            <!-- LIVE DIGITALJS EMBEDDED ENGINE (CIRCUIT DESIGN ONLY - CLEAN FULL VIEW) -->
             <div id="djsLiveIframeWrapper" style="width: 100%; height: 600px; min-height: 580px; position: relative; background: #ffffff; display: flex; flex-direction: column;">
-              <iframe id="djsLiveFrame" src="https://digitaljs.tilk.eu/#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 580px; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
+              <iframe id="djsLiveFrame" src="digitaljs_view.html#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 580px; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
             </div>
 
             <!-- Canvas Zoom Floating Controls (For Congestion View) -->
@@ -4062,7 +4062,8 @@ endmodule`
 
     function updateLiveDigitalJsFrame(moduleFilename) {
       const hash = DIGITALJS_LIVE_HASHES[moduleFilename] || "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
-      const targetUrl = "https://digitaljs.tilk.eu/#" + hash;
+      const targetUrl = "digitaljs_view.html#" + hash;
+      const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
       const badge = document.getElementById("djsLiveGateCountBadge");
@@ -4071,7 +4072,7 @@ endmodule`
         iframe.src = targetUrl;
       }
       if (extBtn) {
-        extBtn.href = targetUrl;
+        extBtn.href = externalUrl;
       }
       if (badge) {
         if (moduleFilename.includes("pipeline") || moduleFilename.includes("rv32i")) {

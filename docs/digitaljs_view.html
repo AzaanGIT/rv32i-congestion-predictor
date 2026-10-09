@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitalJS Circuit Viewer</title>
+  <link rel="stylesheet" href="digitaljs_assets/main.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* ═════════════════════════════════════════════════════════════════════
+       REMOVE ALL LEFT-SIDE PANELS (Options, Choose Files, Synthesis tabs)
+       KEEP ONLY THE RIGHT-SIDE CIRCUIT DESIGN
+       ═════════════════════════════════════════════════════════════════════ */
+    .tab-wrapper.editor-tab,
+    #gutter_horiz,
+    #gutter_vert,
+    #tab-buttons-wrapper,
+    #dropzone,
+    #monitorbox,
+    div.tab-content,
+    form,
+    #iopanel {
+      display: none !important;
+    }
+
+    /* Expand main grid & circuit container to 100% full width & height */
+    .main-wrapper-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .grid {
+      display: block !important;
+      flex: 1 !important;
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+
+    .editor-circuit-wrapper {
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      grid-template-columns: 1fr !important;
+      overflow: hidden !important;
+    }
+
+    .tab-wrapper.circuit-tab {
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      overflow: auto !important;
+      background: #ffffff !important;
+    }
+
+    #paper {
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 100% !important;
+      background: #ffffff !important;
+    }
+
+    /* Floating Zoom Controls (+ / -) on top right of circuit */
+    .zoom-buttons-wrapper {
+      position: fixed !important;
+      top: 14px !important;
+      right: 18px !important;
+      z-index: 1000 !important;
+      display: inline-flex !important;
+      border-radius: 4px !important;
+      overflow: hidden !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    }
+
+    /* Clean subtle top status indicator */
+    #circuit-status-banner {
+      position: fixed;
+      top: 14px;
+      left: 18px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 700;
+      color: #0f172a;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Compact Toolbar (Run/Pause/Step) */
+    #toolbar {
+      position: fixed;
+      top: 14px;
+      left: 280px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      padding: 2px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+  </style>
+
+  <script>
+    // Intercept fetch calls in bundle.js so circuits load instantly from local static JSON
+    const origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+      if (typeof url === 'string' && url.includes('/api/circuit/')) {
+        const hash = url.substring(url.indexOf('/api/circuit/') + 13).replace(/[^a-zA-Z0-9]/g, '');
+        return origFetch('circuits/' + hash + '.json', opts)
+          .catch(() => origFetch('https://digitaljs.tilk.eu/api/circuit/' + hash, opts));
+      }
+      return origFetch(url, opts);
+    };
+
+    // Default to pipelined RV32I if no hash is present
+    if (!window.location.hash || window.location.hash.length < 5) {
+      window.location.hash = '#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573';
+    }
+
+    // Listen for hash changes from parent window
+    window.addEventListener('hashchange', () => {
+      if (typeof window.onpopstate === 'function') {
+        window.onpopstate();
+      }
+    });
+
+    // Listen for postMessage from parent
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'loadHash') {
+        window.location.hash = '#' + event.data.hash;
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <!-- Floating Status Badge -->
+  <div id="circuit-status-banner">
+    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
+    <span>DIGITALJS SYNTHESIZED NETLIST</span>
+  </div>
+
+  <!-- Standard DigitalJS DOM required by bundle.js -->
+  <div class="main-wrapper-grid">
+    
+    <!-- Minimal hidden inputs required by bundle.js so it won't throw null errors -->
+    <div style="display: none;">
+      <input type="checkbox" id="transform" />
+      <select id="layout"><option value="elkjs" selected>elkjs</option></select>
+      <select id="engine"><option value="worker" selected>worker</option></select>
+      <input type="checkbox" id="no-comb-delay" />
+      <input type="checkbox" id="opt" checked />
+      <select id="fsm"><option value=""></option></select>
+      <input type="checkbox" id="fsmexpand" />
+      <input type="checkbox" id="lint" />
+      <input type="checkbox" id="techmap" />
+      <input type="radio" id="abc_disable" checked />
+      <input type="radio" id="abc_gates" />
+      <input type="radio" id="abc_luts" />
+      <input type="text" id="tick" value="0" />
+      <input type="text" name="rangel" />
+      <input type="text" name="rangeh" />
+      <input type="text" name="scale" />
+    </div>
+
+    <!-- Toolbar (Compact top bar) -->
+    <div id="toolbar" class="btn-toolbar" role="toolbar">
+      <div class="btn-group me-1" role="group">
+        <button name="resume" type="button" class="btn btn-success btn-sm" title="Resume simulation">▶ Run</button>
+        <button name="pause" type="button" class="btn btn-secondary btn-sm" title="Pause simulation" disabled>⏸ Pause</button>
+        <button name="single" type="button" class="btn btn-secondary btn-sm" title="Step simulation" disabled>→</button>
+        <button name="fastfw" type="button" class="btn btn-secondary btn-sm" title="Fast forward" disabled>⏩</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="editor-circuit-wrapper">
+        <!-- Hidden Editor Tab -->
+        <div class="tab-wrapper editor-tab">
+          <div class="tab-content"></div>
+        </div>
+
+        <!-- Right Side: The Circuit Design! (Shown 100% full width and height) -->
+        <div class="tab-wrapper circuit-tab active">
+          <div class="btn-group zoom-buttons-wrapper">
+            <button class="btn btn-secondary" name="zoom-out" style="background: #475569; color: #fff; font-weight: bold; border: none; padding: 4px 10px;">–</button>
+            <button class="btn btn-secondary" name="zoom-in" style="background: #475569; color: #fff; font-weight: bold; border: none; padding: 4px 10px;">+</button>
+          </div>
+          <div id="paper"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DigitalJS Bundle Runtime -->
+  <script src="digitaljs_assets/bundle.js"></script>
+
+  <script>
+    // Ensure circuit tab is active and paper takes full space
+    window.addEventListener('load', () => {
+      const cTab = document.querySelector('.tab-wrapper.circuit-tab');
+      if (cTab) cTab.classList.add('active');
+      const eTab = document.querySelector('.tab-wrapper.editor-tab');
+      if (eTab) eTab.style.display = 'none';
+      const gutter = document.getElementById('gutter_horiz');
+      if (gutter) gutter.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
