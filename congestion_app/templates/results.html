@@ -746,11 +746,11 @@
     // ═════════════════════════════════════════════════════════════════════════
     // 0. LAYER DATA & ROUTING DENSITY HEATMAP VIEWER
     // ═════════════════════════════════════════════════════════════════════════
-    const allResources = {{ resources|tojson }};
-    const allDemands = {{ demands|tojson }};
-    const allSuggestedResources = {{ suggested_resources|tojson }};
-    const allSuggestedParams = {{ suggested_params|tojson }};
-    const currentParams = {
+    let allResources = {{ resources|tojson }};
+    let allDemands = {{ demands|tojson }};
+    let allSuggestedResources = {{ suggested_resources|tojson }};
+    let allSuggestedParams = {{ suggested_params|tojson }};
+    let currentParams = {
       utilization: {{ utilization }},
       aspect_ratio: {{ aspect_ratio }},
       core_margin: {{ core_margin }},
@@ -758,7 +758,7 @@
       layer_adjustment: {{ layer_adjustment }}
     };
 
-    const rawData = {{ layer_usage_pct|tojson }};
+    let rawData = {{ layer_usage_pct|tojson }};
     const gridSize = 50;
 
     function generateExactReferenceHeatmap(val) {

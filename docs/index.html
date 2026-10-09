@@ -162,7 +162,7 @@
 
 
 
-  <form id="floorplanForm" action="/predict" method="POST">
+  <form id="floorplanForm" action="/predict" method="POST" onsubmit="triggerAnalysisFromForm(); return false;">
 
     <!-- PROCESSOR ARCHITECTURE SELECTION -->
     <div class="card" style="border: 1.5px solid rgba(124, 58, 237, 0.35); background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%); margin-bottom: 24px;">
@@ -431,7 +431,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-submit" style="width: auto; padding: 14px 28px; margin-top: 0;">⚡ FIND CONGESTION &amp; SYNTHESIZE IN DIGITALJS →</button>
+        <button type="button" class="btn-submit" onclick="triggerAnalysisFromForm()" style="width: auto; padding: 14px 28px; margin-top: 0;">⚡ FIND CONGESTION &amp; SYNTHESIZE IN DIGITALJS →</button>
       </div>
 
     </div>
@@ -1441,11 +1441,11 @@ endmodule`
     // ═════════════════════════════════════════════════════════════════════════
     // 0. LAYER DATA & ROUTING DENSITY HEATMAP VIEWER
     // ═════════════════════════════════════════════════════════════════════════
-    const allResources = {"M1": 0.0, "M10": 2772.0, "M2": 27540.0, "M3": 37221.0, "M4": 18450.0, "M5": 18096.0, "M6": 18450.0, "M7": 5699.0, "M8": 5796.0, "M9": 2758.0};
-    const allDemands = {"M1": 0.0, "M10": 429.7, "M2": 13979.2, "M3": 17125.2, "M4": 6668.9, "M5": 4556.9, "M6": 4614.4, "M7": 840.0, "M8": 856.9, "M9": 489.5};
-    const allSuggestedResources = {"M1": 0, "M10": 2772, "M2": 27540, "M3": 37221, "M4": 18450, "M5": 18096, "M6": 18450, "M7": 5699, "M8": 5796, "M9": 2758};
-    const allSuggestedParams = {"aspect_ratio": 1.0, "core_margin": 4.5, "density": 0.42, "layer_adjustment": 0.4, "utilization": 45.6};
-    const currentParams = {
+    let allResources = {"M1": 0.0, "M10": 2772.0, "M2": 27540.0, "M3": 37221.0, "M4": 18450.0, "M5": 18096.0, "M6": 18450.0, "M7": 5699.0, "M8": 5796.0, "M9": 2758.0};
+    let allDemands = {"M1": 0.0, "M10": 429.7, "M2": 13979.2, "M3": 17125.2, "M4": 6668.9, "M5": 4556.9, "M6": 4614.4, "M7": 840.0, "M8": 856.9, "M9": 489.5};
+    let allSuggestedResources = {"M1": 0, "M10": 2772, "M2": 27540, "M3": 37221, "M4": 18450, "M5": 18096, "M6": 18450, "M7": 5699, "M8": 5796, "M9": 2758};
+    let allSuggestedParams = {"aspect_ratio": 1.0, "core_margin": 4.5, "density": 0.42, "layer_adjustment": 0.4, "utilization": 45.6};
+    let currentParams = {
       utilization: 57.0,
       aspect_ratio: 1.5,
       core_margin: 3.0,
@@ -1453,7 +1453,7 @@ endmodule`
       layer_adjustment: 0.6
     };
 
-    const rawData = {"M1": 0.0, "M10": 15.5, "M2": 50.8, "M3": 46.0, "M4": 36.1, "M5": 25.2, "M6": 25.0, "M7": 14.7, "M8": 14.8, "M9": 17.7};
+    let rawData = {"M1": 0.0, "M10": 15.5, "M2": 50.8, "M3": 46.0, "M4": 36.1, "M5": 25.2, "M6": 25.0, "M7": 14.7, "M8": 14.8, "M9": 17.7};
     const gridSize = 50;
 
     function generateExactReferenceHeatmap(val) {
