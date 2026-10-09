@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261009-v3.7';
+      const BUILD_VER = '20261009-v3.8';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1201,141 +1201,7 @@ endmodule`
 
       </div>
 
-      <!-- 3. LOGIC GATE LEVEL INSPECTOR & PHYSICAL BEOL CONGESTION IMPACT -->
-      <div class="card" style="margin-bottom: 24px; padding: 22px; border: 1.5px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: #f3e8ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; border: 1px solid #e9d5ff;">⚡</div>
-            <div>
-              <div style="color: #1a202c; font-size: 14px; font-weight: 800; letter-spacing: -0.2px;">LOGIC GATE LEVEL INSPECTOR</div>
-              <div style="color: #64748b; font-size: 11px; margin-top: 2px;">Interactive standard-cell analysis &amp; live pin values linked directly to the synthesized gate diagram above</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selected Gate:</span>
-            <span id="inspGateBadge" style="background: #fef2f2; color: #dc2626; font-size: 10px; padding: 3px 9px; border-radius: 6px; border: 1px solid #fecaca; font-weight: 800;">HOTSPOT GATE</span>
-          </div>
-        </div>
 
-        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 18px; align-items: stretch;">
-          
-          <!-- Column 1: Gate Boolean Logic & Cell Profile -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-              <div>
-                <div style="font-size: 15px; font-weight: 800; color: #1a202c;" id="inspGateName">2-Input XOR Gate (XOR2)</div>
-                <div style="color: #64748b; font-size: 11px; margin-top: 2px;" id="inspGateSub">U_ALU_XOR1 (ALU Full Adder Carry Slice)</div>
-              </div>
-            </div>
-
-            <table class="def-table" style="width: 100%; font-size: 11.5px; border-collapse: collapse; margin-top: 10px;">
-              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b; width: 44%;">Boolean Logic:</td><td id="inspGateEquation" style="padding: 6px 0; color: #1a202c; font-weight: 800; font-family: monospace;">Y = A ⊕ B</td></tr>
-              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b;">Live Pin Values:</td><td id="inspGatePins" style="padding: 6px 0; color: #10b981; font-weight: 800; font-family: monospace;">A=1, B=1 → Y=0</td></tr>
-              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b;">Standard Cell:</td><td id="inspCellPrim" style="padding: 6px 0; color: #7c3aed; font-weight: 800; font-size: 11px; font-family: monospace;">sky130_fd_sc_hd__xor2_1</td></tr>
-              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b;">Physical Cell Pins:</td><td id="inspPinCount" style="padding: 6px 0; color: #ea580c; font-weight: 800;">3 Pins (A, B on M1, Y on M1)</td></tr>
-              <tr><td style="padding: 6px 0; color: #64748b;">Gate Transistors:</td><td id="inspTransistors" style="padding: 6px 0; color: #0284c7; font-weight: 800;">8 CMOS FETs (4 NMOS, 4 PMOS)</td></tr>
-            </table>
-          </div>
-
-          <!-- Column 2: Circuit Issues & Routing Bottlenecks -->
-          <div style="background: #ffffff; border: 1.5px solid #fee2e2; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="color: #b91c1c; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
-                  <span>🚨</span>
-                  <span>CIRCUIT ISSUES &amp; BOTTLENECK</span>
-                </div>
-                <span id="inspIssueBadge" style="background: #fef2f2; color: #dc2626; font-size: 9.5px; padding: 2px 8px; border-radius: 4px; border: 1px solid #fecaca; font-weight: 800;">HOTSPOT STAGE 🔥</span>
-              </div>
-
-              <div id="inspIssueTitle" style="font-weight: 800; font-size: 13px; color: #1e293b; margin-bottom: 6px;">Peak M2 Wire Track Saturation (50.8%)</div>
-
-              <div id="inspIssueDesc" style="color: #475569; font-size: 11px; line-height: 1.5; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                64 parallel XOR gates &amp; arithmetic carry cells clustered across 4 standard cell rows cause severe horizontal track saturation. Two 4:1 forwarding multiplexers add 128+ cross-stage nets directly into ALU pins.
-              </div>
-
-              <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="padding: 4px 0; color: #64748b; width: 42%;">Bottleneck Layer:</td>
-                  <td id="inspBottleneckLayer" style="padding: 4px 0; font-weight: 700; color: #dc2626;">Metal 2 Horizontal (M1→M2 Overflows)</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                  <td style="padding: 4px 0; color: #64748b;">Critical Path Delay:</td>
-                  <td id="inspCriticalPathDelay" style="padding: 4px 0; font-weight: 700; color: #334155;">1.42ns across 8 logic levels</td>
-                </tr>
-                <tr>
-                  <td style="padding: 4px 0; color: #64748b;">DRC Risk Assessment:</td>
-                  <td id="inspDrcRisk" style="padding: 4px 0; font-weight: 700; color: #dc2626;">High DRC Risk (&gt;45% Track Capacity)</td>
-                </tr>
-              </table>
-            </div>
-
-            <div style="margin-top: 10px; font-size: 10px; color: #64748b; background: #f8fafc; border-radius: 6px; padding: 6px 10px; border-top: 1px solid #e2e8f0;">
-              💡 <b>Auto-Diagnostics:</b> Real-time BEOL layout congestion and timing bottleneck analysis.
-            </div>
-          </div>
-
-          <!-- Column 3: Gate Movement & Relocation Simulator -->
-          <div style="background: #ffffff; border: 1.5px solid #e0e7ff; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <div style="color: #4338ca; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
-                  <span>🔀</span>
-                  <span>CAN WE MOVE THE GATES? (RELOCATION IMPACT)</span>
-                </div>
-              </div>
-              <div style="font-size: 10.5px; color: #64748b; margin-bottom: 8px;">
-                Select movement to preview what happens and what problems occur:
-              </div>
-
-              <!-- Movement Scenario Buttons -->
-              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 10px;">
-                <button type="button" id="btnRelocSpread" onclick="selectRelocationScenario('spread')" style="background: #4338ca; color: #ffffff; border: none; padding: 5px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                  <span>↔ Spread Apart</span>
-                </button>
-                <button type="button" id="btnRelocLeft" onclick="selectRelocationScenario('moveLeft')" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 5px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                  <span>⬅ Move Left (ID)</span>
-                </button>
-                <button type="button" id="btnRelocRight" onclick="selectRelocationScenario('moveRight')" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 5px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                  <span>➡ Move Right (MEM)</span>
-                </button>
-                <button type="button" id="btnRelocLayer" onclick="selectRelocationScenario('moveLayer')" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 5px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                  <span>⬍ Upper Metals</span>
-                </button>
-              </div>
-
-              <!-- Consequence Box -->
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                  <span style="font-size: 10px; color: #64748b; font-weight: 700;">CONSEQUENCE &amp; PROBLEMS:</span>
-                  <span id="inspMoveVerdict" style="background: #f0fdf4; color: #15803d; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; border: 1px solid #bbf7d0; font-weight: 800;">RECOMMENDED CONGESTION FIX</span>
-                </div>
-                <div id="inspMoveConsequence" style="font-size: 11px; color: #1e293b; line-height: 1.45;">
-                  Spreading the 64 XOR gates across 6 standard cell rows (de-clustering) doubles channel whitespace for routing. M2 track congestion drops from 50.8% down to 31.4% (clearing DRC). HOWEVER, wirelength increases by +140µm, adding +110ps of parasitic RC delay to the ALU critical path.
-                </div>
-              </div>
-
-              <!-- Live Trade-off Metrics Chips -->
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; padding: 6px 4px; text-align: center;">
-                  <div style="font-size: 9px; color: #15803d; font-weight: 700;">CONGESTION</div>
-                  <div id="inspMoveMetricCongest" style="font-size: 10.5px; color: #166534; font-weight: 800; margin-top: 2px;">-19.4% (Pass)</div>
-                </div>
-                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; padding: 6px 4px; text-align: center;">
-                  <div style="font-size: 9px; color: #dc2626; font-weight: 700;">TIMING DELAY</div>
-                  <div id="inspMoveMetricDelay" style="font-size: 10.5px; color: #991b1b; font-weight: 800; margin-top: 2px;">+110ps RC</div>
-                </div>
-                <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 4px; padding: 6px 4px; text-align: center;">
-                  <div style="font-size: 9px; color: #7c3aed; font-weight: 700;">WIRELENGTH</div>
-                  <div id="inspMoveMetricWL" style="font-size: 10.5px; color: #5b21b6; font-weight: 800; margin-top: 2px;">+14.8% WL</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </div>
 
       <!-- Overview Cards: 4 KPI Cards -->
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
