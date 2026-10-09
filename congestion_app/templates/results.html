@@ -370,16 +370,24 @@
               <button type="button" onclick="djsLoadDialog()" title="Load from file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">📁</button>
               <button type="button" onclick="djsExportJson()" title="Save to file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">💾</button>
               <button type="button" onclick="djsShareLink()" title="Get link" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer;">🔗</button>
+            <!-- Layout Orientation Switcher (" = " Stacked vs " || " Side) -->
+            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Layout orientation" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d;">
+              <button type="button" id="djsLayoutStackedBtn" onclick="setDjsLayout('stacked')" title="Stack Code &amp; Gate-Level: Top &amp; Bottom (=)" style="background: #343a40; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #5a6268; display: inline-flex; align-items: center; gap: 4px;">
+                <span>☰ Stacked (=)</span>
+              </button>
+              <button type="button" id="djsLayoutSideBtn" onclick="setDjsLayout('side')" title="Side-by-side Layout (||)" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                <span>◫ Side (||)</span>
+              </button>
             </div>
 
           </div>
         </div>
 
-        <!-- 2. SPLIT WORKBENCH: EDITOR (LEFT) + SPLITTER (10px) + CANVAS (RIGHT) -->
-        <div class="editor-circuit-wrapper" style="display: grid; grid-template-columns: 460px 10px 1fr; min-height: 560px; background: #ffffff;">
+        <!-- 2. WORKBENCH: STACKED LAYOUT (=) - CODE ON TOP, GATE LEVEL BELOW -->
+        <div id="djsWorkbenchLayout" class="editor-circuit-wrapper" style="display: flex; flex-direction: column; background: #ffffff;">
           
-          <!-- LEFT COLUMN: CODE EDITOR & SETUP / IO TABS -->
-          <div style="background: #ffffff; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid #dee2e6;">
+          <!-- TOP ROW: CODE EDITOR & SETUP / IO TABS -->
+          <div id="djsEditorContainer" style="background: #ffffff; display: flex; flex-direction: column; height: 270px; flex-shrink: 0; overflow: hidden; width: 100%;">
             
             <!-- Nav Tabs (Setup | I/O | rv32i_core.sv ☁️ ✕) -->
             <nav style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 6px 8px 0 8px;">
@@ -440,13 +448,13 @@
 
           </div>
 
-          <!-- MIDDLE COLUMN: SPLITTER GUTTER -->
-          <div id="gutter_horiz" class="gutter gutter-horizontal" style="width: 10px; background-color: #eee; cursor: ew-resize; background-repeat: no-repeat; background-position: 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');"></div>
+          <!-- HORIZONTAL SPLITTER GUTTER BETWEEN CODE AND GATE LEVEL CANVAS -->
+          <div id="gutter_splitter" class="gutter gutter-vertical" style="height: 10px; width: 100%; background-color: #eee; cursor: ns-resize; background-repeat: no-repeat; background-position: 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII='); border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;"></div>
 
-          <!-- RIGHT COLUMN: CIRCUIT CANVAS (PURE WHITE PAPER) -->
-          <div class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column;">
+          <!-- BOTTOM ROW: GATE LEVEL CIRCUIT CANVAS (ONE BELOW ANOTHER "=") -->
+          <div id="djsCircuitContainer" class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column; min-height: 560px; width: 100%;">
             
-            <!-- Canvas Zoom Floating Controls (Exact Screenshot 2 style) -->
+            <!-- Canvas Zoom Floating Controls -->
             <div class="btn-group zoom-buttons-wrapper" style="position: absolute; top: 14px; right: 18px; z-index: 20; display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
               <button class="btn btn-secondary" onclick="djsZoomOut()" title="Zoom out" style="background: #6c757d; color: #ffffff; border: none; padding: 3px 10px; font-size: 14px; font-weight: bold; cursor: pointer; border-right: 1px solid #5a6268;">–</button>
               <button class="btn btn-secondary" onclick="djsZoomIn()" title="Zoom in" style="background: #6c757d; color: #ffffff; border: none; padding: 3px 10px; font-size: 14px; font-weight: bold; cursor: pointer;">+</button>
@@ -454,7 +462,7 @@
 
             <!-- SVG Circuit Viewport (White Paper) -->
             <div id="djsCanvasViewport" style="flex: 1; width: 100%; height: 100%; overflow: auto; display: flex; align-items: center; justify-content: center; background: #ffffff;">
-              <svg id="djsCircuitSvg" viewBox="0 0 960 560" style="width: 100%; height: 100%; min-width: 650px; min-height: 480px; display: block; background: #ffffff;" xmlns="http://www.w3.org/2000/svg">
+              <svg id="djsCircuitSvg" viewBox="0 0 960 560" style="width: 100%; height: 100%; min-width: 650px; min-height: 520px; display: block; background: #ffffff;" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <pattern id="edaGridDjs" width="20" height="20" patternUnits="userSpaceOnUse">
                     <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="0.8"/>
@@ -1976,6 +1984,71 @@ endmodule`
     function applyZoom() {
       const grp = document.getElementById("djsCircuitGroup");
       if (grp) grp.setAttribute("transform", `scale(${simZoom})`);
+    }
+
+    function setDjsLayout(mode) {
+      const wrapper = document.getElementById("djsWorkbenchLayout");
+      const editor = document.getElementById("djsEditorContainer");
+      const gutter = document.getElementById("gutter_splitter");
+      const circuit = document.getElementById("djsCircuitContainer");
+      const btnStacked = document.getElementById("djsLayoutStackedBtn");
+      const btnSide = document.getElementById("djsLayoutSideBtn");
+
+      if (!wrapper || !editor || !gutter || !circuit) return;
+
+      if (mode === 'stacked') {
+        // Stacked mode (" = ") - One below another
+        wrapper.style.display = "flex";
+        wrapper.style.flexDirection = "column";
+        wrapper.style.gridTemplateColumns = "none";
+        
+        editor.style.width = "100%";
+        editor.style.height = "270px";
+        editor.style.borderRight = "none";
+        editor.style.borderBottom = "none";
+        
+        gutter.className = "gutter gutter-vertical";
+        gutter.style.height = "10px";
+        gutter.style.width = "100%";
+        gutter.style.cursor = "ns-resize";
+        gutter.style.backgroundImage = "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=')";
+        gutter.style.borderTop = "1px solid #dee2e6";
+        gutter.style.borderBottom = "1px solid #dee2e6";
+        gutter.style.borderLeft = "none";
+        gutter.style.borderRight = "none";
+
+        circuit.style.width = "100%";
+        circuit.style.minHeight = "560px";
+
+        if (btnStacked) { btnStacked.style.background = "#343a40"; btnStacked.style.color = "#ffffff"; }
+        if (btnSide) { btnSide.style.background = "#6c757d"; btnSide.style.color = "#ffffff"; }
+      } else {
+        // Side-by-side mode (" || ")
+        wrapper.style.display = "grid";
+        wrapper.style.flexDirection = "row";
+        wrapper.style.gridTemplateColumns = "460px 10px 1fr";
+        
+        editor.style.width = "auto";
+        editor.style.height = "auto";
+        editor.style.borderRight = "1px solid #dee2e6";
+        editor.style.borderBottom = "none";
+        
+        gutter.className = "gutter gutter-horizontal";
+        gutter.style.height = "auto";
+        gutter.style.width = "10px";
+        gutter.style.cursor = "ew-resize";
+        gutter.style.backgroundImage = "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==')";
+        gutter.style.borderTop = "none";
+        gutter.style.borderBottom = "none";
+        gutter.style.borderLeft = "none";
+        gutter.style.borderRight = "none";
+
+        circuit.style.width = "auto";
+        circuit.style.minHeight = "560px";
+
+        if (btnStacked) { btnStacked.style.background = "#6c757d"; btnStacked.style.color = "#ffffff"; }
+        if (btnSide) { btnSide.style.background = "#343a40"; btnSide.style.color = "#ffffff"; }
+      }
     }
 
     function djsLoadDialog() {
