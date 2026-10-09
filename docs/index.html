@@ -142,6 +142,30 @@
     #fixModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
     .modal-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border-radius: 12px; width: 600px; max-width: 90%; padding: 24px; color: #1a202c; }
   </style>
+  <script>
+    function showInputForm() {
+      const resultsEl = document.getElementById('resultsView');
+      const controlsEl = document.getElementById('controlsView');
+      if (resultsEl) resultsEl.style.display = 'none';
+      if (controlsEl) controlsEl.style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function triggerAnalysisFromForm() {
+      const controlsEl = document.getElementById('controlsView');
+      const resultsEl = document.getElementById('resultsView');
+      if (controlsEl) controlsEl.style.display = 'none';
+      if (resultsEl) resultsEl.style.display = 'block';
+      window.scrollTo(0, 0);
+      if (typeof applyFloorplanAnalysis === 'function') {
+        try {
+          applyFloorplanAnalysis(false, null);
+        } catch (err) {
+          console.error('Error running applyFloorplanAnalysis:', err);
+        }
+      }
+    }
+  </script>
 </head>
 <body>
 
@@ -545,7 +569,8 @@
     // Initialize on load
     updateLiveStats();
 
-    const HDL_PRESETS = {
+    if (typeof window.HDL_PRESETS === 'undefined') {
+      window.HDL_PRESETS = {
       "rv32i_core.sv": `// RV32I Single-Cycle Processor Core (Gate-Level Synthesizable)
 module rv32i_core(
   input clk,
@@ -687,6 +712,8 @@ module custom_rv32i_submodule(
 
 endmodule`
     };
+    }
+    var HDL_PRESETS = window.HDL_PRESETS;
 
     function loadHdlPreset(filename) {
       const code = HDL_PRESETS[filename] || HDL_PRESETS["rv32i_core.sv"];
@@ -1636,7 +1663,17 @@ endmodule`
     }
 
     function applyFloorplanAnalysis(isFix, targetFixedLayer) {
-      const util = parseFloat(document.getElementById('inp_util')?.value) || currentParams.utilization || 57.0;
+      // 0. Ensure Page 2 is visible immediately so UI responds without delay
+      const controlsEl = document.getElementById('controlsView');
+      const resultsEl = document.getElementById('resultsView');
+      if (controlsEl) controlsEl.style.display = 'none';
+      if (resultsEl) resultsEl.style.display = 'block';
+      if (!isFix) {
+        window.scrollTo(0, 0);
+      }
+
+      try {
+        const util = parseFloat(document.getElementById('inp_util')?.value) || currentParams.utilization || 57.0;
       const aspect = parseFloat(document.getElementById('inp_aspect')?.value) || currentParams.aspect_ratio || 1.5;
       const margin = parseFloat(document.getElementById('inp_margin')?.value) || currentParams.core_margin || 3.0;
       const density = parseFloat(document.getElementById('inp_density')?.value) || currentParams.density || 0.56;
@@ -1808,12 +1845,6 @@ endmodule`
         djsSelectModule(targetModule);
       }
 
-      // 10. Focus / Smooth Scroll Context
-      const controlsEl = document.getElementById('controlsView');
-      const resultsEl = document.getElementById('resultsView');
-      if (controlsEl) controlsEl.style.display = 'none';
-      if (resultsEl) resultsEl.style.display = 'block';
-
       if (isFix) {
         if (targetFixedLayer) {
           const card = document.getElementById('card-' + targetFixedLayer);
@@ -1832,12 +1863,16 @@ endmodule`
       } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+    } catch (err) {
+      console.error('applyFloorplanAnalysis error:', err);
     }
+  }
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // 1. HDL PRESETS & MODULE DEFINITIONS (Matches DigitalJS Online Exactly)
-    // ═════════════════════════════════════════════════════════════════════════
-    const HDL_PRESETS = {
+  // ═════════════════════════════════════════════════════════════════════════
+  // 1. HDL PRESETS & MODULE DEFINITIONS (Matches DigitalJS Online Exactly)
+  // ═════════════════════════════════════════════════════════════════════════
+  if (typeof window.HDL_PRESETS === 'undefined') {
+    window.HDL_PRESETS = {
       "rv32i_core.sv": `// RV32I Single-Cycle Processor Core (Gate-Level Synthesizable)
 module rv32i_core(
   input clk,
@@ -1963,9 +1998,10 @@ module full_adder(
   and g3(a1, a, b);
   and g4(a2, x1, cin);
   or  g5(cout, a1, a2);
-
 endmodule`
     };
+  }
+  var HDL_PRESETS = window.HDL_PRESETS;
 
     // User-submitted Verilog code from Form
     const userSubmittedCode = "";
@@ -3650,25 +3686,11 @@ endmodule`
   </div>
 
   <script>
-    function showInputForm() {
-      const resultsEl = document.getElementById('resultsView');
-      const controlsEl = document.getElementById('controlsView');
-      if (resultsEl) resultsEl.style.display = 'none';
-      if (controlsEl) controlsEl.style.display = 'block';
-      window.scrollTo(0, 0);
-    }
-
     // ALWAYS ensure Page 1 (Input Form) opens first when visiting or refreshing the website
     showInputForm();
     window.addEventListener('DOMContentLoaded', () => {
       showInputForm();
     });
-
-    function triggerAnalysisFromForm() {
-      if (typeof applyFloorplanAnalysis === 'function') {
-        applyFloorplanAnalysis(false, null);
-      }
-    }
 
     // Intercept floorplanForm submission on controlsView
     document.addEventListener('DOMContentLoaded', () => {

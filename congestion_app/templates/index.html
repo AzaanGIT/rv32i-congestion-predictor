@@ -625,7 +625,8 @@
     // Initialize on load
     updateLiveStats();
 
-    const HDL_PRESETS = {
+    if (typeof window.HDL_PRESETS === 'undefined') {
+      window.HDL_PRESETS = {
       "rv32i_core.sv": `// RV32I Single-Cycle Processor Core (Gate-Level Synthesizable)
 module rv32i_core(
   input clk,
@@ -767,6 +768,8 @@ module custom_rv32i_submodule(
 
 endmodule`
     };
+    }
+    var HDL_PRESETS = window.HDL_PRESETS;
 
     function loadHdlPreset(filename) {
       const code = HDL_PRESETS[filename] || HDL_PRESETS["rv32i_core.sv"];
