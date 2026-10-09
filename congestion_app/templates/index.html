@@ -251,32 +251,33 @@
           <div class="card-title">TARGET PROCESSOR CORE / ARCHITECTURE</div>
           <div class="card-heading">Select the processor through which you want to proceed</div>
         </div>
-        <span id="activeTargetBadge" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
-          TARGET LOADED: RV32I
+        <span id="activeTargetBadge" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
+          AWAITING SELECTION
         </span>
       </div>
       
       <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;">
         <div>
           <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="width: 100%; background: #ffffff; border: 2px solid #7c3aed; border-radius: 10px; padding: 13px 18px; font-size: 14px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);">
-            <option value="RV32I" selected>RV32I (RISC-V 32-bit Integer ISA Core)</option>
+            <option value="" selected>-- SELECT PROCESSOR CORE --</option>
+            <option value="RV32I">RV32I (RISC-V 32-bit Integer ISA Core)</option>
           </select>
         </div>
         <div>
           <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; text-align: right;">
             <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">SUPPORTED ARCHITECTURES</div>
-            <div id="isaLabel" style="font-size: 13px; font-weight: 800; color: #7c3aed;">32-Bit RISC-V (RV32I)</div>
+            <div id="isaLabel" style="font-size: 13px; font-weight: 800; color: #718096;">RV32I Available</div>
           </div>
         </div>
       </div>
 
-      <div id="selectPromptBanner" style="display: none; margin-top: 14px; padding: 14px 18px; background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 10px; text-align: center; color: #475569; font-size: 13px; font-weight: 600;">
+      <div id="selectPromptBanner" style="display: block; margin-top: 14px; padding: 14px 18px; background: #ffffff; border: 1.5px dashed #cbd5e1; border-radius: 10px; text-align: center; color: #475569; font-size: 13px; font-weight: 600;">
         👆 Please select <b>RV32I</b> from the dropdown above to proceed and unlock floorplan routing parameters.
       </div>
     </div>
 
     <!-- WRAPPER: VISIBLE ONLY WHEN RV32I IS SELECTED -->
-    <div id="processorContent" style="display: block;">
+    <div id="processorContent" style="display: none;">
 
     <!-- PRESETS SELECTION -->
     <div class="preset-bar">
