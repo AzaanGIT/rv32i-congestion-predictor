@@ -325,15 +325,6 @@
 
           <!-- Simulation & Player Controls -->
           <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            
-            <!-- Circuit / Module Selector -->
-            <select id="djsCircuitSelect" onchange="djsSelectModule(this.value)" style="background: #1e293b; color: #38bdf8; border: 1.5px solid #334155; border-radius: 6px; padding: 6px 12px; font-size: 11.5px; font-weight: 800; cursor: pointer; outline: none;">
-              <option value="rv32i_core.sv">⚡ rv32i_core.sv (RV32I Processor Gate Netlist)</option>
-              <option value="rv32i_alu.sv">🔥 rv32i_alu.sv (32-Bit ALU Hotspot)</option>
-              <option value="sr_neg_gate.sv">🔍 sr_neg_gate.sv (SR Latch Gate Model)</option>
-              <option value="fulladder.sv">🔢 fulladder.sv (1-Bit Full Adder)</option>
-              <option value="custom.sv">✏️ custom.sv (User HDL Code)</option>
-            </select>
 
             <!-- Blue Run Button -->
             <button id="djsRunBtn" type="button" onclick="djsToggleRun()" title="Synthesize and simulate!" style="background: #2563eb; color: #ffffff; border: none; border-radius: 6px; padding: 6px 16px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s ease; box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);">
@@ -1429,10 +1420,6 @@ endmodule`
 
     function djsSelectModule(filename) {
       currentModule = filename;
-      
-      // Update selector
-      const select = document.getElementById("djsCircuitSelect");
-      if (select && select.value !== filename) select.value = filename;
 
       // Update active tab label
       const tabLabel = document.getElementById("djsActiveFileTabName");

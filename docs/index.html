@@ -315,16 +315,6 @@
           <div class="card-title">3. Verilog HDL Processor Hardware Description</div>
           <div class="card-heading">Input HDL code to synthesize into gate-level design (DigitalJS Online Editor)</div>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Load Example:</span>
-          <select id="hdlExampleSelect" onchange="loadHdlPreset(this.value)" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; color: #1e293b; cursor: pointer; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-            <option value="rv32i_core.sv" selected>⚡ rv32i_core.sv (RV32I Single-Cycle Processor Core)</option>
-            <option value="rv32i_alu.sv">🔥 rv32i_alu.sv (32-Bit ALU Hotspot Wire Density)</option>
-            <option value="sr_neg_gate.sv">🔍 sr_neg_gate.sv (SR Latch Gate Model)</option>
-            <option value="fulladder.sv">🔢 fulladder.sv (1-Bit Full Adder Gate Netlist)</option>
-            <option value="custom.sv">✏️ custom.sv (User Custom Verilog HDL)</option>
-          </select>
-        </div>
       </div>
 
       <!-- DigitalJS-Themed Tab Bar -->
@@ -667,12 +657,10 @@ endmodule`
       const textarea = document.getElementById("hdlCodeTextarea");
       const hiddenInput = document.getElementById("selectedHdlFilenameInput");
       const tabLabel = document.getElementById("tabFilenameLabel");
-      const select = document.getElementById("hdlExampleSelect");
 
       if (textarea) textarea.value = code;
       if (hiddenInput) hiddenInput.value = filename;
       if (tabLabel) tabLabel.textContent = filename;
-      if (select && select.value !== filename) select.value = filename;
 
       updateLineNumbers();
       updateIoPortList(filename);
@@ -888,15 +876,6 @@ endmodule`
 
           <!-- Simulation & Player Controls -->
           <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-            
-            <!-- Circuit / Module Selector -->
-            <select id="djsCircuitSelect" onchange="djsSelectModule(this.value)" style="background: #1e293b; color: #38bdf8; border: 1.5px solid #334155; border-radius: 6px; padding: 6px 12px; font-size: 11.5px; font-weight: 800; cursor: pointer; outline: none;">
-              <option value="rv32i_core.sv">⚡ rv32i_core.sv (RV32I Processor Gate Netlist)</option>
-              <option value="rv32i_alu.sv">🔥 rv32i_alu.sv (32-Bit ALU Hotspot)</option>
-              <option value="sr_neg_gate.sv">🔍 sr_neg_gate.sv (SR Latch Gate Model)</option>
-              <option value="fulladder.sv">🔢 fulladder.sv (1-Bit Full Adder)</option>
-              <option value="custom.sv">✏️ custom.sv (User HDL Code)</option>
-            </select>
 
             <!-- Blue Run Button -->
             <button id="djsRunBtn" type="button" onclick="djsToggleRun()" title="Synthesize and simulate!" style="background: #2563eb; color: #ffffff; border: none; border-radius: 6px; padding: 6px 16px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s ease; box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);">
@@ -2082,10 +2061,6 @@ endmodule`
 
     function djsSelectModule(filename) {
       currentModule = filename;
-      
-      // Update selector
-      const select = document.getElementById("djsCircuitSelect");
-      if (select && select.value !== filename) select.value = filename;
 
       // Update active tab label
       const tabLabel = document.getElementById("djsActiveFileTabName");
