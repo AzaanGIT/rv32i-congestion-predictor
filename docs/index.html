@@ -907,8 +907,8 @@ endmodule`
           </div>
         </div>
 
-        <!-- 2. SPLIT WORKBENCH LAYOUT: CODE EDITOR (LEFT) + CIRCUIT CANVAS (MIDDLE) + INSPECTOR (RIGHT) -->
-        <div style="display: grid; grid-template-columns: 340px 1fr 290px; min-height: 600px; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+        <!-- 2. SPLIT WORKBENCH LAYOUT: CODE EDITOR (LEFT) + CIRCUIT CANVAS (RIGHT) -->
+        <div style="display: grid; grid-template-columns: 360px 1fr; min-height: 580px; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
           
           <!-- LEFT COLUMN: CODE EDITOR & SETUP / IO TABS (Matches Screenshot 1 Left Pane) -->
           <div style="background: #f8fafc; border-right: 1.5px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden;">
@@ -1020,160 +1020,83 @@ endmodule`
             <div style="background: #0f172a; border-top: 1px solid #1e293b; padding: 6px 14px; display: flex; align-items: center; gap: 12px; font-size: 10.5px; color: #94a3b8;">
               <span style="font-weight: 800; color: #38bdf8;">SIGNALS:</span>
               <span id="djsSignalHud" style="font-family: monospace; color: #cbd5e1;">clk=0 | reset=0 | instr=00000033 (ADD) | alu_out=00000008 | Cout=0</span>
-              <span style="margin-left: auto; color: #64748b; font-size: 10px;">🟢 Logic 1 &nbsp;|&nbsp; 🔴 Logic 0 &nbsp;|&nbsp; ⚡ Interactive</span>
-            </div>
-          </div>
-
-          <!-- RIGHT COLUMN: LOGIC GATE LEVEL INSPECTOR & BEOL CONGESTION (Matches Screenshot 2 Right) -->
-          <div style="background: #ffffff; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto;">
-            <div>
-              <div style="color: #7c3aed; font-size: 11px; font-weight: 800; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <span>LOGIC GATE LEVEL INSPECTOR</span>
-                <span id="inspGateBadge" style="background: #fef2f2; color: #dc2626; font-size: 9px; padding: 2px 6px; border-radius: 4px; border: 1px solid #fecaca; font-weight: 800;">HOTSPOT GATE</span>
-              </div>
-              
-              <div class="inspector-card" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 12px;">
-                <div style="font-size: 14px; font-weight: 800; color: #1a202c; margin-bottom: 2px;" id="inspGateName">2-Input XOR Gate (XOR2)</div>
-                <div style="color: #64748b; font-size: 10.5px; margin-bottom: 10px;" id="inspGateSub">U_ALU_XOR1 (ALU Full Adder Carry Slice)</div>
-                
-                <table class="def-table" style="width: 100%; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; font-size: 11px;">
-                  <tr><td style="color: #64748b; width: 44%;">Boolean Logic:</td><td id="inspGateEquation" style="color: #1a202c; font-weight: 800; font-family: monospace;">Y = A ⊕ B</td></tr>
-                  <tr><td style="color: #64748b;">Live Pin Values:</td><td id="inspGatePins" style="color: #10b981; font-weight: 800; font-family: monospace;">A=1, B=1 → Y=0</td></tr>
-                  <tr><td style="color: #64748b;">Standard Cell:</td><td id="inspCellPrim" style="color: #7c3aed; font-weight: 800; font-size: 10px;">sky130_fd_sc_hd__xor2_1</td></tr>
-                  <tr><td style="color: #64748b;">Physical Cell Pins:</td><td id="inspPinCount" style="color: #ea580c; font-weight: 800;">3 Pins (A, B on M1, Y on M1)</td></tr>
-                  <tr><td style="color: #64748b;">Gate Transistors:</td><td id="inspTransistors" style="color: #0284c7; font-weight: 800;">8 CMOS FETs (4 NMOS, 4 PMOS)</td></tr>
-                </table>
-
-                <div style="color: #b91c1c; font-size: 10px; font-weight: 800; margin-bottom: 4px; text-transform: uppercase;">BEOL Wire Track Impact</div>
-                <p id="inspCongestionImpact" style="color: #475569; font-size: 10.5px; line-height: 1.45; margin: 0;">
-                  This logic gate connects on Metal 1. In the 32-bit ALU, 64 XOR gates cluster in standard cell rows, requiring continuous horizontal (M2) and vertical (M3) track routing that causes the predicted <b>50.8% saturation on M2</b>!
-                </p>
-              </div>
-            </div>
-
-            <!-- GATE-LEVEL AGENDA & WORKING PRINCIPLE CARD -->
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 8px;">
-              <div style="color: #d97706; font-size: 10px; font-weight: 800; margin-bottom: 6px; text-transform: uppercase;">AGENDA: GATE NETLIST TO METAL CONGESTION</div>
-              <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 6px; padding: 10px; font-size: 10px; color: #92400e; line-height: 1.45;">
-                <b>Why visualize gate-level connections?</b> Every logic gate (AND, NAND, OR, XOR, DFF) contains physical pins on Metal 1. In dense datapath units like the 32-bit ALU, thousands of gate wires must cross over each other on <b>Metal 2 &amp; Metal 3</b>. Our ML model predicts whether these gate wires will overflow metal capacity in <b>&lt; 5 ms</b>!
-              </div>
             </div>
           </div>
 
         </div>
 
-      </div>`;
-            }
-          }
-        }
+      </div>
 
-        function djsRun() {
-          if (!djsCircuit) return;
-          djsCircuit.start();
-          djsIsRunning = true;
-          djsSetStatus('running', 'Simulation running');
-          document.getElementById('djs-btn-run').disabled = true;
-          document.getElementById('djs-btn-pause').disabled = false;
-          document.getElementById('djs-btn-ff').disabled = false;
-          document.getElementById('djs-btn-step').disabled = false;
-          // Tick counter update
-          djsTickInterval = setInterval(() => {
-            if (djsCircuit) {
-              djsTickVal = djsCircuit.tick || djsTickVal + 1;
-              const el = document.getElementById('djs-tick');
-              if (el) el.textContent = djsTickVal;
-            }
-          }, 100);
-        }
+      <!-- 3. LOGIC GATE LEVEL INSPECTOR & PHYSICAL BEOL CONGESTION IMPACT -->
+      <div class="card" style="margin-bottom: 24px; padding: 22px; border: 1.5px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: #f3e8ff; color: #7c3aed; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; border: 1px solid #e9d5ff;">⚡</div>
+            <div>
+              <div style="color: #1a202c; font-size: 14px; font-weight: 800; letter-spacing: -0.2px;">LOGIC GATE LEVEL INSPECTOR</div>
+              <div style="color: #64748b; font-size: 11px; margin-top: 2px;">Interactive standard-cell analysis &amp; live pin values linked directly to the synthesized gate diagram above</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Selected Gate:</span>
+            <span id="inspGateBadge" style="background: #fef2f2; color: #dc2626; font-size: 10px; padding: 3px 9px; border-radius: 6px; border: 1px solid #fecaca; font-weight: 800;">HOTSPOT GATE</span>
+          </div>
+        </div>
 
-        function djsPause() {
-          if (!djsCircuit) return;
-          djsCircuit.pause();
-          djsIsRunning = false;
-          djsSetStatus('paused', 'Paused');
-          document.getElementById('djs-btn-pause').disabled = true;
-          document.getElementById('djs-btn-resume').disabled = false;
-          clearInterval(djsTickInterval);
-        }
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 18px; align-items: stretch;">
+          
+          <!-- Column 1: Gate Boolean Logic & Cell Profile -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div>
+                <div style="font-size: 15px; font-weight: 800; color: #1a202c;" id="inspGateName">2-Input XOR Gate (XOR2)</div>
+                <div style="color: #64748b; font-size: 11px; margin-top: 2px;" id="inspGateSub">U_ALU_XOR1 (ALU Full Adder Carry Slice)</div>
+              </div>
+            </div>
 
-        function djsResume() {
-          if (!djsCircuit) return;
-          djsCircuit.resume();
-          djsIsRunning = true;
-          djsSetStatus('running', 'Simulation running');
-          document.getElementById('djs-btn-pause').disabled = false;
-          document.getElementById('djs-btn-resume').disabled = true;
-        }
+            <table class="def-table" style="width: 100%; font-size: 11.5px; border-collapse: collapse; margin-top: 10px;">
+              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b; width: 44%;">Boolean Logic:</td><td id="inspGateEquation" style="padding: 6px 0; color: #1a202c; font-weight: 800; font-family: monospace;">Y = A ⊕ B</td></tr>
+              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b;">Live Pin Values:</td><td id="inspGatePins" style="padding: 6px 0; color: #10b981; font-weight: 800; font-family: monospace;">A=1, B=1 → Y=0</td></tr>
+              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b;">Standard Cell:</td><td id="inspCellPrim" style="padding: 6px 0; color: #7c3aed; font-weight: 800; font-size: 11px; font-family: monospace;">sky130_fd_sc_hd__xor2_1</td></tr>
+              <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 6px 0; color: #64748b;">Physical Cell Pins:</td><td id="inspPinCount" style="padding: 6px 0; color: #ea580c; font-weight: 800;">3 Pins (A, B on M1, Y on M1)</td></tr>
+              <tr><td style="padding: 6px 0; color: #64748b;">Gate Transistors:</td><td id="inspTransistors" style="padding: 6px 0; color: #0284c7; font-weight: 800;">8 CMOS FETs (4 NMOS, 4 PMOS)</td></tr>
+            </table>
+          </div>
 
-        function djsFastFwd() {
-          if (!djsCircuit) return;
-          djsCircuit.fastForward(100);
-        }
+          <!-- Column 2: BEOL Wire Track Routing Impact -->
+          <div style="background: #ffffff; border: 1px solid #fee2e2; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="color: #b91c1c; font-size: 11px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <span>🔥</span>
+                <span>BEOL WIRE TRACK ROUTING IMPACT</span>
+              </div>
+              <p id="inspCongestionImpact" style="color: #475569; font-size: 11.5px; line-height: 1.55; margin: 0; background: #fff5f5; border: 1px solid #fed7d7; border-radius: 6px; padding: 12px;">
+                This logic gate connects on Metal 1. In the 32-bit ALU, 64 XOR gates cluster in standard cell rows, requiring continuous horizontal (M2) and vertical (M3) track routing that causes the predicted <b>50.8% saturation on M2</b>!
+              </p>
+            </div>
+            <div style="margin-top: 10px; font-size: 10.5px; color: #718096; background: #f8fafc; border-radius: 6px; padding: 8px 10px;">
+              💡 <b>Interactive Tip:</b> Click any logic gate (AND, OR, NAND, XOR, DFF) inside the schematic viewer above to inspect its physical pin demand.
+            </div>
+          </div>
 
-        function djsStep() {
-          if (!djsCircuit) return;
-          djsCircuit.updateGates();
-        }
+          <!-- Column 3: Agenda: Gate Netlist to Metal Congestion -->
+          <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="color: #d97706; font-size: 11px; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <span>📋</span>
+                <span>AGENDA: GATE NETLIST TO METAL CONGESTION</span>
+              </div>
+              <div style="font-size: 11px; color: #92400e; line-height: 1.55;">
+                <b>Why visualize gate-level connections?</b> Every logic gate (AND, NAND, OR, XOR, DFF) contains physical pins on Metal 1. In dense datapath units like the 32-bit ALU, thousands of gate wires must cross over each other on <b>Metal 2 &amp; Metal 3</b>. Our ML model predicts whether these gate wires will overflow metal capacity in <b>&lt; 5 ms</b>!
+              </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 10.5px; color: #b45309; font-weight: 700;">
+              Target PDK: SkyWater 130nm High-Density (HD) Standard Cells
+            </div>
+          </div>
 
-        function djsStop() {
-          if (djsCircuit) {
-            try { djsCircuit.stop(); } catch(e) {}
-            djsCircuit = null;
-          }
-          djsIsRunning = false;
-          clearInterval(djsTickInterval);
-          djsTickVal = 0;
-          const el = document.getElementById('djs-tick');
-          if (el) el.textContent = '0';
-          document.getElementById('djs-btn-run').disabled = false;
-          document.getElementById('djs-btn-pause').disabled = true;
-          document.getElementById('djs-btn-resume').disabled = true;
-          document.getElementById('djs-btn-ff').disabled = true;
-          document.getElementById('djs-btn-step').disabled = true;
-        }
-
-        function djsZoomIn() {
-          djsZoomLevel = Math.min(djsZoomLevel * 1.25, 4);
-          const paper = document.getElementById('djs-paper');
-          if (paper) paper.style.transform = `scale(${djsZoomLevel})`;
-          if (paper) paper.style.transformOrigin = 'top left';
-        }
-
-        function djsZoomOut() {
-          djsZoomLevel = Math.max(djsZoomLevel / 1.25, 0.25);
-          const paper = document.getElementById('djs-paper');
-          if (paper) paper.style.transform = `scale(${djsZoomLevel})`;
-          if (paper) paper.style.transformOrigin = 'top left';
-        }
-
-        function djsSave() {
-          if (!djsCircuit) { alert('No circuit loaded.'); return; }
-          const json = JSON.stringify(djsCircuit.toJSON ? djsCircuit.toJSON() : NETLISTS[document.getElementById('djs-circuit-select').value], null, 2);
-          const blob = new Blob([json], {type:'application/json'});
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url;
-          a.download = 'rv32i_circuit.json'; a.click();
-          URL.revokeObjectURL(url);
-        }
-
-        function djsSetStatus(state, text) {
-          const dot = document.getElementById('djs-status-dot');
-          const txt = document.getElementById('djs-status-text');
-          const colors = {running:'#22c55e', paused:'#f59e0b', ready:'#3b82f6', error:'#ef4444'};
-          if (dot) dot.style.background = colors[state] || '#d1d5db';
-          if (txt) txt.textContent = text;
-        }
-
-        // Helper: make jQuery-like $ for DigitalJS
-        function $(el) { return el; }
-
-        // Initialize when the page is ready
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initDigitalJS);
-        } else {
-          initDigitalJS();
-        }
-      </script>
+        </div>
+      </div>
 
       <!-- Overview Cards: 4 KPI Cards -->
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
