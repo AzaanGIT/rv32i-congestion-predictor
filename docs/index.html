@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261009-v3.1';
+      const BUILD_VER = '20261009-v3.2';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1054,6 +1054,21 @@ endmodule`
               </button>
             </div>
 
+            <!-- Alternative View Mode Switcher: Genuine DigitalJS Circuit vs BEOL Congestion Tracks -->
+            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="View Mode" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1.5px solid #0284c7;">
+              <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="Genuine DigitalJS Gate-Level Netlist (225 Gates / 441 Nets)" style="background: #0284c7; color: #ffffff; border: none; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #0369a1; display: inline-flex; align-items: center; gap: 5px;">
+                <span>⚡ DigitalJS Netlist</span>
+              </button>
+              <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="BEOL Metal Layer Routing Congestion &amp; Track Hotspots" style="background: #ffffff; color: #0284c7; border: none; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                <span>📐 BEOL Hotspots</span>
+              </button>
+            </div>
+
+            <!-- Fullscreen at digitaljs.tilk.eu -->
+            <a id="djsOpenExternalBtn" href="https://digitaljs.tilk.eu/#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" target="_blank" rel="noopener noreferrer" title="Open Fullscreen in new tab" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 4px; background: #0284c7; color: #ffffff; text-decoration: none; margin-left: auto;">
+              <span>↗ Fullscreen</span>
+            </a>
+
           </div>
         </div>
 
@@ -1126,36 +1141,11 @@ endmodule`
           <div id="gutter_splitter" class="gutter gutter-vertical" style="height: 10px; width: 100%; background-color: #eee; cursor: ns-resize; background-repeat: no-repeat; background-position: 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII='); border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;"></div>
 
           <!-- BOTTOM ROW: GATE LEVEL CIRCUIT CANVAS (ONE BELOW ANOTHER "=") -->
-          <div id="djsCircuitContainer" class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column; min-height: 620px; width: 100%;">
-            
-            <!-- DUAL ENGINE COLLABORATION HEADER BAR -->
-            <div id="djsDualEngineBar" style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; z-index: 15;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.5px;">CIRCUIT VIEWER:</span>
-                <div class="btn-group" style="display: inline-flex; border-radius: 6px; overflow: hidden; border: 1.5px solid #0284c7; box-shadow: 0 1px 3px rgba(2,132,199,0.12);">
-                  <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="Run genuine DigitalJS Online engine in background" style="background: #0284c7; color: #ffffff; border: none; padding: 5px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                    <span>⚡ Live DigitalJS Engine (Tilk)</span>
-                    <span id="djsLiveGateCountBadge" style="background: rgba(255,255,255,0.25); padding: 1px 6px; border-radius: 10px; font-size: 10px;">225 Gates / 441 Nets</span>
-                  </button>
-                  <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="View BEOL Metal Layer Track Congestion &amp; Hotspots" style="background: #ffffff; color: #0284c7; border: none; padding: 5px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                    <span>📐 BEOL Track Hotspots View</span>
-                  </button>
-                </div>
-              </div>
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span id="djsEngineBadge" style="font-size: 11px; color: #16a34a; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
-                  Synthesized via Yosys &amp; yosys2digitaljs
-                </span>
-                <a id="djsOpenExternalBtn" href="https://digitaljs.tilk.eu/#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 5px; background: #0284c7; color: #ffffff; text-decoration: none; box-shadow: 0 1px 2px rgba(2,132,199,0.2);">
-                  <span>↗ Fullscreen at digitaljs.tilk.eu</span>
-                </a>
-              </div>
-            </div>
+          <div id="djsCircuitContainer" class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column; min-height: 600px; width: 100%;">
 
             <!-- LIVE DIGITALJS EMBEDDED ENGINE (CIRCUIT DESIGN ONLY - CLEAN FULL VIEW) -->
-            <div id="djsLiveIframeWrapper" style="width: 100%; height: 600px; min-height: 580px; position: relative; background: #ffffff; display: flex; flex-direction: column;">
-              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261009-v3.1#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 580px; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
+            <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 580px; position: relative; background: #ffffff; display: flex; flex-direction: column; flex: 1;">
+              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261009-v3.2#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 580px; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
             </div>
 
             <!-- Canvas Zoom Floating Controls (For Congestion View) -->
@@ -4062,7 +4052,7 @@ endmodule`
 
     function updateLiveDigitalJsFrame(moduleFilename) {
       const hash = DIGITALJS_LIVE_HASHES[moduleFilename] || "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
-      const targetUrl = "digitaljs_view.html?v=20261009-v3.1#" + hash;
+      const targetUrl = "digitaljs_view.html?v=20261009-v3.2#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
@@ -4086,6 +4076,21 @@ endmodule`
         }
       }
     }
+
+    function sendDjsIframeCmd(cmd) {
+      const iframe = document.getElementById("djsLiveFrame");
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'simCommand', cmd: cmd }, '*');
+      }
+    }
+
+    // Sync tick from DigitalJS engine iframe
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "tickUpdate") {
+        const el = document.getElementById("djsTickVal");
+        if (el) el.value = event.data.tick;
+      }
+    });
 
     function djsSelectModule(filename) {
       currentModule = filename;
@@ -4219,6 +4224,7 @@ endmodule`
       const txt = document.getElementById("djsRunBtnText");
       if (btn) btn.style.background = "#0d6efd";
       if (txt) txt.textContent = "Run";
+      sendDjsIframeCmd('pause');
     }
 
     function djsResumeSim() {
@@ -4228,18 +4234,22 @@ endmodule`
       if (btn) btn.style.background = "#16a34a";
       if (txt) txt.textContent = "Running...";
       startSimLoop();
+      sendDjsIframeCmd('resume');
     }
 
     function djsStepSim() {
       advanceTick();
+      sendDjsIframeCmd('single');
     }
 
     function djsFastFwdSim() {
       for (let i = 0; i < 20; i++) advanceTick();
+      sendDjsIframeCmd('fastfw');
     }
 
     function djsNextEventSim() {
       advanceTick();
+      sendDjsIframeCmd('next');
     }
 
     function djsResetSim() {
@@ -4270,7 +4280,10 @@ endmodule`
 
     function updateTickDisplay() {
       const el = document.getElementById("djsTickVal");
-      if (el) el.textContent = simTick;
+      if (el) {
+        if (el.tagName === 'INPUT') el.value = simTick;
+        else el.textContent = simTick;
+      }
     }
 
     function updateHudClock() {
