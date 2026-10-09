@@ -308,115 +308,130 @@
     <div class="main-content">
       
             <!-- DIGITALJS REAL INTERACTIVE CIRCUIT SIMULATOR -->
-      <div id="panelSchematic" style="margin-bottom: 24px; border-radius: 12px; overflow: hidden; border: 1.5px solid #c7d2fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); background: #ffffff;">
+      <div id="panelSchematic" style="margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); background: #ffffff;">
 
-        <!-- 1. DIGITALJS SIGNATURE TOOLBAR (Matches digitaljs.tilk.eu) -->
-        <div class="djs-toolbar" style="background: #0f172a; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #1e293b; color: #f1f5f9;">
-          
-          <!-- Brand Badge -->
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: #ffffff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 900; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              DigitalJS
-            </div>
-            <span style="font-size: 13px; font-weight: 800; color: #e2e8f0; letter-spacing: -0.2px;">RV32I PROCESSOR SIMULATOR</span>
-            <span style="color: #64748b; font-size: 11px; font-weight: 600;">(tilk/digitaljs_online engine)</span>
-          </div>
-
-          <!-- Simulation & Player Controls -->
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-
-            <!-- Blue Run Button -->
-            <button id="djsRunBtn" type="button" onclick="djsToggleRun()" title="Synthesize and simulate!" style="background: #2563eb; color: #ffffff; border: none; border-radius: 6px; padding: 6px 16px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.15s ease; box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              <span id="djsRunBtnText">Run</span>
-            </button>
-
-            <!-- Player Controls -->
-            <div style="display: inline-flex; border-radius: 6px; overflow: hidden; border: 1px solid #334155;">
-              <button type="button" id="djsBtnPause" onclick="djsPauseSim()" title="Pause simulation" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 11px; font-size: 12px; cursor: pointer; border-right: 1px solid #334155;">⏸</button>
-              <button type="button" id="djsBtnResume" onclick="djsResumeSim()" title="Resume simulation" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 11px; font-size: 12px; cursor: pointer; border-right: 1px solid #334155;">▶</button>
-              <button type="button" id="djsBtnFastFwd" onclick="djsFastFwdSim()" title="Fast-forward simulation" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 11px; font-size: 12px; cursor: pointer; border-right: 1px solid #334155;">⏩</button>
-              <button type="button" id="djsBtnStep" onclick="djsStepSim()" title="Run single clock cycle (Step)" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 11px; font-size: 12px; cursor: pointer; border-right: 1px solid #334155;">→</button>
-              <button type="button" id="djsBtnNext" onclick="djsNextEventSim()" title="Run until next event" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 11px; font-size: 12px; cursor: pointer; border-right: 1px solid #334155;">⇥</button>
-              <button type="button" onclick="djsResetSim()" title="Reset simulation" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 11px; font-size: 12px; cursor: pointer;">🔄</button>
+        <!-- 1. DIGITALJS SIGNATURE TOOLBAR (Exact replica of digitaljs.tilk.eu / Screenshot 2) -->
+        <div id="toolbar" style="width: 100%; box-sizing: border-box; border-bottom: 5px solid #eee; padding: 4px 10px; background: #ffffff;">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+            
+            <!-- Authentic DigitalJS SVG Logo (Screenshot 2 left) -->
+            <div class="me-2 upper-toolbar-group digitaljs-logo" title="DigitalJS" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;">
+              <svg width="32" height="32" viewBox="0 0 78.7 78.7" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="djsGrad1" x1="55.6" y1="76.3" x2="75.8" y2="76.3" gradientUnits="userSpaceOnUse" gradientTransform="rotate(-45,20.49,119.89)">
+                    <stop style="stop-color:#f6aff6;stop-opacity:1;" offset="0"/>
+                    <stop style="stop-color:#ffffff;stop-opacity:1" offset="1"/>
+                  </linearGradient>
+                  <linearGradient id="djsGrad2" x1="77.66" y1="71.94" x2="115.66" y2="71.94" gradientUnits="userSpaceOnUse" gradientTransform="rotate(-45,24.81,115.76)">
+                    <stop style="stop-color:#ff00ff;stop-opacity:1;" offset="0"/>
+                    <stop style="stop-color:#fffdff;stop-opacity:1" offset="1"/>
+                  </linearGradient>
+                </defs>
+                <path style="fill:url(#djsGrad1);" d="m 6.9,40.68 c -0.37,0.41 -1.15,1.58 -1.54,4.37 -0.44,3.14 3.21,7.62 3.55,9.18 0.75,3.63 -0.08,4.36 5.56,10 5.64,5.64 6.37,4.8 10,5.56 1.56,0.34 6.04,3.99 9.18,3.55 3.73,-0.52 4.56,-1.73 4.56,-1.73 0.98,-0.98 0.03,-8.2 -0.94,-9.18 l -6.13,-9.66 C 30.16,51.78 26.42,46.4 19.47,42.98 12.22,39.41 7.63,40.49 7.11,40.63 l -0.01,-0.15 c 0,0 -0.07,0.05 -0.2,0.19 z"/>
+                <path style="fill:#d070d0;" d="m 36.57,71.83 c -0.65,0.28 -1.35,0.6 -2.8,0.8 -1.34,0.19 -3.19,-0.54 -4.86,-1.43 -0.84,-0.44 -1.64,-0.91 -2.34,-1.3 -0.7,-0.39 -1.26,-0.7 -1.79,-0.81 h -0.01 c -3.72,-0.77 -4.13,0.19 -9.74,-5.42 -5.6,-5.6 -4.64,-6.02 -5.42,-9.74 v -0.01 c -0.11,-0.53 -0.43,-1.1 -0.81,-1.79 -0.39,-0.7 -0.86,-1.5 -1.3,-2.34 -0.89,-1.68 -1.62,-3.53 -1.43,-4.86 0.13,-1.05 0.45,-2.09 0.79,-3.03 l 0.23,-1.41 c -1.47,1.48 -1.81,2.61 -2.05,4.3 -0.25,1.8 0.62,3.76 1.54,5.5 0.46,0.87 0.93,1.68 1.31,2.36 0.38,0.68 0.65,1.26 0.71,1.51 0.73,3.54 0.03,4.59 5.7,10.26 5.67,5.67 6.72,4.96 10.26,5.7 0.25,0.06 0.83,0.33 1.5,0.7 0.68,0.38 1.49,0.86 2.36,1.31 1.74,0.92 3.7,1.79 5.49,1.54 2.28,-0.3 2.1,-0.41 4.29,-2.06 z"/>
+                <path style="fill:url(#djsGrad2);opacity:0.93;" d="M 9.68,37.9 C 8.65,38.87 23.1,45.12 24.1,46.12 l 6.87,4.82 c 1.24,1.24 9.11,19.67 9.83,18.08 l 1.48,-1.48 14.24,-27.18 c 0.44,-0.99 3.5,-17.94 2.7,-18.67 l -4.79,-2.44 c -0.76,-0.68 -15.76,1.99 -16.68,2.43 l -26.58,14.75 c -0.22,0.11 -1.3,1.31 -1.48,1.48 z"/>
+                <path d="M 24.13,46.08 9.62,60.59 M 32.69,54.5 18.11,69.08" style="fill:#820082;stroke:#800080;stroke-width:2.65;"/>
+                <path style="fill:#820082;fill-rule:evenodd" d="m 40.27,65.3 c 0.74,3 0.53,3.71 0.53,3.71 l -2.59,2.59 -0.31,-3.14 c 0,0 -2.36,-10.36 -9.83,-17.83 -7.47,-7.47 -17.83,-9.83 -17.83,-9.83 l -3.14,-0.31 2.59,-2.59 c 1.22,0.11 2.18,0.17 3.69,0.55 3.52,0.87 11.18,4.42 16.82,10.05 5.62,5.62 9.18,13.28 10.08,16.79 z"/>
+                <path style="fill:#820082;fill-rule:evenodd" d="m 11.16,36.42 3.14,0.31 c 0,0 10.36,2.36 17.83,9.83 7.47,7.47 9.83,17.83 9.83,17.83 l 0.31,3.14 c 0,0 7.56,-8.56 10.72,-13.55 3.16,-4.98 4.58,-7.59 6.52,-12.75 1.94,-5.16 3.44,-13.66 0.84,-22.89 -9.23,-2.6 -17.73,-1.1 -22.89,0.84 -5.16,1.94 -7.77,3.36 -12.75,6.52 -4.98,3.16 -13.55,10.72 -13.55,10.72 z m 9.41,-1.77 c 0,0 3.76,-3.15 7.67,-5.41 3.91,-2.26 8.01,-4.68 11.62,-5.7 3.61,-1.03 7.62,-2.92 17.35,-2.06 1.57,9.72 -1.03,13.73 -2.06,17.35 -1.03,3.61 -3.45,7.71 -5.7,11.62 -2.26,3.91 -5.41,7.67 -5.41,7.67 -0.87,-3.52 -2.76,-9.47 -8.38,-15.1 -5.62,-5.62 -11.57,-7.51 -15.1,-8.38 z"/>
+                <path d="m 65.55,13.15 a 4,4 0 1 1 -5.66,5.66 4,4 0 1 1 5.66,-5.66 z" style="fill:#40c040;stroke:#005a00;stroke-width:3;"/>
+                <path style="fill:none;stroke:#005a00;stroke-width:2.8;" d="m 65.07,13.62 7.64,-7.64"/>
+              </svg>
             </div>
 
-            <!-- Tick Counter -->
-            <div style="background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 4px 10px; font-family: ui-monospace, monospace; font-size: 11px; display: flex; align-items: center; gap: 6px;">
-              <span style="color: #38bdf8;">⏱</span>
-              <span id="djsTickVal" style="color: #f1f5f9; font-weight: 800; min-width: 48px;">32351</span>
+            <!-- Run Button (Bootstrap primary blue #0d6efd) -->
+            <div id="synthesize-bar" style="display: inline-flex; align-items: center;">
+              <button id="djsRunBtn" type="button" onclick="djsToggleRun()" title="Synthesize and simulate!" style="background: #0d6efd; color: #ffffff; border: 1px solid #0d6efd; border-radius: 4px; padding: 5px 14px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span id="djsRunBtnText">Run</span>
+              </button>
             </div>
 
-            <!-- File Actions -->
-            <div style="display: inline-flex; border-radius: 6px; overflow: hidden; border: 1px solid #334155;">
-              <button type="button" onclick="djsExportJson()" title="Save netlist JSON" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 10px; font-size: 12px; cursor: pointer; border-right: 1px solid #334155;">💾</button>
-              <button type="button" onclick="djsShareLink()" title="Copy link" style="background: #1e293b; color: #cbd5e1; border: none; padding: 6px 10px; font-size: 12px; cursor: pointer;">🔗</button>
+            <!-- Player Controls Group (Slate Gray #6c757d) -->
+            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Time control" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d;">
+              <button type="button" id="djsBtnPause" onclick="djsPauseSim()" title="Pause simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">⏸</button>
+              <button type="button" id="djsBtnResume" onclick="djsResumeSim()" title="Resume simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">▶</button>
+              <button type="button" id="djsBtnFastFwd" onclick="djsFastFwdSim()" title="Fast-forward simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">⏩</button>
+              <button type="button" id="djsBtnStep" onclick="djsStepSim()" title="Run single time step" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">→</button>
+              <button type="button" id="djsBtnNext" onclick="djsNextEventSim()" title="Run until next event" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer;">⇥</button>
             </div>
+
+            <!-- Tick Counter Input Group -->
+            <div class="input-group me-2 upper-toolbar-group" style="display: inline-flex; align-items: stretch; border: 1px solid #ced4da; border-radius: 4px; overflow: hidden;">
+              <div class="input-group-prepend" style="background: #e9ecef; border-right: 1px solid #ced4da; padding: 5px 10px; display: flex; align-items: center; color: #495057;">
+                <span title="Current tick" style="font-size: 13px;">⏱</span>
+              </div>
+              <input type="text" id="djsTickVal" value="45620" readonly style="background: #ffffff; border: none; padding: 5px 10px; font-family: monospace; font-size: 13px; width: 7.5em; color: #212529; outline: none;" />
+            </div>
+
+            <!-- File Actions Button Group -->
+            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Saving and sharing" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d;">
+              <button type="button" onclick="djsLoadDialog()" title="Load from file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">📁</button>
+              <button type="button" onclick="djsExportJson()" title="Save to file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">💾</button>
+              <button type="button" onclick="djsShareLink()" title="Get link" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer;">🔗</button>
+            </div>
+
           </div>
         </div>
 
-        <!-- 2. SPLIT WORKBENCH LAYOUT: CODE EDITOR (LEFT) + CIRCUIT CANVAS (RIGHT) -->
-        <div style="display: grid; grid-template-columns: 360px 1fr; min-height: 580px; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+        <!-- 2. SPLIT WORKBENCH: EDITOR (LEFT) + SPLITTER (10px) + CANVAS (RIGHT) -->
+        <div class="editor-circuit-wrapper" style="display: grid; grid-template-columns: 460px 10px 1fr; min-height: 560px; background: #ffffff;">
           
-          <!-- LEFT COLUMN: CODE EDITOR & SETUP / IO TABS (Matches Screenshot 1 Left Pane) -->
-          <div style="background: #f8fafc; border-right: 1.5px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden;">
+          <!-- LEFT COLUMN: CODE EDITOR & SETUP / IO TABS -->
+          <div style="background: #ffffff; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid #dee2e6;">
             
-            <!-- Sub-tab Bar -->
-            <div style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 10px;">
-              <div style="display: flex; gap: 2px;">
-                <button type="button" id="djsSubTabSetup" onclick="switchDjsLeftTab('setup')" style="background: transparent; color: #64748b; border: none; padding: 9px 12px; font-size: 11px; font-weight: 800; cursor: pointer;">Setup</button>
-                <button type="button" id="djsSubTabIo" onclick="switchDjsLeftTab('io')" style="background: transparent; color: #64748b; border: none; padding: 9px 12px; font-size: 11px; font-weight: 800; cursor: pointer;">I/O</button>
-                <button type="button" id="djsSubTabCode" onclick="switchDjsLeftTab('code')" class="active" style="background: #ffffff; color: #2563eb; border: 1px solid #e2e8f0; border-bottom: 1px solid #ffffff; padding: 9px 14px; font-size: 11px; font-weight: 800; cursor: pointer; border-radius: 6px 6px 0 0; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
+            <!-- Nav Tabs (Setup | I/O | rv32i_core.sv ☁️ ✕) -->
+            <nav style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 6px 8px 0 8px;">
+              <div class="nav nav-tabs" style="display: flex; gap: 4px; align-items: flex-end; border-bottom: none;">
+                <button type="button" id="djsSubTabSetup" onclick="switchDjsLeftTab('setup')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">Setup</button>
+                <button type="button" id="djsSubTabIo" onclick="switchDjsLeftTab('io')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">I/O</button>
+                <button type="button" id="djsSubTabCode" onclick="switchDjsLeftTab('code')" class="nav-item nav-link active" style="background: #ffffff; border: 1px solid #dee2e6; border-bottom: 1px solid #ffffff; color: #495057; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px;">
                   <span id="djsActiveFileTabName">rv32i_core.sv</span>
-                  <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
+                  <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
                 </button>
               </div>
-              <div style="font-size: 10px; font-weight: 700; color: #059669; display: flex; align-items: center; gap: 4px;">
-                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
-                <span>Active</span>
-              </div>
-            </div>
+            </nav>
 
             <!-- Tab Pane 1: Code View (Default) -->
             <div id="djsLeftCodePane" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; background: #ffffff;">
-              <div style="display: flex; flex: 1; overflow: auto;">
-                <!-- Line Numbers -->
-                <div id="djsCodeGutter" style="background: #f8fafc; color: #94a3b8; padding: 12px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; line-height: 1.55; text-align: right; width: 34px; flex-shrink: 0; border-right: 1px solid #f1f5f9; user-select: none;">
+              <div style="display: flex; flex: 1; overflow: auto; background: #ffffff;">
+                <!-- Line Numbers Gutter -->
+                <div id="djsCodeGutter" style="background: #f8f9fa; color: #adb5bd; padding: 10px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; text-align: right; width: 34px; flex-shrink: 0; border-right: 1px solid #dee2e6; user-select: none;">
                   1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22
                 </div>
-                <!-- Code Area -->
-                <pre id="djsCodeDisplay" style="margin: 0; padding: 12px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; line-height: 1.55; color: #1e293b; overflow-x: auto; flex: 1; white-space: pre; background: #ffffff;"></pre>
+                <!-- Code Area with Syntax Highlighting -->
+                <pre id="djsCodeDisplay" style="margin: 0; padding: 10px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; color: #212529; overflow-x: auto; flex: 1; white-space: pre; background: #ffffff;"></pre>
               </div>
-              <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 6px 12px; font-size: 10px; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
+              <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 4px 12px; font-size: 10px; color: #6c757d; display: flex; justify-content: space-between; align-items: center;">
                 <span>SystemVerilog HDL | Synthesized</span>
-                <button type="button" onclick="djsEditCodePrompt()" style="background: #e2e8f0; border: none; border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 700; color: #475569; cursor: pointer;">✏️ Edit</button>
+                <button type="button" onclick="djsEditCodePrompt()" style="background: #e9ecef; border: 1px solid #ced4da; border-radius: 4px; padding: 2px 8px; font-size: 10px; font-weight: 600; color: #495057; cursor: pointer;">✏️ Edit</button>
               </div>
             </div>
 
             <!-- Tab Pane 2: Setup View -->
             <div id="djsLeftSetupPane" style="display: none; padding: 16px; flex: 1; overflow-y: auto; background: #ffffff;">
-              <div style="font-size: 12px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">Circuit synthesis options</div>
-              <p style="font-size: 11px; color: #64748b; line-height: 1.45; margin-bottom: 12px;">Yosys Open-Source Hardware Synthesis &amp; ABC Logic Gate Mapping.</p>
+              <div style="font-size: 13px; font-weight: 700; color: #212529; margin-bottom: 8px;">Circuit synthesis options</div>
+              <p style="font-size: 11.5px; color: #6c757d; line-height: 1.45; margin-bottom: 12px;">Yosys Open-Source Hardware Synthesis &amp; ABC Logic Gate Mapping.</p>
               
-              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 11px; color: #334155;">
+              <div style="display: flex; flex-direction: column; gap: 8px; font-size: 11.5px; color: #334155;">
                 <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox" checked disabled> <b>Optimize in Yosys</b> (<code>opt -full</code>)</label>
                 <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox" checked disabled> <b>Simplify diagram</b> (Gate reduction)</label>
                 <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox" checked disabled> <b>Convert to logic gates</b> (<code>techmap</code>)</label>
                 <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox" checked disabled> <b>ABC Gate subset</b> (AND, NAND, OR, XOR)</label>
               </div>
 
-              <div style="margin-top: 16px; border-top: 1px solid #f1f5f9; padding-top: 12px;">
-                <div style="font-size: 11px; font-weight: 800; color: #7c3aed; margin-bottom: 4px;">Silicon PDK Target</div>
+              <div style="margin-top: 16px; border-top: 1px solid #dee2e6; padding-top: 12px;">
+                <div style="font-size: 11.5px; font-weight: 700; color: #7c3aed; margin-bottom: 4px;">Silicon PDK Target</div>
                 <div style="font-size: 11px; color: #475569;">SkyWater 130nm (<code>sky130_fd_sc_hd</code>)</div>
-                <div style="font-size: 10px; color: #94a3b8; margin-top: 4px;">Gate logic directly impacts M1 pin density and M2/M3 wire tracks.</div>
+                <div style="font-size: 10.5px; color: #94a3b8; margin-top: 4px;">Gate logic directly impacts M1 pin density and M2/M3 wire tracks.</div>
               </div>
             </div>
 
             <!-- Tab Pane 3: I/O View -->
             <div id="djsLeftIoPane" style="display: none; padding: 16px; flex: 1; overflow-y: auto; background: #ffffff;">
-              <div style="font-size: 12px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">I/O Panel (Live Bit Controls)</div>
-              <p style="font-size: 11px; color: #64748b; line-height: 1.45; margin-bottom: 12px;">Click buttons below to toggle inputs or observe output indicators:</p>
+              <div style="font-size: 13px; font-weight: 700; color: #212529; margin-bottom: 8px;">I/O Panel (Live Bit Controls)</div>
+              <p style="font-size: 11.5px; color: #6c757d; line-height: 1.45; margin-bottom: 12px;">Click buttons below to toggle inputs or observe output indicators:</p>
               
               <div id="djsIoControlsList" style="display: flex; flex-direction: column; gap: 10px;">
                 <!-- Dynamically populated per module -->
@@ -425,29 +440,25 @@
 
           </div>
 
-          <!-- CENTER COLUMN: CIRCUIT CANVAS & GATE LEVEL DESIGN (Matches Screenshot 1 & 2 Center) -->
-          <div style="position: relative; background: #080c14; overflow: hidden; display: flex; flex-direction: column;">
+          <!-- MIDDLE COLUMN: SPLITTER GUTTER -->
+          <div id="gutter_horiz" class="gutter gutter-horizontal" style="width: 10px; background-color: #eee; cursor: ew-resize; background-repeat: no-repeat; background-position: 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');"></div>
+
+          <!-- RIGHT COLUMN: CIRCUIT CANVAS (PURE WHITE PAPER) -->
+          <div class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column;">
             
-            <!-- Canvas Zoom & View Controls Overlay (Matches top-right of Screenshot 1) -->
-            <div style="position: absolute; top: 12px; right: 14px; z-index: 20; display: flex; gap: 4px;">
-              <button type="button" onclick="djsZoomOut()" title="Zoom Out" style="background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(4px); color: #f1f5f9; border: 1px solid #334155; border-radius: 5px; width: 28px; height: 28px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">–</button>
-              <button type="button" onclick="djsZoomIn()" title="Zoom In" style="background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(4px); color: #f1f5f9; border: 1px solid #334155; border-radius: 5px; width: 28px; height: 28px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
-              <button type="button" onclick="djsResetZoom()" title="Reset Zoom" style="background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(4px); color: #94a3b8; border: 1px solid #334155; border-radius: 5px; padding: 0 8px; height: 28px; font-size: 11px; font-weight: 700; cursor: pointer;">1:1</button>
+            <!-- Canvas Zoom Floating Controls (Exact Screenshot 2 style) -->
+            <div class="btn-group zoom-buttons-wrapper" style="position: absolute; top: 14px; right: 18px; z-index: 20; display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+              <button class="btn btn-secondary" onclick="djsZoomOut()" title="Zoom out" style="background: #6c757d; color: #ffffff; border: none; padding: 3px 10px; font-size: 14px; font-weight: bold; cursor: pointer; border-right: 1px solid #5a6268;">–</button>
+              <button class="btn btn-secondary" onclick="djsZoomIn()" title="Zoom in" style="background: #6c757d; color: #ffffff; border: none; padding: 3px 10px; font-size: 14px; font-weight: bold; cursor: pointer;">+</button>
             </div>
 
-            <!-- Canvas Status HUD Overlay -->
-            <div style="position: absolute; top: 12px; left: 16px; z-index: 20; display: flex; gap: 8px; align-items: center;">
-              <span id="djsHudClkBadge" style="background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); color: #38bdf8; border: 1px solid #334155; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; font-family: monospace;">CLK: LOW | Cycle #1</span>
-              <span id="djsHudModeBadge" style="background: rgba(88, 28, 135, 0.85); backdrop-filter: blur(4px); color: #e9d5ff; border: 1px solid #7e22ce; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; font-family: monospace;">[GATE LEVEL NETLIST]</span>
-            </div>
-
-            <!-- SVG Circuit Viewport -->
-            <div id="djsCanvasViewport" style="flex: 1; width: 100%; height: 100%; overflow: auto; display: flex; align-items: center; justify-content: center;">
-              <svg id="djsCircuitSvg" viewBox="0 0 960 560" style="width: 100%; height: 100%; min-width: 650px; min-height: 480px; display: block;" xmlns="http://www.w3.org/2000/svg">
+            <!-- SVG Circuit Viewport (White Paper) -->
+            <div id="djsCanvasViewport" style="flex: 1; width: 100%; height: 100%; overflow: auto; display: flex; align-items: center; justify-content: center; background: #ffffff;">
+              <svg id="djsCircuitSvg" viewBox="0 0 960 560" style="width: 100%; height: 100%; min-width: 650px; min-height: 480px; display: block; background: #ffffff;" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <pattern id="edaGridDjs" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#111827" stroke-width="0.8"/>
-                    <circle cx="20" cy="20" r="0.8" fill="#1e293b" />
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="0.8"/>
+                    <circle cx="20" cy="20" r="0.8" fill="#e2e8f0" />
                   </pattern>
                   <marker id="djsArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                     <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b" />
@@ -455,7 +466,7 @@
                 </defs>
 
                 <!-- Grid background -->
-                <rect width="100%" height="100%" fill="#080c14" />
+                <rect width="100%" height="100%" fill="#ffffff" />
                 <rect width="100%" height="100%" fill="url(#edaGridDjs)" />
 
                 <!-- Dynamic Circuit Elements Container -->
@@ -465,10 +476,10 @@
               </svg>
             </div>
 
-            <!-- Bottom Waveform / Signal Mini-Bar -->
-            <div style="background: #0f172a; border-top: 1px solid #1e293b; padding: 6px 14px; display: flex; align-items: center; gap: 12px; font-size: 10.5px; color: #94a3b8;">
-              <span style="font-weight: 800; color: #38bdf8;">SIGNALS:</span>
-              <span id="djsSignalHud" style="font-family: monospace; color: #cbd5e1;">clk=0 | reset=0 | instr=00000033 (ADD) | alu_out=00000008 | Cout=0</span>
+            <!-- Bottom Signal Mini-Bar (Clean Light Theme) -->
+            <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 6px 14px; display: flex; align-items: center; gap: 12px; font-size: 11px; color: #495057;">
+              <span style="font-weight: 700; color: #0d6efd;">SIGNALS:</span>
+              <span id="djsSignalHud" style="font-family: monospace; color: #212529;">clk=0 | reset=0 | instr=00000033 (ADD) | alu_out=00000008 | Cout=0</span>
             </div>
           </div>
 
@@ -1340,53 +1351,62 @@ endmodule`
     };
 
     // ═════════════════════════════════════════════════════════════════════════
-    // 3. SVG GATE SHAPES (DigitalJS & IEEE Standard Symbols)
+    // 3. SVG GATE SHAPES (DigitalJS White Theme & IEEE Standard Symbols)
     // ═════════════════════════════════════════════════════════════════════════
     function svgNandGate(x, y, id, label) {
       return `
         <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
           <!-- Body -->
-          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
           <!-- Inversion bubble -->
-          <circle cx="${x+45}" cy="${y+18}" r="3.5" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-          <text x="${x+14}" y="${y+22}" fill="#e2e8f0" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
-          <text x="${x+6}" y="${y+50}" fill="#94a3b8" font-size="8.5" font-family="monospace">${label}</text>
+          <circle cx="${x+45}" cy="${y+18}" r="3.5" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <text x="${x+14}" y="${y+22}" fill="#0f172a" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
+          <text x="${x+6}" y="${y+50}" fill="#64748b" font-size="8.5" font-family="monospace">${label}</text>
         </g>
       `;
     }
 
     function svgAndGate(x, y, id, label, isHotspot=false) {
-      const stroke = isHotspot ? "#ef4444" : "#38bdf8";
+      const stroke = isHotspot ? "#ef4444" : "#1e293b";
+      const fill = isHotspot ? "#fff5f5" : "#ffffff";
+      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
+      const labelFill = isHotspot ? "#ef4444" : "#64748b";
       return `
         <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="#0f172a" stroke="${stroke}" stroke-width="2"/>
-          <text x="${x+14}" y="${y+22}" fill="#e2e8f0" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
-          <text x="${x+6}" y="${y+50}" fill="${isHotspot ? '#fca5a5' : '#94a3b8'}" font-size="8.5" font-family="monospace">${label}</text>
+          <path d="M ${x} ${y} L ${x+24} ${y} A 18 18 0 0 1 ${x+24} ${y+36} L ${x} ${y+36} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <text x="${x+14}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">&amp;</text>
+          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
         </g>
       `;
     }
 
     function svgOrGate(x, y, id, label, isHotspot=false) {
-      const stroke = isHotspot ? "#ef4444" : "#38bdf8";
+      const stroke = isHotspot ? "#ef4444" : "#1e293b";
+      const fill = isHotspot ? "#fff5f5" : "#ffffff";
+      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
+      const labelFill = isHotspot ? "#ef4444" : "#64748b";
       return `
         <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="#0f172a" stroke="${stroke}" stroke-width="2"/>
-          <text x="${x+16}" y="${y+22}" fill="#e2e8f0" font-size="10" font-family="monospace" font-weight="bold">≥</text>
-          <text x="${x+6}" y="${y+50}" fill="${isHotspot ? '#fca5a5' : '#94a3b8'}" font-size="8.5" font-family="monospace">${label}</text>
+          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <text x="${x+16}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">≥</text>
+          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
         </g>
       `;
     }
 
     function svgXorGate(x, y, id, label, isHotspot=false) {
-      const stroke = isHotspot ? "#ef4444" : "#38bdf8";
+      const stroke = isHotspot ? "#ef4444" : "#1e293b";
+      const fill = isHotspot ? "#fff5f5" : "#ffffff";
+      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
+      const labelFill = isHotspot ? "#ef4444" : "#64748b";
       return `
         <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
           <!-- Rear arc -->
-          <path d="M ${x-6} ${y} Q ${x+6} ${y+18} ${x-6} ${y+36}" fill="none" stroke="${stroke}" stroke-width="2"/>
+          <path d="M ${x-6} ${y} Q ${x+6} ${y+18} ${x-6} ${y+36}" fill="none" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
           <!-- Front body -->
-          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="#0f172a" stroke="${stroke}" stroke-width="2"/>
-          <text x="${x+16}" y="${y+22}" fill="#e2e8f0" font-size="10" font-family="monospace" font-weight="bold">=1</text>
-          <text x="${x+6}" y="${y+50}" fill="${isHotspot ? '#fca5a5' : '#94a3b8'}" font-size="8.5" font-family="monospace">${label}</text>
+          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+40} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <text x="${x+16}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">=1</text>
+          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
         </g>
       `;
     }
@@ -1394,22 +1414,22 @@ endmodule`
     function svgNotGate(x, y, id, label) {
       return `
         <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" style="cursor: pointer;">
-          <polygon points="${x},${y} ${x+28},${y+14} ${x},${y+28}" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-          <circle cx="${x+33}" cy="${y+14}" r="3" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
-          <text x="${x+4}" y="${y+42}" fill="#94a3b8" font-size="8.5" font-family="monospace">${label}</text>
+          <polygon points="${x},${y} ${x+28},${y+14} ${x},${y+28}" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <circle cx="${x+33}" cy="${y+14}" r="3" fill="#ffffff" stroke="#1e293b" stroke-width="2"/>
+          <text x="${x+4}" y="${y+42}" fill="#64748b" font-size="8.5" font-family="monospace">${label}</text>
         </g>
       `;
     }
 
     function svgButtonInput(x, y, label, pinKey) {
       const val = pinState[pinKey] || 0;
-      const fillColor = val ? "#166534" : "#1e293b";
-      const textColor = val ? "#86efac" : "#94a3b8";
-      const strokeColor = val ? "#22c55e" : "#475569";
+      const fillColor = val ? "#dcfce7" : "#f8fafc";
+      const textColor = val ? "#15803d" : "#334155";
+      const strokeColor = val ? "#16a34a" : "#94a3b8";
       return `
         <g class="comp-box" onclick="togglePin('${pinKey}')" style="cursor: pointer;">
-          <rect x="${x}" y="${y}" width="38" height="36" rx="5" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2"/>
-          <circle cx="${x+19}" cy="${y+18}" r="7" fill="${val ? '#22c55e' : '#334155'}"/>
+          <rect x="${x}" y="${y}" width="38" height="36" rx="5" fill="${fillColor}" stroke="${strokeColor}" stroke-width="1.8"/>
+          <circle cx="${x+19}" cy="${y+18}" r="7" fill="${val ? '#22c55e' : '#cbd5e1'}"/>
           <text x="${x+19}" y="${y+15}" fill="${textColor}" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">${label}</text>
           <text x="${x+19}" y="${y+30}" fill="${textColor}" font-size="8" font-family="monospace" text-anchor="middle">[${val}]</text>
         </g>
@@ -1418,21 +1438,21 @@ endmodule`
 
     function svgLampOutput(x, y, label, val) {
       const active = val ? true : false;
-      const lampColor = active ? "#22c55e" : "#334155";
-      const glow = active ? `filter="drop-shadow(0 0 6px rgba(34, 197, 94, 0.8))"` : "";
+      const lampColor = active ? "#22c55e" : "#f1f5f9";
+      const glow = active ? `filter="drop-shadow(0 0 5px rgba(34, 197, 94, 0.6))"` : "";
       return `
         <g ${glow}>
-          <rect x="${x}" y="${y}" width="38" height="36" rx="5" fill="#0f172a" stroke="${active ? '#22c55e' : '#475569'}" stroke-width="2"/>
-          <circle cx="${x+19}" cy="${y+18}" r="8" fill="${lampColor}"/>
-          <text x="${x+19}" y="${y+14}" fill="${active ? '#86efac' : '#94a3b8'}" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">${label}</text>
-          <text x="${x+19}" y="${y+30}" fill="${active ? '#86efac' : '#64748b'}" font-size="8" font-family="monospace" text-anchor="middle">${active ? 'HIGH' : 'LOW'}</text>
+          <rect x="${x}" y="${y}" width="38" height="36" rx="5" fill="#ffffff" stroke="${active ? '#16a34a' : '#94a3b8'}" stroke-width="1.8"/>
+          <circle cx="${x+19}" cy="${y+18}" r="8" fill="${lampColor}" stroke="${active ? '#15803d' : '#cbd5e1'}" stroke-width="1"/>
+          <text x="${x+19}" y="${y+14}" fill="${active ? '#15803d' : '#64748b'}" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">${label}</text>
+          <text x="${x+19}" y="${y+30}" fill="${active ? '#15803d' : '#94a3b8'}" font-size="8" font-family="monospace" text-anchor="middle">${active ? 'HIGH' : 'LOW'}</text>
         </g>
       `;
     }
 
     function svgWire(pathD, isHigh=false, isPulse=true) {
-      const color = isHigh ? "#22c55e" : "#f87171";
-      const strokeWidth = isHigh ? "2.5" : "1.8";
+      const color = isHigh ? "#16a34a" : "#0284c7";
+      const strokeWidth = isHigh ? "2.2" : "1.8";
       const dash = isPulse && isHigh ? 'stroke-dasharray="6 3" class="wire-active"' : "";
       return `<path d="${pathD}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" ${dash}/>`;
     }
@@ -1441,11 +1461,8 @@ endmodule`
     // 4. CIRCUIT RENDERERS: SR LATCH, PROCESSOR CORE, ALU HOTSPOT, FULL ADDER
     // ═════════════════════════════════════════════════════════════════════════
 
-    // (A) SR Latch with Negated Inputs (Matches Screenshot 1 Exactly)
+    // (A) SR Latch with Negated Inputs
     function renderSrLatchCircuit() {
-      // Logic equation evaluation
-      // nand1: q = ~(ns & nq)
-      // nand2: nq = ~(nr & q)
       const ns = pinState.ns;
       const nr = pinState.nr;
       if (ns === 0 && nr === 1) {
@@ -1462,17 +1479,17 @@ endmodule`
       return `
         <!-- Title Banner -->
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#38bdf8">// SR latch with negated inputs (gate model - digitaljs.tilk.eu)</text>
-          <text x="60" y="65" fill="#94a3b8">module sr_neg_latch: nand g1(q, ns, nq); nand g2(nq, nr, q);</text>
+          <text x="60" y="45" fill="#0284c7">// SR latch with negated inputs (gate model - digitaljs.tilk.eu)</text>
+          <text x="60" y="65" fill="#64748b">module sr_neg_latch: nand g1(q, ns, nq); nand g2(nq, nr, q);</text>
         </g>
 
         <!-- Input Button: ns (Set) -->
         ${svgButtonInput(70, 110, "ns", "ns")}
-        <text x="120" y="132" fill="#94a3b8" font-size="10" font-family="monospace">ns</text>
+        <text x="120" y="132" fill="#64748b" font-size="10" font-family="monospace">ns</text>
 
         <!-- Input Button: nr (Reset) -->
         ${svgButtonInput(70, 240, "nr", "nr")}
-        <text x="120" y="262" fill="#94a3b8" font-size="10" font-family="monospace">nr</text>
+        <text x="120" y="262" fill="#64748b" font-size="10" font-family="monospace">nr</text>
 
         <!-- Wire from ns into NAND1 pin 1 -->
         ${svgWire("M 108 128 L 320 128", ns === 1)}
@@ -1488,11 +1505,11 @@ endmodule`
 
         <!-- Cross-Coupled Feedback Wire 1: From Q (NAND1 out) down and into NAND2 pin 1 -->
         ${svgWire("M 368 128 L 440 128 L 440 210 L 220 210 L 220 245 L 260 245", q === 1)}
-        <text x="330" y="205" fill="${q ? '#22c55e' : '#f87171'}" font-size="9" font-family="monospace" font-weight="bold">q (feedback)</text>
+        <text x="330" y="205" fill="${q ? '#15803d' : '#0284c7'}" font-size="9" font-family="monospace" font-weight="bold">q (feedback)</text>
 
         <!-- Cross-Coupled Feedback Wire 2: From nq (NAND2 out) up and into NAND1 pin 2 -->
         ${svgWire("M 308 258 L 400 258 L 400 170 L 280 170 L 280 143 L 320 143", nq === 1)}
-        <text x="330" y="165" fill="${nq ? '#22c55e' : '#f87171'}" font-size="9" font-family="monospace" font-weight="bold">nq (feedback)</text>
+        <text x="330" y="165" fill="${nq ? '#15803d' : '#0284c7'}" font-size="9" font-family="monospace" font-weight="bold">nq (feedback)</text>
 
         <!-- Wire from NAND1 out to Lamp Q -->
         ${svgWire("M 368 128 L 560 128", q === 1)}
@@ -1508,27 +1525,27 @@ endmodule`
 
         <!-- Status Box -->
         <g transform="translate(70, 340)">
-          <rect width="528" height="60" rx="6" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
-          <text x="14" y="22" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace">TRUTH TABLE / LOGIC EVALUATION:</text>
-          <text x="14" y="44" fill="${(ns===0&&nr===0) ? '#ef4444' : '#86efac'}" font-size="11" font-family="monospace">
+          <rect width="528" height="60" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="14" y="22" fill="#0284c7" font-size="11" font-weight="bold" font-family="monospace">TRUTH TABLE / LOGIC EVALUATION:</text>
+          <text x="14" y="44" fill="${(ns===0&&nr===0) ? '#dc2626' : '#15803d'}" font-size="11" font-family="monospace">
             ns=${ns}, nr=${nr} ──► Q=${q}, Q̄=${nq} (${(ns===0&&nr===1)?'SET: Q latched HIGH':(ns===1&&nr===0)?'RESET: Q latched LOW':(ns===1&&nr===1)?'HOLD: Latch retaining previous state':'FORBIDDEN: ns=0, nr=0 (Metastable)'})
           </text>
         </g>
       `;
     }
 
-    // (B) RV32I Complete Processor Core Gate Netlist (Matches Screenshot 2)
+    // (B) RV32I Complete Processor Core Gate Netlist (White Paper Theme)
     function renderProcessorCoreCircuit() {
       return `
         <!-- Title & Clock Banner -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="25" y="25" fill="#38bdf8">⚡ RV32I SINGLE-CYCLE CPU GATE NETLIST | 5-STAGE PIPELINE ROUTING DEMAND</text>
+          <text x="25" y="25" fill="#0284c7">⚡ RV32I SINGLE-CYCLE CPU GATE NETLIST | 5-STAGE PIPELINE ROUTING DEMAND</text>
         </g>
 
         <!-- STAGE 1: PC REGISTER (8-NAND DFF LATCHES) -->
         <g transform="translate(20, 45)">
-          <rect width="190" height="480" rx="8" fill="#090d16" stroke="#0ea5e9" stroke-width="1.5"/>
-          <text x="10" y="20" fill="#38bdf8" font-size="9" font-family="monospace" font-weight="bold">STAGE 1: PC FETCH (DFF)</text>
+          <rect width="190" height="480" rx="6" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
+          <text x="10" y="20" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">STAGE 1: PC FETCH (DFF)</text>
           
           ${svgNotGate(15, 40, "pc_clk_inv", "CLK_INV")}
           ${svgNandGate(70, 40, "dff_pc", "DFF_PC0")}
@@ -1545,8 +1562,8 @@ endmodule`
 
         <!-- STAGE 2: INSTRUCTION DECODER (AND/INV MATRIX) -->
         <g transform="translate(225, 45)">
-          <rect width="175" height="480" rx="8" fill="#090d16" stroke="#a855f7" stroke-width="1.5"/>
-          <text x="10" y="20" fill="#c084fc" font-size="9" font-family="monospace" font-weight="bold">STAGE 2: DECODER GATES</text>
+          <rect width="175" height="480" rx="6" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="10" y="20" fill="#7c3aed" font-size="9" font-family="monospace" font-weight="bold">STAGE 2: DECODER GATES</text>
           
           ${svgNotGate(15, 40, "dec_inv1", "INV_OP5")}
           ${svgNotGate(15, 100, "dec_inv2", "INV_OP6")}
@@ -1562,22 +1579,22 @@ endmodule`
 
         <!-- STAGE 3: REGISTER FILE BITCELL (NAND LATCHES) -->
         <g transform="translate(415, 45)">
-          <rect width="180" height="480" rx="8" fill="#090d16" stroke="#f59e0b" stroke-width="1.5"/>
-          <text x="10" y="20" fill="#fbbf24" font-size="9" font-family="monospace" font-weight="bold">STAGE 3: REGFILE BITCELLS</text>
+          <rect width="180" height="480" rx="6" fill="#ffffff" stroke="#d97706" stroke-width="1.5"/>
+          <text x="10" y="20" fill="#d97706" font-size="9" font-family="monospace" font-weight="bold">STAGE 3: REGFILE BITCELLS</text>
           
           ${svgAndGate(20, 50, "rf_and1", "RD_EN1")}
           ${svgNandGate(90, 50, "rf_nand1", "RF_LATCH1")}
           ${svgNandGate(90, 120, "rf_nand2", "RF_LATCH2")}
           ${svgAndGate(20, 190, "rf_and2", "RD_EN2")}
 
-          <text x="15" y="270" fill="#d97706" font-size="8.5" font-family="monospace">rs1 data: 0x0005</text>
-          <text x="15" y="290" fill="#d97706" font-size="8.5" font-family="monospace">rs2 data: 0x0003</text>
+          <text x="15" y="270" fill="#b45309" font-size="8.5" font-family="monospace">rs1 data: 0x0005</text>
+          <text x="15" y="290" fill="#b45309" font-size="8.5" font-family="monospace">rs2 data: 0x0003</text>
         </g>
 
         <!-- STAGE 4: 32-BIT ALU LOGIC GATES (CRITICAL CONGESTION HOTSPOT) -->
         <g transform="translate(610, 45)">
-          <rect width="330" height="480" rx="8" fill="#180b12" stroke="#ef4444" stroke-width="2"/>
-          <text x="10" y="20" fill="#f87171" font-size="9" font-family="monospace" font-weight="bold">STAGE 4: 32-BIT ALU [🔥 {{ peak_layer }} HOTSPOT]</text>
+          <rect width="330" height="480" rx="6" fill="#fff5f5" stroke="#ef4444" stroke-width="2"/>
+          <text x="10" y="20" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">STAGE 4: 32-BIT ALU [🔥 {{ peak_layer }} HOTSPOT]</text>
           
           ${svgXorGate(20, 50, "alu_xor1", "XOR1 (A⊕B)", true)}
           ${svgXorGate(110, 50, "alu_xor2", "XOR2 (Sum)", true)}
@@ -1595,8 +1612,8 @@ endmodule`
           ${svgNotGate(30, 310, "wb_inv", "WB_INV")}
           ${svgAndGate(110, 310, "wb_and", "WB_AND")}
 
-          <text x="15" y="380" fill="#fca5a5" font-size="9" font-family="monospace">ALU Out: 0x00000008 (ADD result)</text>
-          <text x="15" y="400" fill="#f87171" font-size="8.5" font-family="monospace" font-weight="bold">64 XOR Cells Cluster on M1 ──► M2/M3 Saturated</text>
+          <text x="15" y="380" fill="#b91c1c" font-size="9" font-family="monospace">ALU Out: 0x00000008 (ADD result)</text>
+          <text x="15" y="400" fill="#ef4444" font-size="8.5" font-family="monospace" font-weight="bold">64 XOR Cells Cluster on M1 ──► M2/M3 Saturated</text>
         </g>
 
         <!-- Inter-Stage Connecting Wires -->
@@ -1612,14 +1629,14 @@ endmodule`
     function renderAluCircuit() {
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="30" y="35" fill="#ef4444">🔥 32-BIT ARITHMETIC LOGIC UNIT (ALU) GATE-LEVEL HOTSPOT</text>
-          <text x="30" y="55" fill="#94a3b8">Primary cause of {{ peak_layer }} ({{ peak_val_pct }}%) track congestion in RISC-V core.</text>
+          <text x="30" y="35" fill="#b91c1c">🔥 32-BIT ARITHMETIC LOGIC UNIT (ALU) GATE-LEVEL HOTSPOT</text>
+          <text x="30" y="55" fill="#64748b">Primary cause of {{ peak_layer }} ({{ peak_val_pct }}%) track congestion in RISC-V core.</text>
         </g>
 
         <!-- 4 Bit-Slice Full Adders side by side -->
         <g transform="translate(40, 80)">
-          <rect width="260" height="380" rx="8" fill="#0f172a" stroke="#ef4444" stroke-width="1.5"/>
-          <text x="12" y="24" fill="#f87171" font-size="10" font-family="monospace" font-weight="bold">BIT 0 GATE SLICE (LSB)</text>
+          <rect width="260" height="380" rx="6" fill="#fff5f5" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="12" y="24" fill="#b91c1c" font-size="10" font-family="monospace" font-weight="bold">BIT 0 GATE SLICE (LSB)</text>
           ${svgXorGate(20, 50, "alu_xor1", "XOR1 (A0⊕B0)", true)}
           ${svgXorGate(140, 50, "alu_xor2", "XOR2 (Sum0)", true)}
           ${svgAndGate(20, 130, "alu_and1", "AND1 (G0)", true)}
@@ -1628,8 +1645,8 @@ endmodule`
         </g>
 
         <g transform="translate(330, 80)">
-          <rect width="260" height="380" rx="8" fill="#0f172a" stroke="#ef4444" stroke-width="1.5"/>
-          <text x="12" y="24" fill="#f87171" font-size="10" font-family="monospace" font-weight="bold">BIT 1 GATE SLICE</text>
+          <rect width="260" height="380" rx="6" fill="#fff5f5" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="12" y="24" fill="#b91c1c" font-size="10" font-family="monospace" font-weight="bold">BIT 1 GATE SLICE</text>
           ${svgXorGate(20, 50, "b1_xor1", "XOR1 (A1⊕B1)", true)}
           ${svgXorGate(140, 50, "b1_xor2", "XOR2 (Sum1)", true)}
           ${svgAndGate(20, 130, "b1_and1", "AND1 (G1)", true)}
@@ -1641,12 +1658,12 @@ endmodule`
         ${svgWire("M 200 290 L 330 290 L 330 210 L 350 210", true)}
 
         <g transform="translate(620, 80)">
-          <rect width="290" height="380" rx="8" fill="#090d16" stroke="#334155" stroke-width="1.5"/>
-          <text x="12" y="24" fill="#cbd5e1" font-size="10" font-family="monospace" font-weight="bold">BITS [2 TO 31] EXPANSION</text>
+          <rect width="290" height="380" rx="6" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="12" y="24" fill="#334155" font-size="10" font-family="monospace" font-weight="bold">BITS [2 TO 31] EXPANSION</text>
           <text x="20" y="80" fill="#64748b" font-size="9.5" font-family="monospace">30 Parallel Adder &amp; Logic Bit Slices</text>
-          <text x="20" y="110" fill="#ea580c" font-size="9.5" font-weight="bold" font-family="monospace">Total Gates: 240 Logic Cells</text>
-          <text x="20" y="140" fill="#fca5a5" font-size="9.5" font-family="monospace">Creates continuous horizontal tracks on M2</text>
-          <text x="20" y="160" fill="#fca5a5" font-size="9.5" font-family="monospace">and vertical feedthrough tracks on M3.</text>
+          <text x="20" y="110" fill="#d97706" font-size="9.5" font-weight="bold" font-family="monospace">Total Gates: 240 Logic Cells</text>
+          <text x="20" y="140" fill="#b91c1c" font-size="9.5" font-family="monospace">Creates continuous horizontal tracks on M2</text>
+          <text x="20" y="160" fill="#b91c1c" font-size="9.5" font-family="monospace">and vertical feedthrough tracks on M3.</text>
         </g>
       `;
     }
@@ -1664,8 +1681,8 @@ endmodule`
 
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#38bdf8">// 1-Bit Full Adder Gate Netlist (xor g1, g2; and g3, g4; or g5)</text>
-          <text x="60" y="65" fill="#94a3b8">Computes Sum = A ⊕ B ⊕ Cin, Carry Out = AB + BCin + ACin</text>
+          <text x="60" y="45" fill="#0284c7">// 1-Bit Full Adder Gate Netlist (xor g1, g2; and g3, g4; or g5)</text>
+          <text x="60" y="65" fill="#64748b">Computes Sum = A ⊕ B ⊕ Cin, Carry Out = AB + BCin + ACin</text>
         </g>
 
         <!-- Inputs -->
@@ -1708,25 +1725,59 @@ endmodule`
       const container = document.getElementById("djsCircuitGroup");
       if (!container) return;
 
+      const badge = document.getElementById("djsHudModeBadge");
+
       if (currentModule === "sr_neg_gate.sv") {
         container.innerHTML = renderSrLatchCircuit();
-        document.getElementById("djsHudModeBadge").textContent = "[SR LATCH GATE MODEL]";
+        if (badge) badge.textContent = "[SR LATCH GATE MODEL]";
         selectGate("sr_nand1");
       } else if (currentModule === "rv32i_alu.sv") {
         container.innerHTML = renderAluCircuit();
-        document.getElementById("djsHudModeBadge").textContent = "[32-BIT ALU HOTSPOT]";
+        if (badge) badge.textContent = "[32-BIT ALU HOTSPOT]";
         selectGate("alu_xor1");
       } else if (currentModule === "fulladder.sv") {
         container.innerHTML = renderFullAdderCircuit();
-        document.getElementById("djsHudModeBadge").textContent = "[FULL ADDER GATE MODEL]";
+        if (badge) badge.textContent = "[FULL ADDER GATE MODEL]";
         selectGate("alu_xor1");
       } else {
         container.innerHTML = renderProcessorCoreCircuit();
-        document.getElementById("djsHudModeBadge").textContent = "[RV32I GATE NETLIST]";
+        if (badge) badge.textContent = "[RV32I GATE NETLIST]";
         selectGate("alu_xor1");
       }
 
       updateSignalHud();
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function syntaxHighlightVerilog(code) {
+      const lines = code.split("\n");
+      const keywordRegex = /\b(module|endmodule|input|output|inout|wire|reg|logic|assign|always|always_ff|always_comb|begin|end|case|endcase|if|else|parameter|localparam|posedge|negedge)\b/g;
+      const gateRegex = /\b(and|nand|or|nor|xor|xnor|not|buf)\b/g;
+      const numRegex = /\b(\d+'[bBoOdDhH][0-9a-fA-F_]+|\d+)\b/g;
+
+      return lines.map(line => {
+        const commentIdx = line.indexOf("//");
+        if (commentIdx !== -1) {
+          const codePart = line.substring(0, commentIdx);
+          const commentPart = line.substring(commentIdx);
+          const highlightedCode = escapeHtml(codePart)
+            .replace(keywordRegex, '<span style="color: #6f42c1; font-weight: 600;">$1</span>')
+            .replace(gateRegex, '<span style="color: #0284c7; font-weight: 600;">$1</span>')
+            .replace(numRegex, '<span style="color: #0550ae;">$1</span>');
+          return highlightedCode + `<span style="color: #b45309; font-style: italic;">${escapeHtml(commentPart)}</span>`;
+        } else {
+          return escapeHtml(line)
+            .replace(keywordRegex, '<span style="color: #6f42c1; font-weight: 600;">$1</span>')
+            .replace(gateRegex, '<span style="color: #0284c7; font-weight: 600;">$1</span>')
+            .replace(numRegex, '<span style="color: #0550ae;">$1</span>');
+        }
+      }).join("\n");
     }
 
     function djsSelectModule(filename) {
@@ -1736,10 +1787,10 @@ endmodule`
       const tabLabel = document.getElementById("djsActiveFileTabName");
       if (tabLabel) tabLabel.textContent = filename;
 
-      // Update Code display
+      // Update Code display with syntax highlighting
       const code = HDL_PRESETS[filename] || HDL_PRESETS["rv32i_core.sv"];
       const codeEl = document.getElementById("djsCodeDisplay");
-      if (codeEl) codeEl.textContent = code;
+      if (codeEl) codeEl.innerHTML = syntaxHighlightVerilog(code);
 
       // Update Line numbers
       const gutter = document.getElementById("djsCodeGutter");
@@ -1765,13 +1816,13 @@ endmodule`
           if (t === tabName) {
             btn.classList.add("active");
             btn.style.background = "#ffffff";
-            btn.style.color = "#2563eb";
-            btn.style.border = "1px solid #e2e8f0";
+            btn.style.color = "#495057";
+            btn.style.border = "1px solid #dee2e6";
             btn.style.borderBottom = "1px solid #ffffff";
           } else {
             btn.classList.remove("active");
             btn.style.background = "transparent";
-            btn.style.color = "#64748b";
+            btn.style.color = "#0d6efd";
             btn.style.border = "none";
           }
         }
@@ -1830,7 +1881,7 @@ endmodule`
       clearInterval(simTimer);
       const btn = document.getElementById("djsRunBtn");
       const txt = document.getElementById("djsRunBtnText");
-      if (btn) btn.style.background = "#16a34a";
+      if (btn) btn.style.background = "#0d6efd";
       if (txt) txt.textContent = "Run";
     }
 
@@ -1838,8 +1889,8 @@ endmodule`
       isSimRunning = true;
       const btn = document.getElementById("djsRunBtn");
       const txt = document.getElementById("djsRunBtnText");
-      if (btn) btn.style.background = "#2563eb";
-      if (txt) txt.textContent = "Running";
+      if (btn) btn.style.background = "#0d6efd";
+      if (txt) txt.textContent = "Run";
       startSimLoop();
     }
 
@@ -1925,6 +1976,24 @@ endmodule`
     function applyZoom() {
       const grp = document.getElementById("djsCircuitGroup");
       if (grp) grp.setAttribute("transform", `scale(${simZoom})`);
+    }
+
+    function djsLoadDialog() {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".v,.sv,.json";
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (re) => {
+            HDL_PRESETS[file.name] = re.target.result;
+            djsSelectModule(file.name);
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
     }
 
     function djsExportJson() {
