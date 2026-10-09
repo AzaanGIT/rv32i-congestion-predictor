@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261009-v3.5';
+      const BUILD_VER = '20261009-v3.6';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1046,10 +1046,10 @@ endmodule`
 
             <!-- Layout Orientation Switcher (" = " Stacked vs " || " Side) -->
             <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Layout orientation" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d;">
-              <button type="button" id="djsLayoutStackedBtn" onclick="setDjsLayout('stacked')" title="Stack Code &amp; Gate-Level: Top &amp; Bottom (=)" style="background: #343a40; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #5a6268; display: inline-flex; align-items: center; gap: 4px;">
+              <button type="button" id="djsLayoutStackedBtn" onclick="setDjsLayout('stacked')" title="Stack Code &amp; Gate-Level: Top &amp; Bottom (=)" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #5a6268; display: inline-flex; align-items: center; gap: 4px;">
                 <span>☰ Stacked (=)</span>
               </button>
-              <button type="button" id="djsLayoutSideBtn" onclick="setDjsLayout('side')" title="Side-by-side Layout (||)" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <button type="button" id="djsLayoutSideBtn" onclick="setDjsLayout('side')" title="Side-by-side Layout (||)" style="background: #343a40; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                 <span>◫ Side (||)</span>
               </button>
             </div>
@@ -1072,11 +1072,11 @@ endmodule`
           </div>
         </div>
 
-        <!-- 2. WORKBENCH: STACKED LAYOUT (=) - CODE ON TOP, GATE LEVEL BELOW -->
-        <div id="djsWorkbenchLayout" class="editor-circuit-wrapper" style="display: flex; flex-direction: column; background: #ffffff;">
+        <!-- 2. WORKBENCH: SIDE-BY-SIDE LAYOUT (||) - CODE ON LEFT, GATE LEVEL CANVAS ON RIGHT -->
+        <div id="djsWorkbenchLayout" class="editor-circuit-wrapper" style="display: grid; grid-template-columns: minmax(380px, 460px) 10px 1fr; height: 640px; min-height: 560px; max-height: calc(100vh - 120px); overflow: hidden; background: #ffffff;">
           
-          <!-- TOP ROW: CODE EDITOR & SETUP / IO TABS -->
-          <div id="djsEditorContainer" style="background: #ffffff; display: flex; flex-direction: column; height: 270px; flex-shrink: 0; overflow: hidden; width: 100%;">
+          <!-- LEFT COLUMN: CODE EDITOR & SETUP / IO TABS -->
+          <div id="djsEditorContainer" style="background: #ffffff; display: flex; flex-direction: column; height: 100%; min-height: 0; max-height: 100%; overflow: hidden; width: 100%; border-right: 1px solid #dee2e6;">
             
             <!-- Nav Tabs (Setup | I/O | Active User File ☁️ ✕) -->
             <nav style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 6px 8px 0 8px;">
@@ -1091,8 +1091,8 @@ endmodule`
             </nav>
 
             <!-- Tab Pane 1: Code View (Default) -->
-            <div id="djsLeftCodePane" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; background: #ffffff;">
-              <div id="djsCodeScrollBox" style="display: flex; flex: 1; overflow: auto; background: #ffffff;">
+            <div id="djsLeftCodePane" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; background: #ffffff;">
+              <div id="djsCodeScrollBox" style="display: flex; flex: 1; min-height: 0; overflow-y: auto; overflow-x: auto; background: #ffffff;">
                 <!-- Line Numbers Gutter -->
                 <div id="djsCodeGutter" style="background: #f8f9fa; color: #adb5bd; padding: 10px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; text-align: right; width: 34px; flex-shrink: 0; border-right: 1px solid #dee2e6; user-select: none;">
                   1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22
@@ -1149,15 +1149,15 @@ endmodule`
 
           </div>
 
-          <!-- HORIZONTAL SPLITTER GUTTER BETWEEN CODE AND GATE LEVEL CANVAS -->
-          <div id="gutter_splitter" class="gutter gutter-vertical" style="height: 10px; width: 100%; background-color: #eee; cursor: ns-resize; background-repeat: no-repeat; background-position: 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII='); border-top: 1px solid #dee2e6; border-bottom: 1px solid #dee2e6;"></div>
+          <!-- VERTICAL SPLITTER GUTTER BETWEEN CODE AND GATE LEVEL CANVAS -->
+          <div id="gutter_splitter" class="gutter gutter-horizontal" style="height: 100%; width: 10px; background-color: #eee; cursor: ew-resize; background-repeat: no-repeat; background-position: 50%; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');"></div>
 
-          <!-- BOTTOM ROW: GATE LEVEL CIRCUIT CANVAS (ONE BELOW ANOTHER "=") -->
-          <div id="djsCircuitContainer" class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column; min-height: 600px; width: 100%;">
+          <!-- RIGHT COLUMN: GATE LEVEL CIRCUIT CANVAS (SIDE-BY-SIDE '||') -->
+          <div id="djsCircuitContainer" class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 0; max-height: 100%; width: 100%;">
 
             <!-- LIVE DIGITALJS EMBEDDED ENGINE (CIRCUIT DESIGN ONLY - CLEAN FULL VIEW) -->
-            <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 580px; position: relative; background: #ffffff; display: flex; flex-direction: column; flex: 1;">
-              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261009-v3.2#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 580px; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
+            <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 0; position: relative; background: #ffffff; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261009-v3.2#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
             </div>
 
             <!-- Canvas Zoom Floating Controls (For Congestion View) -->
@@ -4838,6 +4838,8 @@ endmodule`
       const editor = document.getElementById("djsEditorContainer");
       const gutter = document.getElementById("gutter_splitter");
       const circuit = document.getElementById("djsCircuitContainer");
+      const liveWrap = document.getElementById("djsLiveIframeWrapper");
+      const liveFrame = document.getElementById("djsLiveFrame");
       const btnStacked = document.getElementById("djsLayoutStackedBtn");
       const btnSide = document.getElementById("djsLayoutSideBtn");
 
@@ -4848,9 +4850,18 @@ endmodule`
         wrapper.style.display = "flex";
         wrapper.style.flexDirection = "column";
         wrapper.style.gridTemplateColumns = "none";
+        wrapper.style.height = "auto";
+        wrapper.style.maxHeight = "none";
+        wrapper.style.minHeight = "auto";
+        wrapper.style.overflow = "visible";
         
         editor.style.width = "100%";
-        editor.style.height = "270px";
+        editor.style.height = "280px";
+        editor.style.maxHeight = "280px";
+        editor.style.minHeight = "0";
+        editor.style.display = "flex";
+        editor.style.flexDirection = "column";
+        editor.style.overflow = "hidden";
         editor.style.borderRight = "none";
         editor.style.borderBottom = "none";
         
@@ -4865,23 +4876,41 @@ endmodule`
         gutter.style.borderRight = "none";
 
         circuit.style.width = "100%";
-        circuit.style.minHeight = "560px";
+        circuit.style.height = "580px";
+        circuit.style.maxHeight = "none";
+        circuit.style.minHeight = "580px";
+        circuit.style.display = "flex";
+        circuit.style.flexDirection = "column";
+        circuit.style.overflow = "hidden";
+
+        if (liveWrap) { liveWrap.style.minHeight = "560px"; liveWrap.style.height = "100%"; }
+        if (liveFrame) { liveFrame.style.minHeight = "560px"; liveFrame.style.height = "100%"; }
 
         if (btnStacked) { btnStacked.style.background = "#343a40"; btnStacked.style.color = "#ffffff"; }
         if (btnSide) { btnSide.style.background = "#6c757d"; btnSide.style.color = "#ffffff"; }
       } else {
-        // Side-by-side mode (" || ")
+        // Side-by-side mode (" || ") - Code on left, Circuit on right, matching heights!
+        // Both code and circuit stay fully visible, rest of the code scrolls inside the editor window!
         wrapper.style.display = "grid";
         wrapper.style.flexDirection = "row";
-        wrapper.style.gridTemplateColumns = "460px 10px 1fr";
+        wrapper.style.gridTemplateColumns = "minmax(380px, 460px) 10px 1fr";
+        wrapper.style.height = "640px";
+        wrapper.style.maxHeight = "calc(100vh - 120px)";
+        wrapper.style.minHeight = "560px";
+        wrapper.style.overflow = "hidden";
         
-        editor.style.width = "auto";
-        editor.style.height = "auto";
+        editor.style.width = "100%";
+        editor.style.height = "100%";
+        editor.style.maxHeight = "100%";
+        editor.style.minHeight = "0";
+        editor.style.display = "flex";
+        editor.style.flexDirection = "column";
+        editor.style.overflow = "hidden";
         editor.style.borderRight = "1px solid #dee2e6";
         editor.style.borderBottom = "none";
         
         gutter.className = "gutter gutter-horizontal";
-        gutter.style.height = "auto";
+        gutter.style.height = "100%";
         gutter.style.width = "10px";
         gutter.style.cursor = "ew-resize";
         gutter.style.backgroundImage = "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==')";
@@ -4890,8 +4919,16 @@ endmodule`
         gutter.style.borderLeft = "none";
         gutter.style.borderRight = "none";
 
-        circuit.style.width = "auto";
-        circuit.style.minHeight = "560px";
+        circuit.style.width = "100%";
+        circuit.style.height = "100%";
+        circuit.style.maxHeight = "100%";
+        circuit.style.minHeight = "0";
+        circuit.style.display = "flex";
+        circuit.style.flexDirection = "column";
+        circuit.style.overflow = "hidden";
+
+        if (liveWrap) { liveWrap.style.minHeight = "0"; liveWrap.style.height = "100%"; }
+        if (liveFrame) { liveFrame.style.minHeight = "0"; liveFrame.style.height = "100%"; }
 
         if (btnStacked) { btnStacked.style.background = "#6c757d"; btnStacked.style.color = "#ffffff"; }
         if (btnSide) { btnSide.style.background = "#343a40"; btnSide.style.color = "#ffffff"; }
@@ -5030,6 +5067,7 @@ endmodule`
         currentModule = moduleFileName;
       }
       djsSelectModule(currentModule);
+      setDjsLayout('side');
       startSimLoop();
 
       // Listen for manual user scrolling in the code viewer to prevent auto-scroll jumps
