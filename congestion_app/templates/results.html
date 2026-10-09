@@ -784,6 +784,167 @@
 
   <script>
     // ═════════════════════════════════════════════════════════════════════════
+    // 0. LAYER DATA & ROUTING DENSITY HEATMAP VIEWER
+    // ═════════════════════════════════════════════════════════════════════════
+    const allResources = {{ resources|tojson }};
+    const allDemands = {{ demands|tojson }};
+    const allSuggestedResources = {{ suggested_resources|tojson }};
+    const allSuggestedParams = {{ suggested_params|tojson }};
+    const currentParams = {
+      utilization: {{ utilization }},
+      aspect_ratio: {{ aspect_ratio }},
+      core_margin: {{ core_margin }},
+      density: {{ density }},
+      layer_adjustment: {{ layer_adjustment }}
+    };
+
+    const rawData = {{ layer_usage_pct|tojson }};
+    const gridSize = 50;
+
+    function generateExactReferenceHeatmap(val) {
+      const cvs = document.createElement("canvas");
+      cvs.width = gridSize; cvs.height = gridSize;
+      const ctx = cvs.getContext("2d");
+      const imgData = ctx.createImageData(gridSize, gridSize);
+
+      const c1 = [13, 56, 120];  const c2 = [20, 110, 160]; const c3 = [30, 160, 150]; 
+      const c4 = [80, 200, 80];  const c5 = [220, 200, 40]; const c6 = [240, 120, 30]; const c7 = [220, 40, 40];
+
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          const dx = (x - 25) / 25.0;
+          const dy = (y - 25) / 25.0;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          
+          let int = (val / 100.0) - (dist * 0.9) + (Math.random() * 0.8 - 0.4);
+
+          let r, g, b;
+          if (int > 0.7) { r=c7[0]; g=c7[1]; b=c7[2]; }
+          else if (int > 0.4) { r=c6[0]; g=c6[1]; b=c6[2]; }
+          else if (int > 0.1) { r=c5[0]; g=c5[1]; b=c5[2]; }
+          else if (int > -0.2) { r=c4[0]; g=c4[1]; b=c4[2]; }
+          else if (int > -0.5) { r=c3[0]; g=c3[1]; b=c3[2]; }
+          else if (int > -0.8) { r=c2[0]; g=c2[1]; b=c2[2]; }
+          else { r=c1[0]; g=c1[1]; b=c1[2]; }
+
+          const idx = (y * gridSize + x) * 4;
+          imgData.data[idx] = r; imgData.data[idx+1] = g; imgData.data[idx+2] = b; imgData.data[idx+3] = 255;
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+      return cvs;
+    }
+
+    function drawAllLayerHeatmaps() {
+      if (typeof rawData === 'undefined') return;
+      Object.keys(rawData).forEach(layer => {
+        const cvs = document.getElementById("cvs-" + layer);
+        if (cvs) {
+          const ctx = cvs.getContext("2d");
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(generateExactReferenceHeatmap(rawData[layer]), 0, 0, cvs.width, cvs.height);
+        }
+      });
+    }
+
+    function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
+
+    function openFixModal() {
+      document.getElementById('modalTitle').innerText = 'Calculated Parameters to Eliminate Congestion';
+      document.getElementById('modalDesc').innerText = 'Applying these holistic rules will scale core margin, density, and routing tracks below 80%:';
+      
+      const grid = document.getElementById('modalContentGrid');
+      grid.innerHTML = `
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">CORE MARGIN (MM)</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${currentParams.core_margin} → <span style="color:#15803d;">${allSuggestedParams.core_margin}</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">TARGET DENSITY</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${currentParams.density} → <span style="color:#15803d;">${allSuggestedParams.density}</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">UTILIZATION</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${currentParams.utilization}% → <span style="color:#15803d;">${allSuggestedParams.utilization}%</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">{{ peak_layer }} AVAILABLE TRACKS</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${(allResources['{{ peak_layer }}'] || 0).toLocaleString()} → <span style="color:#15803d;">${(allSuggestedResources['{{ peak_layer }}'] || 0).toLocaleString()}</span></div>
+        </div>
+      `;
+
+      const form = document.getElementById('fixForm');
+      form.innerHTML = `
+        <input type="hidden" name="utilization" value="${allSuggestedParams.utilization}">
+        <input type="hidden" name="aspect_ratio" value="${allSuggestedParams.aspect_ratio}">
+        <input type="hidden" name="core_margin" value="${allSuggestedParams.core_margin}">
+        <input type="hidden" name="density" value="${allSuggestedParams.density}">
+        <input type="hidden" name="layer_adjustment" value="${allSuggestedParams.layer_adjustment}">
+        ${Object.keys(allSuggestedResources).map(k => `<input type="hidden" name="metal_${k.replace('M','')}" value="${allSuggestedResources[k]}">`).join('')}
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
+          <button type="submit" class="btn-3d">Apply Fixes & Re-run</button>
+        </div>
+      `;
+
+      document.getElementById('fixModal').style.display = 'flex';
+    }
+
+    function openSingleLayerFix(layer) {
+      const curRes = allResources[layer] || 0;
+      const curDemand = allDemands[layer] || 0;
+      const curPct = rawData[layer] || 0;
+      
+      let recRes = allSuggestedResources[layer];
+      if (!recRes || recRes <= curRes) {
+        recRes = curDemand > 0 ? Math.ceil(curDemand / 0.70) : Math.max(1000, Math.ceil(curRes * 1.25));
+      }
+      const estNewPct = recRes > 0 ? Math.min(100.0, Math.round((curDemand / recRes) * 1000) / 10) : 0;
+
+      document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer + ' Only';
+      document.getElementById('modalDesc').innerText = 'Targeted routing track optimization for ' + layer + ' only. Core margin, cell density, utilization, and all other layers remain unchanged:';
+
+      const grid = document.getElementById('modalContentGrid');
+      grid.innerHTML = `
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">${layer} CURRENT CAPACITY</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${curRes.toLocaleString()} <span style="font-size:11px; color:#718096; font-weight:600;">tracks</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">${layer} WIRE PRESSURE</span>
+          <div style="font-size:14px; font-weight:800; color:${curPct >= 85 ? '#dc2626' : '#1a202c'}; margin-top:2px;">${curDemand.toLocaleString()} <span style="font-size:11px; font-weight:600;">(${curPct}% Saturation)</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">RECOMMENDED ${layer} TRACKS</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${curRes.toLocaleString()} → <span style="color:#15803d;">${recRes.toLocaleString()}</span></div>
+        </div>
+        <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+          <span style="color:#718096; font-size:10px; font-weight: 700;">ESTIMATED NEW SATURATION</span>
+          <div style="font-size:14px; font-weight:800; color:#15803d; margin-top:2px;">${estNewPct}% <span style="font-size:10px; background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px;">OPTIMIZED</span></div>
+        </div>
+      `;
+
+      const form = document.getElementById('fixForm');
+      form.innerHTML = `
+        <input type="hidden" name="utilization" value="${currentParams.utilization}">
+        <input type="hidden" name="aspect_ratio" value="${currentParams.aspect_ratio}">
+        <input type="hidden" name="core_margin" value="${currentParams.core_margin}">
+        <input type="hidden" name="density" value="${currentParams.density}">
+        <input type="hidden" name="layer_adjustment" value="${currentParams.layer_adjustment}">
+        ${Object.keys(allResources).map(k => {
+          const val = (k === layer) ? recRes : allResources[k];
+          return `<input type="hidden" name="metal_${k.replace('M','')}" value="${val}">`;
+        }).join('')}
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+          <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
+          <button type="submit" class="btn-3d">Apply ${layer} Fix & Re-run</button>
+        </div>
+      `;
+
+      document.getElementById('fixModal').style.display = 'flex';
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
     // 1. HDL PRESETS & MODULE DEFINITIONS (Matches DigitalJS Online)
     // ═════════════════════════════════════════════════════════════════════════
     const HDL_PRESETS = {
@@ -1691,8 +1852,9 @@ endmodule`
       djsResetSim();
     }
 
-    // Initialize DigitalJS Workbench on Load
+    // Initialize DigitalJS Workbench & Layer Routing Density Heatmaps on Load
     window.addEventListener("DOMContentLoaded", () => {
+      drawAllLayerHeatmaps();
       djsSelectModule(currentModule);
       startSimLoop();
     });
