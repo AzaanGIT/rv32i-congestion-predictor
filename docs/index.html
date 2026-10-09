@@ -3,7 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>RV32I Congestion Predictor | EDA Silicon Floorplanner</title>
+  <script>
+    // Version check & cache-bust auto-updater
+    (function() {
+      const BUILD_VER = '20261009-v2.6';
+      const stored = localStorage.getItem('rv32i_build_ver');
+      if (stored !== BUILD_VER) {
+        localStorage.setItem('rv32i_build_ver', BUILD_VER);
+        if (window.location.search.indexOf('v=') === -1) {
+          window.location.replace(window.location.pathname + '?v=' + BUILD_VER + window.location.hash);
+        }
+      }
+    })();
+  </script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -148,6 +164,9 @@
       const controlsEl = document.getElementById('controlsView');
       if (resultsEl) resultsEl.style.display = 'none';
       if (controlsEl) controlsEl.style.display = 'block';
+      if (window.location.hash === '#predict' || window.location.hash === '#results') {
+        try { history.replaceState(null, document.title, window.location.pathname + window.location.search); } catch(e) {}
+      }
       window.scrollTo(0, 0);
     }
 
@@ -156,6 +175,7 @@
       const resultsEl = document.getElementById('resultsView');
       if (controlsEl) controlsEl.style.display = 'none';
       if (resultsEl) resultsEl.style.display = 'block';
+      window.location.hash = '#predict';
       window.scrollTo(0, 0);
       if (typeof applyFloorplanAnalysis === 'function') {
         try {
@@ -186,7 +206,7 @@
 
 
 
-  <form id="floorplanForm" action="/predict" method="POST" onsubmit="triggerAnalysisFromForm(); return false;">
+  <form id="floorplanForm" action="javascript:void(0);" method="GET" onsubmit="triggerAnalysisFromForm(); return false;">
 
     <!-- PROCESSOR ARCHITECTURE SELECTION -->
     <div class="card" style="border: 1.5px solid rgba(124, 58, 237, 0.35); background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%); margin-bottom: 24px;">
@@ -455,7 +475,7 @@
           </div>
         </div>
 
-        <button type="button" class="btn-submit" onclick="triggerAnalysisFromForm()" style="width: auto; padding: 14px 28px; margin-top: 0;">⚡ FIND CONGESTION &amp; SYNTHESIZE IN DIGITALJS →</button>
+        <button type="button" id="btnRunSynthesize" class="btn-submit" onclick="triggerAnalysisFromForm(); return false;" style="width: auto; padding: 14px 28px; margin-top: 0;">⚡ FIND CONGESTION &amp; SYNTHESIZE IN DIGITALJS →</button>
       </div>
 
     </div>
@@ -3686,18 +3706,41 @@ endmodule`
   </div>
 
   <script>
-    // ALWAYS ensure Page 1 (Input Form) opens first when visiting or refreshing the website
-    showInputForm();
-    window.addEventListener('DOMContentLoaded', () => {
-      showInputForm();
+    // Handle URL hash routing (#predict or default inputs)
+    window.addEventListener('hashchange', () => {
+      if (window.location.hash === '#predict' || window.location.hash === '#results') {
+        triggerAnalysisFromForm();
+      } else {
+        showInputForm();
+      }
     });
 
-    // Intercept floorplanForm submission on controlsView
+    if (window.location.hash === '#predict' || window.location.hash === '#results') {
+      document.addEventListener('DOMContentLoaded', () => {
+        triggerAnalysisFromForm();
+      });
+    } else {
+      showInputForm();
+      document.addEventListener('DOMContentLoaded', () => {
+        showInputForm();
+      });
+    }
+
+    // Direct event listener attachment for submit button & form
     document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btnRunSynthesize') || document.querySelector('.btn-submit');
+      if (btn) {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          triggerAnalysisFromForm();
+        });
+      }
       const form = document.getElementById('floorplanForm');
       if (form) {
         form.addEventListener('submit', (e) => {
           e.preventDefault();
+          e.stopPropagation();
           triggerAnalysisFromForm();
         });
       }
