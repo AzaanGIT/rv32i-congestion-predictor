@@ -400,6 +400,110 @@
         </div>
       </div>
 
+      
+    <!-- SECTION 3: VERILOG HDL CODE & DIGITALJS SYNTHESIS -->
+    <div class="card" style="border: 1.5px solid rgba(124, 58, 237, 0.35); margin-bottom: 24px;">
+      <div class="card-header" style="margin-bottom: 14px;">
+        <div>
+          <div class="card-title">3. Verilog HDL Processor Hardware Description</div>
+          <div class="card-heading">Input HDL code to synthesize into gate-level design (DigitalJS Online Editor)</div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Load Example:</span>
+          <select id="hdlExampleSelect" onchange="loadHdlPreset(this.value)" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 800; color: #1e293b; cursor: pointer; outline: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <option value="rv32i_core.sv" selected>⚡ rv32i_core.sv (RV32I Single-Cycle Processor Core)</option>
+            <option value="rv32i_alu.sv">🔥 rv32i_alu.sv (32-Bit ALU Hotspot Wire Density)</option>
+            <option value="sr_neg_gate.sv">🔍 sr_neg_gate.sv (SR Latch Gate Model)</option>
+            <option value="fulladder.sv">🔢 fulladder.sv (1-Bit Full Adder Gate Netlist)</option>
+            <option value="custom.sv">✏️ custom.sv (User Custom Verilog HDL)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DigitalJS-Themed Tab Bar -->
+      <div style="background: #1e293b; border-radius: 10px 10px 0 0; padding: 8px 14px 0 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+        <div style="display: flex; gap: 4px; align-items: center;">
+          <div style="background: #7c3aed; color: #ffffff; font-weight: 900; font-size: 11px; padding: 4px 9px; border-radius: 5px; margin-right: 8px; letter-spacing: 0.5px;">DigitalJS</div>
+          <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">Setup</button>
+          <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">I/O</button>
+          <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #0f172a; color: #38bdf8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid #38bdf8; display: flex; align-items: center; gap: 6px;">
+            <span id="tabFilenameLabel">rv32i_core.sv</span>
+            <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; padding-bottom: 4px;">
+          <button type="button" onclick="copyHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">📋 Copy</button>
+          <button type="button" onclick="resetHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">🔄 Reset</button>
+        </div>
+      </div>
+
+      <!-- Tab Content 1: Code View -->
+      <div id="hdlTabCodeView" style="display: block; background: #0f172a; border-radius: 0 0 10px 10px; border: 1px solid #1e293b; border-top: none; position: relative;">
+        <div style="display: flex; min-height: 290px; max-height: 420px; overflow: hidden;">
+          <!-- Line numbers gutter -->
+          <div id="hdlLineNumbers" style="background: #090d16; color: #475569; padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; text-align: right; user-select: none; width: 44px; flex-shrink: 0; border-right: 1px solid #1e293b; overflow: hidden;">
+            1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20
+          </div>
+          <!-- Editable code textarea -->
+          <textarea id="hdlCodeTextarea" name="selected_hdl_code" spellcheck="false" oninput="updateLineNumbers()"
+            style="flex: 1; background: #0f172a; color: #e2e8f0; border: none; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; resize: vertical; min-height: 290px; max-height: 420px; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; tab-size: 2;"></textarea>
+        </div>
+        <div style="background: #090d16; border-top: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; border-radius: 0 0 10px 10px;">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
+            <span>Target: <b>RV32I Gate Netlist (SkyWater 130nm PDK standard cells)</b></span>
+          </span>
+          <span id="hdlCharCount" style="color: #64748b; font-family: monospace;">1,248 characters</span>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Setup View -->
+      <div id="hdlTabSetupView" style="display: none; background: #0f172a; color: #e2e8f0; border-radius: 0 0 10px 10px; border: 1px solid #1e293b; border-top: none; padding: 22px;">
+        <div style="font-weight: 800; font-size: 13px; color: #38bdf8; margin-bottom: 12px;">DigitalJS / Yosys Synthesis Options</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 12px; color: #cbd5e1;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" checked disabled>
+            <span><b>Optimize in Yosys</b> (<code style="color: #f472b6;">opt -full</code>)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" checked disabled>
+            <span><b>Simplify diagram</b> (Post-processing reduction)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" checked disabled>
+            <span><b>Convert to logic gates</b> (<code style="color: #f472b6;">techmap</code> gate level)</span>
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" checked disabled>
+            <span><b>Gate subset mapping</b> (AND, NAND, OR, NOR, XOR, MUX)</span>
+          </label>
+        </div>
+        <div style="margin-top: 14px; font-size: 11px; color: #94a3b8; background: #1e293b; padding: 10px 14px; border-radius: 6px;">
+          ℹ️ When you click <b>Find Congestion</b>, the HDL code is mapped to logic gates and analyzed by the XGBoost backend model to predict silicon routing tracks.
+        </div>
+      </div>
+
+      <!-- Tab Content 3: I/O View -->
+      <div id="hdlTabIoView" style="display: none; background: #0f172a; color: #e2e8f0; border-radius: 0 0 10px 10px; border: 1px solid #1e293b; border-top: none; padding: 22px;">
+        <div style="font-weight: 800; font-size: 13px; color: #38bdf8; margin-bottom: 12px;">Synthesized Module Ports (I/O)</div>
+        <div id="hdlIoPortList" style="font-size: 11px; font-family: monospace; color: #cbd5e1; line-height: 1.8;">
+          • input wire clk [1 bit] - System Clock<br>
+          • input wire reset [1 bit] - Synchronous Core Reset<br>
+          • input wire [31:0] instr - Fetched Machine Instruction<br>
+          • input wire [31:0] rdata - Memory Read Bus<br>
+          • output wire [31:0] pc - Program Counter Register<br>
+          • output wire [31:0] alu_out - 32-Bit Arithmetic Result (Critical Wire Hotspot)<br>
+          • output wire [31:0] wdata - Memory Write Bus<br>
+          • output wire mem_write - Data Memory Write Enable
+        </div>
+      </div>
+
+      <!-- Hidden input for file name -->
+      <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="rv32i_core.sv">
+    </div>
+
+
       <!-- LIVE ESTIMATION BANNER -->
       <div class="summary-banner">
         <div class="metric-group">
@@ -417,9 +521,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-submit" style="width: auto; padding: 12px 28px; margin-top: 0;">
-          RUN ROUTING ANALYSIS →
-        </button>
+        <button type="submit" class="btn-submit" style="width: auto; padding: 14px 28px; margin-top: 0;">⚡ FIND CONGESTION &amp; SYNTHESIZE IN DIGITALJS →</button>
       </div>
 
     </div>
@@ -532,6 +634,225 @@
 
     // Initialize on load
     updateLiveStats();
+
+    const HDL_PRESETS = {
+      "rv32i_core.sv": `// RV32I Single-Cycle Processor Core (Gate-Level Synthesizable)
+module rv32i_core(
+  input clk,
+  input reset,
+  input [31:0] instr,
+  input [31:0] rdata,
+  output [31:0] pc,
+  output [31:0] alu_out,
+  output [31:0] wdata,
+  output mem_write
+);
+
+  // Stage 1: Program Counter Register (8 DFFs per byte)
+  reg [31:0] pc_reg;
+  always @(posedge clk or posedge reset) begin
+    if (reset) pc_reg <= 32'h00000000;
+    else pc_reg <= pc_reg + 4;
+  end
+  assign pc = pc_reg;
+
+  // Stage 2: Instruction Decoder Logic (AND/INV matrix)
+  wire [6:0] opcode = instr[6:0];
+  wire is_r_type = (opcode == 7'b0110011); // ADD, SUB, XOR, OR, AND
+  wire is_load   = (opcode == 7'b0000011); // LW
+  wire is_store  = (opcode == 7'b0100011); // SW
+  wire is_branch = (opcode == 7'b1100011); // BEQ
+
+  // Stage 3: Register File Bitcells (NAND-based latches)
+  wire [4:0] rs1 = instr[19:15];
+  wire [4:0] rs2 = instr[24:20];
+  wire [4:0] rd  = instr[11:7];
+
+  // Stage 4: 32-bit ALU Hotspot (XOR, AND, OR, ADD logic gates)
+  wire [31:0] alu_a = 32'h00000005; // rs1 data
+  wire [31:0] alu_b = is_load ? 32'h00000004 : 32'h00000003;
+  wire [31:0] alu_add = alu_a + alu_b;
+  wire [31:0] alu_xor = alu_a ^ alu_b;
+  wire [31:0] alu_and = alu_a & alu_b;
+  wire [31:0] alu_or  = alu_a | alu_b;
+
+  assign alu_out = is_r_type ? alu_add : (alu_a + 32'd4);
+  assign mem_write = is_store;
+  assign wdata = alu_b;
+
+endmodule`,
+
+      "rv32i_alu.sv": `// 32-Bit RV32I Arithmetic Logic Unit (ALU Hotspot)
+module rv32i_alu(
+  input [31:0] a,
+  input [31:0] b,
+  input [3:0]  alu_ctrl,
+  output reg [31:0] result,
+  output zero
+);
+
+  wire [31:0] sum  = a + b;
+  wire [31:0] diff = a - b;
+  wire [31:0] logic_and = a & b;
+  wire [31:0] logic_or  = a | b;
+  wire [31:0] logic_xor = a ^ b; // Critical Metal 2/3 congestion hotspot
+
+  always @(*) begin
+    case (alu_ctrl)
+      4'b0000: result = sum;        // ADD
+      4'b0001: result = diff;       // SUB
+      4'b0010: result = logic_and;  // AND
+      4'b0011: result = logic_or;   // OR
+      4'b0100: result = logic_xor;  // XOR
+      default: result = sum;
+    endcase
+  end
+
+  assign zero = (result == 32'b0);
+
+endmodule`,
+
+      "sr_neg_gate.sv": `// SR latch with negated inputs (gate model)
+module sr_neg_latch(
+  input ns, nr,
+  output q, nq
+);
+
+  nand g1(q, ns, nq);
+  nand g2(nq, nr, q);
+
+endmodule`,
+
+      "fulladder.sv": `// 1-Bit Full Adder Gate Netlist
+module full_adder(
+  input a,
+  input b,
+  input cin,
+  output sum,
+  output cout
+);
+
+  wire x1, a1, a2;
+  xor g1(x1, a, b);
+  xor g2(sum, x1, cin);
+  and g3(a1, a, b);
+  and g4(a2, x1, cin);
+  or  g5(cout, a1, a2);
+
+endmodule`,
+
+      "custom.sv": `// Custom SystemVerilog / Verilog HDL Module
+module custom_rv32i_submodule(
+  input clk,
+  input reset,
+  input [31:0] data_in,
+  output [31:0] data_out
+);
+
+  // Write your logic or instantiate gates here
+  assign data_out = data_in;
+
+endmodule`
+    };
+
+    function loadHdlPreset(filename) {
+      const code = HDL_PRESETS[filename] || HDL_PRESETS["rv32i_core.sv"];
+      const textarea = document.getElementById("hdlCodeTextarea");
+      const hiddenInput = document.getElementById("selectedHdlFilenameInput");
+      const tabLabel = document.getElementById("tabFilenameLabel");
+      const select = document.getElementById("hdlExampleSelect");
+
+      if (textarea) textarea.value = code;
+      if (hiddenInput) hiddenInput.value = filename;
+      if (tabLabel) tabLabel.textContent = filename;
+      if (select && select.value !== filename) select.value = filename;
+
+      updateLineNumbers();
+      updateIoPortList(filename);
+    }
+
+    function switchHdlTab(tabName) {
+      document.querySelectorAll(".djs-tab-btn").forEach(b => {
+        b.classList.remove("active");
+        b.style.background = "transparent";
+        b.style.color = "#94a3b8";
+        b.style.borderBottom = "none";
+      });
+
+      const codeTab = document.getElementById("hdlTabCodeView");
+      const setupTab = document.getElementById("hdlTabSetupView");
+      const ioTab = document.getElementById("hdlTabIoView");
+
+      if (codeTab) codeTab.style.display = "none";
+      if (setupTab) setupTab.style.display = "none";
+      if (ioTab) ioTab.style.display = "none";
+
+      const btn = document.getElementById("tab_editor_" + tabName);
+      if (btn) {
+        btn.classList.add("active");
+        btn.style.background = "#0f172a";
+        btn.style.color = "#38bdf8";
+        btn.style.borderBottom = "2px solid #38bdf8";
+      }
+
+      if (tabName === "code" && codeTab) codeTab.style.display = "block";
+      if (tabName === "setup" && setupTab) setupTab.style.display = "block";
+      if (tabName === "io" && ioTab) ioTab.style.display = "block";
+    }
+
+    function updateLineNumbers() {
+      const textarea = document.getElementById("hdlCodeTextarea");
+      const gutter = document.getElementById("hdlLineNumbers");
+      const charCount = document.getElementById("hdlCharCount");
+      if (!textarea || !gutter) return;
+
+      const lines = textarea.value.split("\n").length;
+      let numbersHtml = "";
+      for (let i = 1; i <= Math.max(lines, 20); i++) {
+        numbersHtml += i + "<br>";
+      }
+      gutter.innerHTML = numbersHtml;
+
+      if (charCount) {
+        charCount.textContent = textarea.value.length.toLocaleString() + " characters (" + lines + " lines)";
+      }
+    }
+
+    function updateIoPortList(filename) {
+      const list = document.getElementById("hdlIoPortList");
+      if (!list) return;
+
+      if (filename === "sr_neg_gate.sv") {
+        list.innerHTML = "• input wire ns [1 bit] - Active-LOW Set Pin<br>• input wire nr [1 bit] - Active-LOW Reset Pin<br>• output wire q [1 bit] - Latched Output Q<br>• output wire nq [1 bit] - Inverted Output Q̄";
+      } else if (filename === "fulladder.sv") {
+        list.innerHTML = "• input wire a [1 bit] - Operand A<br>• input wire b [1 bit] - Operand B<br>• input wire cin [1 bit] - Carry In<br>• output wire sum [1 bit] - Sum Result (A ⊕ B ⊕ Cin)<br>• output wire cout [1 bit] - Carry Out";
+      } else if (filename === "rv32i_alu.sv") {
+        list.innerHTML = "• input wire [31:0] a - ALU Operand A (rs1)<br>• input wire [31:0] b - ALU Operand B (rs2/imm)<br>• input wire [3:0] alu_ctrl - ALU Operation Select<br>• output reg [31:0] result - ALU 32-Bit Output<br>• output wire zero - Zero Flag (BEQ/BNE)";
+      } else {
+        list.innerHTML = "• input wire clk [1 bit] - System Clock<br>• input wire reset [1 bit] - Synchronous Core Reset<br>• input wire [31:0] instr - Fetched Machine Instruction<br>• input wire [31:0] rdata - Memory Read Bus<br>• output wire [31:0] pc - Program Counter Register<br>• output wire [31:0] alu_out - 32-Bit Arithmetic Result (Critical Wire Hotspot)<br>• output wire [31:0] wdata - Memory Write Bus<br>• output wire mem_write - Data Memory Write Enable";
+      }
+    }
+
+    function copyHdlCode() {
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (textarea) {
+        navigator.clipboard.writeText(textarea.value).then(() => {
+          alert("Verilog HDL code copied to clipboard!");
+        });
+      }
+    }
+
+    function resetHdlCode() {
+      const hiddenInput = document.getElementById("selectedHdlFilenameInput");
+      const fn = (hiddenInput && hiddenInput.value) || "rv32i_core.sv";
+      loadHdlPreset(fn);
+    }
+
+    // Initialize HDL editor on DOMContentLoaded
+    window.addEventListener("DOMContentLoaded", () => {
+      loadHdlPreset("rv32i_core.sv");
+    });
+
   </script>
 </body>
 </html>

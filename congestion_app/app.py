@@ -207,8 +207,10 @@ def predict():
     xgb_acc = meta_info.get("xgboost_accuracy", 0.9915) * 100.0
     avg_r2 = meta_info.get("xgboost_avg_r2", 0.9886)
 
-    return render_template(
+    selected_hdl_filename = request.form.get("selected_hdl_filename", "rv32i_core.sv")
+    selected_hdl_code = request.form.get("selected_hdl_code", "")
 
+    return render_template(
         "results.html",
         utilization=util,
         aspect_ratio=aspect,
@@ -239,7 +241,9 @@ def predict():
         suggested_resources=suggested_resources,
         model_accuracy=round(xgb_acc, 1),
         avg_r2=avg_r2,
-        meta_info=meta_info
+        meta_info=meta_info,
+        selected_hdl_filename=selected_hdl_filename,
+        selected_hdl_code=selected_hdl_code
     )
 
 
