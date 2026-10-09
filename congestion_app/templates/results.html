@@ -250,6 +250,19 @@
       font-weight: 700 !important;
       border-left: 3px solid #eab308 !important;
       border-radius: 2px;
+      box-shadow: 0 0 6px rgba(234, 179, 8, 0.4);
+    }
+    .wire-selected {
+      stroke: #eab308 !important;
+      stroke-width: 3.5px !important;
+      filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.9)) !important;
+    }
+    .djs-wire-group {
+      cursor: pointer;
+    }
+    .djs-wire-group:hover .djs-wire-path {
+      stroke: #facc15 !important;
+      stroke-width: 2.8px !important;
     }
     .djs-draggable {
       user-select: none;
@@ -444,6 +457,18 @@
                 <!-- Code Area with Syntax Highlighting & Direct Editable Capability -->
                 <div id="djsCodeDisplay" contenteditable="true" spellcheck="false" oninput="onDjsCodeInput()" style="margin: 0; padding: 10px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; color: #212529; overflow-x: auto; flex: 1; white-space: pre; background: #ffffff; outline: none;"></div>
               </div>
+
+              <!-- Real-Time Cross-Probing Status Bar -->
+              <div id="djsSelectionBanner" style="display: none; background: #fefce8; border-top: 1.5px solid #facc15; padding: 5px 12px; font-size: 11px; align-items: center; justify-content: space-between; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  <span id="djsSelectionTypeBadge" style="background: #eab308; color: #ffffff; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 3px; text-transform: uppercase;">WIRE</span>
+                  <span style="font-weight: 700; color: #854d0e;">Target:</span>
+                  <code id="djsSelectionName" style="background: #ffffff; border: 1px solid #fef08a; padding: 1px 6px; border-radius: 3px; font-weight: 700; color: #b45309;">pc_plus4_if</code>
+                  <span id="djsSelectionLine" style="color: #475569; font-weight: 600;">(Line 23)</span>
+                </div>
+                <button type="button" onclick="clearCodeHighlight(); document.getElementById('djsSelectionBanner').style.display='none';" style="background: transparent; border: none; font-size: 11px; color: #a16207; cursor: pointer; padding: 0 4px; font-weight: bold;">✕ Clear</button>
+              </div>
+
               <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 4px 12px; font-size: 10px; color: #6c757d; display: flex; justify-content: space-between; align-items: center;">
                 <span>SystemVerilog HDL | Synthesizable (Click <b>Run</b> to synthesize and simulate)</span>
                 <span style="color: #16a34a; font-weight: 700;">● DigitalJS Engine Active</span>
@@ -1815,11 +1840,17 @@ endmodule`
       }
     }
 
-    function svgWire(wireId, pathD, isHigh=false, isPulse=true) {
+    function svgWire(wireId, pathD, isHigh=false, isPulse=true, lineNums=[]) {
       const color = isHigh ? "#22c55e" : "#0284c7";
       const strokeWidth = isHigh ? "2.5" : "1.8";
       const dash = isPulse && isHigh ? 'stroke-dasharray="6 3" class="wire-active"' : "";
-      return `<path id="${wireId}" d="${pathD}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" ${dash}/>`;
+      const linesJson = JSON.stringify(lineNums || []);
+      return `
+        <g class="djs-wire-group" onclick="selectWire('${wireId}', ${linesJson})" onmouseenter="highlightWire('${wireId}', ${linesJson})" onmouseleave="clearCodeHighlight()">
+          <path d="${pathD}" fill="none" stroke="transparent" stroke-width="12" pointer-events="stroke"/>
+          <path id="${wireId}" class="djs-wire-path" d="${pathD}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" ${dash} pointer-events="none"/>
+        </g>
+      `;
     }
 
     function svgButtonInput(id, x, y, label, pinKey, lineNums=[]) {
@@ -2617,19 +2648,19 @@ endmodule`
         <!-- Wires Container -->
         <g id="djsWiresGroup">
           <!-- Forward Dataflow Wires -->
-          ${svgWire("w_if_ifid", wIf_to_ifid, true)}
-          ${svgWire("w_ifid_id", wIfid_to_id, true)}
-          ${svgWire("w_id_idex", wId_to_idex, true)}
-          ${svgWire("w_idex_ex", wIdex_to_ex, true)}
-          ${svgWire("w_ex_exmem", wEx_to_exmem, true)}
-          ${svgWire("w_exmem_mem", wExmem_to_mem, true)}
-          ${svgWire("w_mem_memwb", wMem_to_memwb, true)}
-          ${svgWire("w_memwb_wb", wMemwb_to_wb, true)}
+          ${svgWire("w_if_ifid", wIf_to_ifid, true, true, [20, 21, 23, 26, 27, 28])}
+          ${svgWire("w_ifid_id", wIfid_to_id, true, true, [26, 27, 28, 31, 32, 33, 34])}
+          ${svgWire("w_id_idex", wId_to_idex, true, true, [38, 39, 40, 50, 51, 52, 53, 54])}
+          ${svgWire("w_idex_ex", wIdex_to_ex, true, true, [52, 53, 54, 73, 74, 75, 76])}
+          ${svgWire("w_ex_exmem", wEx_to_exmem, true, true, [76, 83, 84, 85, 86])}
+          ${svgWire("w_exmem_mem", wExmem_to_mem, true, true, [83, 84, 94])}
+          ${svgWire("w_mem_memwb", wMem_to_memwb, true, true, [94, 97, 98, 99, 100])}
+          ${svgWire("w_memwb_wb", wMemwb_to_wb, true, true, [97, 98, 106, 134, 139, 140])}
           
           <!-- Long Feedback Loops -->
-          <path d="${wWb_loop}" fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="6 3" class="wire-active"/>
-          <path d="${wBranch_loop}" fill="none" stroke="#ef4444" stroke-width="2"/>
-          <path d="${wFwd_loop}" fill="none" stroke="#8b5cf6" stroke-width="1.8" stroke-dasharray="4 2"/>
+          ${svgWire("w_wb_loop", wWb_loop, true, true, [106, 134, 139, 140])}
+          ${svgWire("w_branch_loop", wBranch_loop, false, false, [78, 79, 80])}
+          ${svgWire("w_fwd_loop", wFwd_loop, true, true, [73, 74])}
         </g>
 
         <!-- Bus Labels for Feedback Wires -->
@@ -3231,16 +3262,18 @@ endmodule`
     }
 
     // Two-Way Code Cross-Highlighting (Yellow highlight matching video recording)
-    function highlightCodeLines(lineNums) {
+    function highlightCodeLines(lineNums, smoothScroll=true) {
       clearCodeHighlight();
       if (!lineNums || !lineNums.length) return;
       lineNums.forEach(num => {
         const el = document.getElementById("djs-line-" + num);
         if (el) el.classList.add("djs-line-highlighted");
       });
-      const firstEl = document.getElementById("djs-line-" + lineNums[0]);
-      if (firstEl) {
-        firstEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (smoothScroll) {
+        const firstEl = document.getElementById("djs-line-" + lineNums[0]);
+        if (firstEl) {
+          firstEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }
     }
 
@@ -3248,6 +3281,332 @@ endmodule`
       document.querySelectorAll(".djs-line-highlighted").forEach(el => {
         el.classList.remove("djs-line-highlighted");
       });
+    }
+
+    function escapeRegex(string) {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    const GATE_LINE_MAP = {
+      // rv32i pipeline stages & registers
+      pip_in_clk: { lines: [12], name: "clk", type: "PORT" },
+      pip_in_rst: { lines: [13], name: "rst_n", type: "PORT" },
+      pip_if_stage: { lines: [20, 21, 22, 23, 24, 118, 119, 120, 121], name: "IF Stage (PC & I-Mem)", type: "STAGE" },
+      pip_ifid_reg: { lines: [26, 27, 28, 29, 30], name: "IF/ID Pipeline Register", type: "REGISTER" },
+      pip_id_stage: { lines: [31, 32, 33, 34, 35, 36, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137], name: "ID Stage (Decoder & RegFile)", type: "STAGE" },
+      pip_idex_reg: { lines: [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60], name: "ID/EX Pipeline Register", type: "REGISTER" },
+      pip_ex_stage: { lines: [73, 74, 75, 76, 77, 78, 79, 80, 81], name: "EX Stage (ALU & Branch)", type: "STAGE" },
+      pip_exmem_reg: { lines: [83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93], name: "EX/MEM Pipeline Register", type: "REGISTER" },
+      pip_mem_stage: { lines: [94, 95, 96], name: "MEM Stage (Data Memory)", type: "STAGE" },
+      pip_memwb_reg: { lines: [97, 98, 99, 100, 101, 102, 103, 104, 105], name: "MEM/WB Pipeline Register", type: "REGISTER" },
+      pip_wb_stage: { lines: [106, 139, 140], name: "WB Stage (Write-Back Mux)", type: "STAGE" },
+      pip_alu_core: { lines: [76, 77], name: "alu_result_ex", type: "GATE" },
+      pip_branch_unit: { lines: [78, 79, 80], name: "branch_target_ex", type: "GATE" },
+      pip_fwd_a: { lines: [73], name: "forward_a", type: "MUX" },
+      pip_fwd_b: { lines: [74], name: "forward_b", type: "MUX" },
+      pip_alu_mux_b: { lines: [75], name: "alu_input_b", type: "MUX" },
+      pip_pc_mux: { lines: [24], name: "pc_next MUX", type: "MUX" },
+      pip_pc_plus4: { lines: [23], name: "pc_plus4_if Adder", type: "GATE" },
+      pip_regfile: { lines: [127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137], name: "u_regfile", type: "BLOCK" },
+      pip_imem: { lines: [118, 119, 120, 121], name: "u_imem (Instruction Memory)", type: "BLOCK" },
+      pip_imm_gen: { lines: [143, 144, 145, 146, 147, 148, 149, 150, 151, 152], name: "Immediate Generator", type: "BLOCK" },
+      pip_hazard_unit: { lines: [108, 109, 110], name: "Hazard Detection Unit", type: "BLOCK" },
+      pip_wb_mux: { lines: [106, 139, 140], name: "write_data_wb MUX", type: "MUX" },
+
+      // DFF Master-Slave
+      dff_dl1: { lines: [7, 8, 9, 10], name: "Master Latch dl1", type: "BLOCK" },
+      dff_dl2: { lines: [12, 13, 14, 15], name: "Slave Latch dl2", type: "BLOCK" },
+      dff_g1nclk: { lines: [6], name: "nclk Inverter", type: "GATE" },
+
+      // SR Latch
+      sr_nor1: { lines: [5], name: "NOR Gate 1 (Q)", type: "GATE" },
+      sr_nor2: { lines: [6], name: "NOR Gate 2 (nQ)", type: "GATE" },
+
+      // Full Adder
+      fa_xor1: { lines: [4], name: "XOR1 (Sum Int)", type: "GATE" },
+      fa_xor2: { lines: [5], name: "XOR2 (Sum Out)", type: "GATE" },
+      fa_and1: { lines: [6], name: "AND1 (Carry 1)", type: "GATE" },
+      fa_and2: { lines: [7], name: "AND2 (Carry 2)", type: "GATE" },
+      fa_or1: { lines: [8], name: "OR1 (Carry Out)", type: "GATE" },
+
+      // 1-bit ALU
+      alu_xor1: { lines: [12], name: "XOR Gate (Sum / Diff)", type: "GATE" },
+      alu_and1: { lines: [8], name: "AND Gate", type: "GATE" },
+      alu_or1: { lines: [9], name: "OR Gate", type: "GATE" },
+      alu_not_b: { lines: [11], name: "B Inverter", type: "GATE" },
+      alu_b_mux: { lines: [11], name: "B Invert Mux", type: "MUX" },
+      alu_res_mux: { lines: [14, 15], name: "Result MUX", type: "MUX" },
+      alu_full_adder: { lines: [12, 13], name: "Full Adder Slice", type: "BLOCK" }
+    };
+
+    const WIRE_LINE_MAP = {
+      // rv32i pipeline top wires
+      clk: [12],
+      rst_n: [13],
+      debug_pc: [14],
+      debug_alu_result: [15],
+      pc: [20],
+      instr_if: [21, 120],
+      pc_plus4_if: [23],
+      pc_next: [24],
+      ifid_pc: [26],
+      ifid_pc4: [27],
+      ifid_instr: [28],
+      opcode_id: [31],
+      rs1_id: [32, 131],
+      rs2_id: [33, 132],
+      rd_id: [34],
+      funct3_id: [35],
+      rs1_data_id: [38, 135],
+      rs2_data_id: [39, 136],
+      imm_id: [40, 145],
+      regwrite_id: [42],
+      memread_id: [43],
+      memwrite_id: [44],
+      memtoreg_id: [45],
+      alusrc_id: [46],
+      branch_id: [47],
+      branch_type_id: [48],
+      idex_pc: [50],
+      idex_pc4: [51],
+      idex_rs1_data: [52],
+      idex_rs2_data: [53],
+      idex_imm: [54],
+      idex_rs1: [56],
+      idex_rs2: [57],
+      idex_rd: [58],
+      idex_funct3: [60],
+      idex_funct7: [61],
+      idex_opcode: [62],
+      idex_regwrite: [64],
+      idex_memread: [65],
+      idex_memwrite: [66],
+      idex_memtoreg: [67],
+      idex_alusrc: [68],
+      idex_branch: [69],
+      idex_branch_type: [70],
+      forward_a: [73],
+      forward_b: [74],
+      alu_input_b: [75],
+      alu_result_ex: [76],
+      branch_condition: [77],
+      branch_taken_ex: [78],
+      branch_target_ex: [79],
+      exmem_alu_result: [83],
+      exmem_store_data: [84],
+      exmem_pc4: [85],
+      exmem_rd: [86],
+      exmem_regwrite: [88],
+      exmem_memread: [89],
+      exmem_memwrite: [90],
+      exmem_memtoreg: [91],
+      read_data_mem: [94],
+      memwb_alu_result: [97],
+      memwb_read_data: [98],
+      memwb_pc4: [99],
+      memwb_rd: [100],
+      memwb_regwrite: [102, 130],
+      memwb_memtoreg: [103],
+      write_data_wb: [106, 134],
+      load_use_stall: [108],
+      uses_rs1_id: [109],
+      uses_rs2_id: [110],
+
+      // Inter-stage wire IDs
+      w_if_ifid: [20, 21, 23, 26, 27, 28],
+      w_ifid_id: [26, 27, 28, 31, 32, 33, 34],
+      w_id_idex: [38, 39, 40, 50, 51, 52, 53, 54],
+      w_idex_ex: [52, 53, 54, 73, 74, 75, 76],
+      w_ex_exmem: [76, 83, 84, 85, 86],
+      w_exmem_mem: [83, 84, 94],
+      w_mem_memwb: [94, 97, 98, 99, 100],
+      w_memwb_wb: [97, 98, 106, 134, 139, 140],
+      w_wb_loop: [106, 134, 139, 140],
+      w_branch_loop: [78, 79, 80],
+      w_fwd_loop: [73, 74]
+    };
+
+    function findCodeLinesForIdentifier(identifier) {
+      if (!identifier) return [];
+      const codeEl = document.getElementById("djsCodeDisplay");
+      if (!codeEl) return [];
+      const text = codeEl.innerText || codeEl.textContent;
+      if (!text) return [];
+
+      let clean = String(identifier).replace(/^[\$\\.]/, '').replace(/\[.*\]$/, '').trim();
+      if (clean.includes(":")) {
+        const match = clean.match(/:(\d+)/);
+        if (match && match[1]) {
+          const l = parseInt(match[1]);
+          if (!isNaN(l) && l > 0) return [l];
+        }
+      }
+      clean = clean.replace(/^(dyn_in_|dyn_out_|dyn_gate_|dyn_inst_|dyn_asg_|w_|wire_|pip_)/, '');
+      if (!clean || clean.length < 2) return [];
+
+      const lines = text.split("\n");
+      const matches = [];
+      const safeClean = escapeRegex(clean);
+
+      // Priority 1: Declaration lines
+      const declRegex = new RegExp(`\\b(input|output|inout|wire|reg|logic|assign)\\b[^;]*\\b${safeClean}\\b`);
+      lines.forEach((l, idx) => {
+        if (declRegex.test(l)) matches.push(idx + 1);
+      });
+      if (matches.length > 0) return matches;
+
+      // Priority 2: Assignment or port connection or usage
+      const useRegex = new RegExp(`\\b${safeClean}\\b`);
+      lines.forEach((l, idx) => {
+        const trimmed = l.trim();
+        if (!trimmed.startsWith("//") && useRegex.test(l)) {
+          matches.push(idx + 1);
+        }
+      });
+      return matches.slice(0, 5);
+    }
+
+    function handleCircuitSelection(data) {
+      if (!data) return;
+
+      // Automatically switch code tab so the user sees the code highlight side-by-side!
+      switchDjsLeftTab('code');
+
+      // Resolve line numbers
+      let targetLines = [];
+      if (data.lineNums && Array.isArray(data.lineNums) && data.lineNums.length > 0) {
+        targetLines.push(...data.lineNums);
+      }
+      if (data.positions && Array.isArray(data.positions)) {
+        data.positions.forEach(p => {
+          if (p.from && p.from.line) targetLines.push(p.from.line);
+          if (p.line) targetLines.push(p.line);
+        });
+      }
+
+      // Check colon line number in label or wireName (e.g. $add$rv32i_pipeline_top.sv:23$3)
+      const colonMatch = String(data.label || '').match(/:(\d+)(?:\$|:)?/);
+      if (colonMatch && colonMatch[1]) {
+        targetLines.push(parseInt(colonMatch[1]));
+      }
+
+      const wName = data.wireName || data.label || '';
+      if (WIRE_LINE_MAP[wName]) {
+        targetLines.push(...WIRE_LINE_MAP[wName]);
+      }
+      if (GATE_LINE_MAP[wName] && GATE_LINE_MAP[wName].lines) {
+        targetLines.push(...GATE_LINE_MAP[wName].lines);
+      }
+      if (GATE_LINE_MAP[data.label] && GATE_LINE_MAP[data.label].lines) {
+        targetLines.push(...GATE_LINE_MAP[data.label].lines);
+      }
+
+      // If still no lines found, dynamically search for the identifier in code editor
+      if (targetLines.length === 0 && wName) {
+        const searched = findCodeLinesForIdentifier(wName);
+        if (searched.length > 0) targetLines.push(...searched);
+      }
+
+      // Deduplicate and filter valid line numbers
+      targetLines = Array.from(new Set(targetLines.filter(n => typeof n === 'number' && !isNaN(n) && n > 0))).sort((a,b)=>a-b);
+
+      // Highlight code lines and scroll into view
+      if (targetLines.length > 0) {
+        highlightCodeLines(targetLines, Boolean(data.isClick));
+      }
+
+      // Update Selection Banner
+      const banner = document.getElementById("djsSelectionBanner");
+      const typeBadge = document.getElementById("djsSelectionTypeBadge");
+      const nameEl = document.getElementById("djsSelectionName");
+      const lineEl = document.getElementById("djsSelectionLine");
+      if (banner) {
+        banner.style.display = "flex";
+        if (typeBadge) {
+          const typeStr = data.isLink ? "WIRE" : (data.cellType ? data.cellType.toUpperCase().replace(/^\$/, '') : "GATE");
+          typeBadge.textContent = typeStr;
+          typeBadge.style.background = data.isLink ? "#0284c7" : "#eab308";
+        }
+        if (nameEl) {
+          let displayName = wName;
+          if (displayName.startsWith("$")) {
+            const parts = displayName.split("$");
+            if (parts.length >= 2) displayName = parts[1] + (parts[3] ? ` (#${parts[3]})` : '');
+          }
+          nameEl.textContent = displayName || "Element";
+        }
+        if (lineEl) {
+          if (targetLines.length > 0) {
+            lineEl.textContent = `(Line ${targetLines.join(", ")})`;
+            lineEl.style.display = "inline";
+          } else {
+            lineEl.style.display = "none";
+          }
+        }
+      }
+
+      // Update inspector if corresponding gate exists in gateDatabase
+      const gKey = data.label || data.wireName;
+      if (gKey && gateDatabase[gKey]) {
+        const g = gateDatabase[gKey];
+        const badge = document.getElementById("inspGateBadge");
+        const name = document.getElementById("inspGateName");
+        const sub = document.getElementById("inspGateSub");
+        const eq = document.getElementById("inspGateEquation");
+        const pins = document.getElementById("inspGatePins");
+        const cell = document.getElementById("inspCellPrim");
+        const pinCount = document.getElementById("inspPinCount");
+        const trans = document.getElementById("inspTransistors");
+        const impact = document.getElementById("inspCongestionImpact");
+
+        if (badge) badge.textContent = g.badge;
+        if (name) name.textContent = g.name;
+        if (sub) sub.textContent = g.sub;
+        if (eq) eq.textContent = g.eq;
+        if (pins) pins.textContent = typeof g.pins === 'function' ? g.pins() : g.pins;
+        if (cell) cell.textContent = g.cell;
+        if (pinCount) pinCount.textContent = g.cellPins;
+        if (trans) trans.textContent = g.transistors;
+        if (impact) impact.textContent = g.impact;
+      }
+    }
+
+    function selectWire(wireId, explicitLines) {
+      document.querySelectorAll(".wire-selected").forEach(w => w.classList.remove("wire-selected"));
+      const wireEl = document.getElementById(wireId);
+      if (wireEl) wireEl.classList.add("wire-selected");
+
+      let lines = explicitLines && explicitLines.length ? explicitLines : (WIRE_LINE_MAP[wireId] || []);
+      const cleanId = wireId.replace(/^(w_|wire_)/, '');
+      if (!lines.length) {
+        lines = WIRE_LINE_MAP[cleanId] || [];
+      }
+      if (!lines.length) {
+        lines = findCodeLinesForIdentifier(cleanId);
+      }
+
+      handleCircuitSelection({
+        isLink: true,
+        wireName: cleanId,
+        label: wireId,
+        cellType: "wire",
+        lineNums: lines,
+        isClick: true
+      });
+    }
+
+    function highlightWire(wireId, explicitLines) {
+      let lines = explicitLines && explicitLines.length ? explicitLines : (WIRE_LINE_MAP[wireId] || []);
+      const cleanId = wireId.replace(/^(w_|wire_)/, '');
+      if (!lines.length) {
+        lines = WIRE_LINE_MAP[cleanId] || [];
+      }
+      if (!lines.length) {
+        lines = findCodeLinesForIdentifier(cleanId);
+      }
+      if (lines.length) {
+        highlightCodeLines(lines, false);
+      }
     }
 
 
@@ -3306,7 +3665,7 @@ endmodule`
 
     function updateLiveDigitalJsFrame(moduleFilename) {
       const hash = DIGITALJS_LIVE_HASHES[moduleFilename] || "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
-      const targetUrl = "digitaljs_view.html?v=20261009-v3.2#" + hash;
+      const targetUrl = "digitaljs_view.html?v=20261009-v3.3#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
@@ -3338,11 +3697,14 @@ endmodule`
       }
     }
 
-    // Sync tick from DigitalJS engine iframe
+    // Sync tick and cross-probe selection from DigitalJS engine iframe
     window.addEventListener("message", (event) => {
       if (event.data && event.data.type === "tickUpdate") {
         const el = document.getElementById("djsTickVal");
         if (el) el.value = event.data.tick;
+      }
+      if (event.data && event.data.type === "djsCellSelected") {
+        handleCircuitSelection(event.data);
       }
     });
 
@@ -3445,6 +3807,23 @@ endmodule`
       document.querySelectorAll(".comp-box").forEach(el => el.classList.remove("comp-selected"));
       const target = document.getElementById("elem-" + gateKey) || document.getElementById(gateKey);
       if (target) target.classList.add("comp-selected");
+
+      // Cross-probe to code editor!
+      const mapEntry = GATE_LINE_MAP[gateKey];
+      let lines = mapEntry ? [...mapEntry.lines] : [];
+      const cleanKey = gateKey.replace(/^(elem-|dyn_gate_|dyn_inst_|dyn_asg_|pip_)/, '');
+      if (!lines.length) {
+        lines = findCodeLinesForIdentifier(cleanKey);
+      }
+
+      handleCircuitSelection({
+        isLink: false,
+        wireName: (mapEntry && mapEntry.name) || (g && g.name) || gateKey,
+        label: gateKey,
+        cellType: (mapEntry && mapEntry.type) || "GATE",
+        lineNums: lines,
+        isClick: true
+      });
     }
 
     function djsToggleRun() {

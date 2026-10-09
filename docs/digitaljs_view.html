@@ -52,16 +52,31 @@
       }
     }, 150);
 
-    // Ensure circuit tab is active on load
+    // Ensure circuit tab is active on load and attach cell selection fallbacks
     window.addEventListener("DOMContentLoaded", () => {
       const cTab = document.querySelector(".tab-wrapper.circuit-tab");
       if (cTab) cTab.classList.add("active");
       const cBtn = document.querySelector(".tab-btn.circuit-tab");
       if (cBtn) cBtn.classList.add("active");
+
+      // Native SVG click & hover fallback for JointJS cells (wires & gates)
+      document.addEventListener("click", (ev) => {
+        const cellEl = ev.target.closest("[model-id], .joint-cell, .joint-link, .joint-element, path.connection");
+        if (cellEl && window.paper && window.sendDjsSelection) {
+          const modelId = cellEl.getAttribute("model-id") || cellEl.id;
+          if (modelId) {
+            const cell = window.paper.model.getCell(modelId);
+            if (cell) {
+              const view = window.paper.findViewByModel(cell);
+              if (view) window.sendDjsSelection(view, true);
+            }
+          }
+        }
+      });
     });
   </script>
-  <link href="digitaljs_assets/main.css?v=20261009-v3.2" rel="stylesheet">
-  <script type="module" src="digitaljs_assets/bundle.js?v=20261009-v3.2"></script>
+  <link href="digitaljs_assets/main.css?v=20261009-v3.3" rel="stylesheet">
+  <script type="module" src="digitaljs_assets/bundle.js?v=20261009-v3.3"></script>
   <style>
     /* ══════════════════════════════════════════════════════════════════
        DIGITALJS CIRCUIT DESIGN VIEWER (PURE CIRCUIT CANVAS)
