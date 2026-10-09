@@ -416,19 +416,16 @@
           <div style="background: #7c3aed; color: #ffffff; font-weight: 900; font-size: 11px; padding: 4px 9px; border-radius: 5px; margin-right: 8px; letter-spacing: 0.5px;">DigitalJS</div>
           <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">Setup</button>
           <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">I/O</button>
-          <button type="button" class="djs-tab-btn active" id="tab_editor_code_rv32i" onclick="selectHdlPreset('rv32i_core.sv')" style="background: #0f172a; color: #38bdf8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid #38bdf8; display: flex; align-items: center; gap: 6px;">
-            <span>rv32i_core.sv</span>
-            <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
-          </button>
-          <button type="button" class="djs-tab-btn" id="tab_editor_code_dff" onclick="selectHdlPreset('dff_master_slave.sv')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 6px;">
-            <span>dff_master_slave.sv</span>
+          <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #0f172a; color: #38bdf8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid #38bdf8; display: flex; align-items: center; gap: 6px;">
+            <span id="tabFilenameLabel">user_design.sv</span>
             <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
           </button>
         </div>
 
         <div style="display: flex; gap: 8px; align-items: center; padding-bottom: 4px;">
-          <button type="button" onclick="copyHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">📋 Copy</button>
-          <button type="button" onclick="resetHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">🔄 Reset</button>
+          <button type="button" onclick="pasteHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">📋 Paste</button>
+          <button type="button" onclick="copyHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">📑 Copy</button>
+          <button type="button" onclick="clearHdlCode()" style="background: #334155; color: #ef4444; border: 1px solid #7f1d1d; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">✕ Clear</button>
         </div>
       </div>
 
@@ -439,16 +436,16 @@
           <div id="hdlLineNumbers" style="background: #090d16; color: #475569; padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; text-align: right; user-select: none; width: 44px; flex-shrink: 0; border-right: 1px solid #1e293b; overflow: hidden;">
             1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20
           </div>
-          <!-- Editable code textarea -->
-          <textarea id="hdlCodeTextarea" name="selected_hdl_code" spellcheck="false" oninput="updateLineNumbers()"
+          <!-- Editable code textarea (Empty by default for user input) -->
+          <textarea id="hdlCodeTextarea" name="selected_hdl_code" placeholder="// Type or paste your Verilog / SystemVerilog code here...&#10;// Example:&#10;// module my_processor(input clk, reset, input [31:0] instr, output [31:0] pc, alu_out);&#10;//   ... write your gates, modules or RTL here ...&#10;// endmodule" spellcheck="false" oninput="updateLineNumbers()"
             style="flex: 1; background: #0f172a; color: #e2e8f0; border: none; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; resize: vertical; min-height: 290px; max-height: 420px; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; tab-size: 2;"></textarea>
         </div>
         <div style="background: #090d16; border-top: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; border-radius: 0 0 10px 10px;">
           <span style="display: flex; align-items: center; gap: 8px;">
             <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
-            <span>Target: <b>RV32I Gate Netlist (SkyWater 130nm PDK standard cells)</b></span>
+            <span>Target: <b>User Verilog HDL Code ──► Synthesized Gate-Level Netlist</b></span>
           </span>
-          <span id="hdlCharCount" style="color: #64748b; font-family: monospace;">1,248 characters</span>
+          <span id="hdlCharCount" style="color: #64748b; font-family: monospace;">0 characters (0 lines)</span>
         </div>
       </div>
 
@@ -864,22 +861,42 @@ endmodule`
 
     function copyHdlCode() {
       const textarea = document.getElementById("hdlCodeTextarea");
-      if (textarea) {
+      if (textarea && textarea.value) {
         navigator.clipboard.writeText(textarea.value).then(() => {
           alert("Verilog HDL code copied to clipboard!");
         });
       }
     }
 
-    function resetHdlCode() {
-      const hiddenInput = document.getElementById("selectedHdlFilenameInput");
-      const fn = (hiddenInput && hiddenInput.value) || "rv32i_core.sv";
-      loadHdlPreset(fn);
+    function clearHdlCode() {
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (textarea) {
+        textarea.value = "";
+        updateLineNumbers();
+      }
     }
 
-    // Initialize HDL editor on DOMContentLoaded
+    async function pasteHdlCode() {
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (!textarea) return;
+      try {
+        const text = await navigator.clipboard.readText();
+        if (text) {
+          textarea.value = text;
+          updateLineNumbers();
+        }
+      } catch (err) {
+        textarea.focus();
+      }
+    }
+
+    // Initialize HDL editor on DOMContentLoaded - Start empty for user input
     window.addEventListener("DOMContentLoaded", () => {
-      loadHdlPreset("rv32i_core.sv");
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (textarea && !textarea.value) {
+        textarea.value = "";
+      }
+      updateLineNumbers();
     });
 
   </script>

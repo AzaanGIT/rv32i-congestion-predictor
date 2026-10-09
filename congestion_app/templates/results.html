@@ -254,6 +254,11 @@
     .djs-draggable {
       user-select: none;
     }
+    .tok-kw { color: #6f42c1; font-weight: 600; }
+    .tok-gate { color: #0284c7; font-weight: 600; }
+    .tok-num { color: #0550ae; font-weight: 500; }
+    .tok-comment { color: #b45309; font-style: italic; }
+    .tok-str { color: #0a3069; }
 
     #fixModal { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; }
     .modal-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border-radius: 12px; width: 600px; max-width: 90%; padding: 24px; color: #1a202c; }
@@ -400,21 +405,13 @@
           <!-- TOP ROW: CODE EDITOR & SETUP / IO TABS -->
           <div id="djsEditorContainer" style="background: #ffffff; display: flex; flex-direction: column; height: 270px; flex-shrink: 0; overflow: hidden; width: 100%;">
             
-            <!-- Nav Tabs (Setup | I/O | rv32i_core.sv | dff_master_slave.sv | rv32i_alu.sv) -->
+            <!-- Nav Tabs (Setup | I/O | Active User File ☁️ ✕) -->
             <nav style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 6px 8px 0 8px;">
               <div class="nav nav-tabs" style="display: flex; gap: 4px; align-items: flex-end; border-bottom: none;">
                 <button type="button" id="djsSubTabSetup" onclick="switchDjsLeftTab('setup')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">Setup</button>
                 <button type="button" id="djsSubTabIo" onclick="switchDjsLeftTab('io')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">I/O</button>
-                <button type="button" id="djsSubTabCode_rv32i" onclick="djsSelectModule('rv32i_core.sv')" class="nav-item nav-link active" style="background: #ffffff; border: 1px solid #dee2e6; border-bottom: 1px solid #ffffff; color: #495057; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px;">
-                  <span id="djsActiveFileTabName">rv32i_core.sv</span>
-                  <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
-                </button>
-                <button type="button" id="djsSubTabCode_dff" onclick="djsSelectModule('dff_master_slave.sv')" class="nav-item nav-link" style="background: transparent; border: 1px solid transparent; color: #0d6efd; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; display: inline-flex; align-items: center; gap: 6px;">
-                  <span>dff_master_slave.sv</span>
-                  <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
-                </button>
-                <button type="button" id="djsSubTabCode_alu" onclick="djsSelectModule('rv32i_alu.sv')" class="nav-item nav-link" style="background: transparent; border: 1px solid transparent; color: #0d6efd; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; display: inline-flex; align-items: center; gap: 6px;">
-                  <span>rv32i_alu.sv</span>
+                <button type="button" id="djsSubTabCode" onclick="switchDjsLeftTab('code')" class="nav-item nav-link active" style="background: #ffffff; border: 1px solid #dee2e6; border-bottom: 1px solid #ffffff; color: #495057; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px;">
+                  <span id="djsActiveFileTabName">user_design.sv</span>
                   <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
                 </button>
               </div>
@@ -1097,13 +1094,21 @@
       }
 
       // 9. DigitalJS Module sync
-      const selectedHdl = document.getElementById('selectedHdlFilenameInput')?.value || 'rv32i_core.sv';
       const userCode = document.getElementById('hdlCodeTextarea')?.value;
-      if (userCode && typeof HDL_PRESETS !== 'undefined') {
-        HDL_PRESETS[selectedHdl] = userCode;
+      let targetModule = 'user_design.sv';
+      if (userCode && userCode.trim().length > 0) {
+        if (typeof parseVerilogCode === 'function') {
+          const parsed = parseVerilogCode(userCode);
+          targetModule = (parsed.moduleName ? parsed.moduleName : "user_design") + ".sv";
+        }
+        if (typeof HDL_PRESETS !== 'undefined') {
+          HDL_PRESETS[targetModule] = userCode;
+        }
+      } else {
+        targetModule = document.getElementById('selectedHdlFilenameInput')?.value || 'rv32i_core.sv';
       }
       if (typeof djsSelectModule === 'function') {
-        djsSelectModule(selectedHdl);
+        djsSelectModule(targetModule);
       }
 
       // 10. Focus / Smooth Scroll Context
@@ -1265,10 +1270,19 @@ module full_adder(
 endmodule`
     };
 
+    // User-submitted Verilog code from Form
+    const userSubmittedCode = {{ (selected_hdl_code or '')|tojson }};
+    const userSubmittedFilename = {{ (selected_hdl_filename or 'user_design.sv')|tojson }};
+    if (userSubmittedCode && userSubmittedCode.trim().length > 0) {
+      HDL_PRESETS[userSubmittedFilename] = userSubmittedCode;
+    }
+
     // ═════════════════════════════════════════════════════════════════════════
     // 2. SIMULATION STATE, INTERACTIVE DRAG COORDINATES & SUB-CIRCUIT EXPANSIONS
     // ═════════════════════════════════════════════════════════════════════════
-    let currentModule = "{{ selected_hdl_filename or 'rv32i_core.sv' }}";
+    let currentModule = (userSubmittedCode && userSubmittedCode.trim().length > 0) 
+      ? userSubmittedFilename 
+      : "{{ selected_hdl_filename or 'rv32i_core.sv' }}";
     let isSimRunning = true;
     let simTimer = null;
     let simTick = 32351;
@@ -2036,44 +2050,409 @@ endmodule`
     }
 
     // ═════════════════════════════════════════════════════════════════════════
-    // 5. DIGITALJS CORE CONTROLLER, SYNTAX HIGHLIGHTING & CODE CROSS-HIGHLIGHTING
+    // 5. VERILOG HDL PARSER & DYNAMIC SCHEMATIC SYNTHESIZER
     // ═════════════════════════════════════════════════════════════════════════
+
+    function parseVerilogCode(code) {
+      if (!code || !code.trim()) {
+        return {
+          moduleName: "user_design",
+          inputs: [],
+          outputs: [],
+          instances: [],
+          gates: [],
+          assigns: [],
+          rawLines: []
+        };
+      }
+
+      const lines = code.split("\n");
+      let moduleName = "user_design";
+      const inputs = [];
+      const outputs = [];
+      const instances = [];
+      const gates = [];
+      const assigns = [];
+
+      // Extract top module name
+      const modMatch = code.match(/\bmodule\s+([a-zA-Z_0-9]+)/);
+      if (modMatch && modMatch[1]) {
+        moduleName = modMatch[1];
+      }
+
+      // Parse lines
+      lines.forEach((line, idx) => {
+        const lineNum = idx + 1;
+        let clean = line;
+        const cIdx = clean.indexOf("//");
+        if (cIdx !== -1) clean = clean.substring(0, cIdx);
+        clean = clean.trim();
+        if (!clean) return;
+
+        // 1. Inputs: input [31:0] a, b; or input clk, d;
+        const inpMatch = clean.match(/\binput\s*(?:wire|reg|logic)?\s*(?:\[(\d+):(\d+)\])?\s*([^;,\)]+)/);
+        if (inpMatch) {
+          const msb = inpMatch[1] !== undefined ? parseInt(inpMatch[1]) : 0;
+          const lsb = inpMatch[2] !== undefined ? parseInt(inpMatch[2]) : 0;
+          const isBus = inpMatch[1] !== undefined;
+          const namesStr = inpMatch[3];
+          namesStr.split(',').forEach(n => {
+            const trimmed = n.trim().replace(/[;)]/g, '').trim();
+            if (trimmed && !trimmed.startsWith('(') && !inputs.some(x => x.name === trimmed)) {
+              inputs.push({ name: trimmed, isBus, msb, lsb, lineNum });
+            }
+          });
+        }
+
+        // 2. Outputs: output reg [31:0] result; or output q, nq;
+        const outMatch = clean.match(/\boutput\s*(?:wire|reg|logic)?\s*(?:\[(\d+):(\d+)\])?\s*([^;,\)]+)/);
+        if (outMatch) {
+          const msb = outMatch[1] !== undefined ? parseInt(outMatch[1]) : 0;
+          const lsb = outMatch[2] !== undefined ? parseInt(outMatch[2]) : 0;
+          const isBus = outMatch[1] !== undefined;
+          const namesStr = outMatch[3];
+          namesStr.split(',').forEach(n => {
+            const trimmed = n.trim().replace(/[;)]/g, '').trim();
+            if (trimmed && !trimmed.startsWith('(') && !outputs.some(x => x.name === trimmed)) {
+              outputs.push({ name: trimmed, isBus, msb, lsb, lineNum });
+            }
+          });
+        }
+
+        // 3. Primitive gates: not g1(nclk, clk); or and (d1, clk, d); or nand g1(q, ns, nq);
+        const gateMatch = clean.match(/\b(not|buf|and|nand|or|nor|xor|xnor)\s*(?:([a-zA-Z_0-9]+))?\s*\(([^)]+)\)\s*;/);
+        if (gateMatch) {
+          const type = gateMatch[1];
+          const name = gateMatch[2] || `${type}_${lineNum}`;
+          const args = gateMatch[3].split(',').map(s => s.trim());
+          gates.push({ type, name, out: args[0], ins: args.slice(1), lineNum });
+        }
+
+        // 4. Subcircuit instances: e.g. d_latch dl1(nclk, d, qm); or d_latch dl2(clk, qm, q, nq);
+        const instMatch = clean.match(/^([a-zA-Z_0-9]+)\s+([a-zA-Z_0-9]+)\s*\(([^)]+)\)\s*;/);
+        if (instMatch) {
+          const modType = instMatch[1];
+          const instName = instMatch[2];
+          const primitives = ['not', 'buf', 'and', 'nand', 'or', 'nor', 'xor', 'xnor', 'module', 'assign', 'always', 'initial', 'reg', 'wire', 'logic', 'input', 'output'];
+          if (!primitives.includes(modType)) {
+            const portList = instMatch[3].split(',').map(s => s.trim().replace(/^\.[a-zA-Z_0-9]+\s*\(/, '').replace(/\)$/, ''));
+            instances.push({ modType, instName, portList, lineNum });
+          }
+        }
+
+        // 5. Continuous assignments: assign alu_out = a + b;
+        const assignMatch = clean.match(/\bassign\s+([a-zA-Z_0-9]+)\s*=\s*([^;]+);/);
+        if (assignMatch) {
+          assigns.push({ lhs: assignMatch[1].trim(), rhs: assignMatch[2].trim(), lineNum });
+        }
+      });
+
+      return {
+        moduleName,
+        inputs,
+        outputs,
+        instances,
+        gates,
+        assigns,
+        rawCode: code
+      };
+    }
+
+    // Dynamic schematic renderer for arbitrary user-defined Verilog HDL
+    function renderDynamicSynthesizedCircuit(code, parsed) {
+      const inputs = parsed.inputs.length > 0 ? parsed.inputs : [
+        { name: "clk", isBus: false, lineNum: 2 },
+        { name: "d", isBus: false, lineNum: 3 }
+      ];
+      const outputs = parsed.outputs.length > 0 ? parsed.outputs : [
+        { name: "out", isBus: false, lineNum: 4 }
+      ];
+      const gates = parsed.gates;
+      const instances = parsed.instances;
+      const assigns = parsed.assigns;
+
+      const p = nodePos;
+
+      // Layout Inputs on Left (x = 50)
+      let leftY = 80;
+      inputs.forEach((inp, idx) => {
+        const id = 'dyn_in_' + inp.name;
+        if (!p[id]) p[id] = { x: 50, y: leftY };
+        if (pinState[inp.name] === undefined) {
+          pinState[inp.name] = inp.name.toLowerCase().includes('clk') ? simClock : (idx % 2 === 0 ? 1 : 0);
+        }
+        leftY += 65;
+      });
+
+      // Layout Subcircuits & Gates in Middle
+      let midY = 80;
+      let midX = 260;
+      instances.forEach((inst, idx) => {
+        const id = 'dyn_inst_' + inst.instName;
+        if (!p[id]) p[id] = { x: midX, y: midY };
+        midY += 140;
+        if (midY > 400) { midY = 80; midX += 260; }
+        gateDatabase[id] = {
+          name: `${inst.modType} Subcircuit (${inst.instName})`,
+          sub: `${inst.instName}: ${inst.modType}(${inst.portList.join(', ')})`,
+          eq: `Instance of ${inst.modType}`,
+          pins: () => `Ports: ${inst.portList.join(', ')}`,
+          cell: `sky130_fd_sc_hd__${inst.modType.toLowerCase()}`,
+          cellPins: `${inst.portList.length} Pins on M1/M2`,
+          transistors: `${inst.portList.length * 4} CMOS FETs`,
+          badge: "SUBCIRCUIT BLOCK",
+          impact: "Synthesized standard-cell subcircuit instance mapped onto SkyWater 130nm standard cell rows."
+        };
+      });
+
+      gates.forEach((g, idx) => {
+        const id = 'dyn_gate_' + g.name;
+        if (!p[id]) p[id] = { x: midX, y: midY };
+        midY += 75;
+        if (midY > 400) { midY = 80; midX += 160; }
+        const fets = (g.type === 'not' || g.type === 'buf') ? 2 : (g.type === 'xor' || g.type === 'xnor') ? 8 : 4;
+        gateDatabase[id] = {
+          name: `${g.type.toUpperCase()} Logic Gate (${g.name})`,
+          sub: `${g.name}: ${g.type}(${g.out}, ${g.ins.join(', ')})`,
+          eq: `${g.out} = ${g.type}(${g.ins.join(', ')})`,
+          pins: () => `${g.ins.join(', ')} → ${g.out}`,
+          cell: `sky130_fd_sc_hd__${g.type}2_1`,
+          cellPins: `${g.ins.length + 1} Pins on M1`,
+          transistors: `${fets} CMOS FETs`,
+          badge: g.type === 'xor' ? "HOTSPOT GATE" : "LOGIC GATE",
+          impact: `Synthesized primitive ${g.type.toUpperCase()} gate connected on Metal 1 standard-cell rows.`
+        };
+      });
+
+      assigns.forEach((asg, idx) => {
+        const id = 'dyn_asg_' + asg.lhs;
+        if (!p[id]) p[id] = { x: midX, y: midY };
+        midY += 75;
+        if (midY > 400) { midY = 80; midX += 160; }
+        gateDatabase[id] = {
+          name: `Continuous Assignment (${asg.lhs})`,
+          sub: `assign ${asg.lhs} = ${asg.rhs};`,
+          eq: `${asg.lhs} = ${asg.rhs}`,
+          pins: () => `${asg.rhs} → ${asg.lhs}`,
+          cell: "sky130_fd_sc_hd__logic_slice",
+          cellPins: "Datapath Slice Pins on M1",
+          transistors: "16 CMOS FETs",
+          badge: "ASSIGNMENT",
+          impact: "Continuous assignment synthesized into combinational logic array."
+        };
+      });
+
+      // Layout Outputs on Right
+      let rightY = 80;
+      const outX = Math.max(760, midX + 220);
+      outputs.forEach((out, idx) => {
+        const id = 'dyn_out_' + out.name;
+        if (!p[id]) p[id] = { x: outX, y: rightY };
+        rightY += 65;
+      });
+
+      // SVG Elements Markup
+      let svgHtml = `
+        <g font-size="11" font-family="monospace" font-weight="bold">
+          <text x="40" y="30" fill="#0284c7">// Synthesized Gate Netlist for module: ${parsed.moduleName}</text>
+          <text x="40" y="48" fill="#64748b">Synthesized from user-submitted Verilog code (${inputs.length} inputs, ${outputs.length} outputs, ${instances.length} subcircuits, ${gates.length} primitive gates)</text>
+        </g>
+        <g id="djsWiresGroup">
+      `;
+
+      // Draw Wires between components
+      inputs.forEach(inp => {
+        const inpPos = p['dyn_in_' + inp.name];
+        instances.forEach(inst => {
+          if (inst.portList.includes(inp.name)) {
+            const instPos = p['dyn_inst_' + inst.instName];
+            const wPath = orthoWirePath(inpPos.x + 46, inpPos.y + 20, instPos.x, instPos.y + 45);
+            svgHtml += svgWire(`w_${inp.name}_${inst.instName}`, wPath, (pinState[inp.name] || 0) === 1);
+          }
+        });
+        gates.forEach(g => {
+          if (g.ins.includes(inp.name)) {
+            const gPos = p['dyn_gate_' + g.name];
+            const wPath = orthoWirePath(inpPos.x + 46, inpPos.y + 20, gPos.x, gPos.y + 14);
+            svgHtml += svgWire(`w_${inp.name}_${g.name}`, wPath, (pinState[inp.name] || 0) === 1);
+          }
+        });
+        outputs.forEach(out => {
+          if (out.name === inp.name) {
+            const outPos = p['dyn_out_' + out.name];
+            const wPath = orthoWirePath(inpPos.x + 46, inpPos.y + 20, outPos.x, outPos.y + 20);
+            svgHtml += svgWire(`w_${inp.name}_${out.name}`, wPath, (pinState[inp.name] || 0) === 1);
+          }
+        });
+      });
+
+      gates.forEach(g => {
+        const gPos = p['dyn_gate_' + g.name];
+        const gOutX = gPos.x + (g.type === 'not' ? 36 : 48);
+        const gOutY = gPos.y + 14;
+        outputs.forEach(out => {
+          if (out.name === g.out) {
+            const outPos = p['dyn_out_' + out.name];
+            const wPath = orthoWirePath(gOutX, gOutY, outPos.x, outPos.y + 20);
+            svgHtml += svgWire(`w_${g.name}_${out.name}`, wPath, true);
+          }
+        });
+        instances.forEach(inst => {
+          if (inst.portList.includes(g.out)) {
+            const instPos = p['dyn_inst_' + inst.instName];
+            const wPath = orthoWirePath(gOutX, gOutY, instPos.x, instPos.y + 45);
+            svgHtml += svgWire(`w_${g.name}_${inst.instName}`, wPath, true);
+          }
+        });
+      });
+
+      instances.forEach(inst => {
+        const instPos = p['dyn_inst_' + inst.instName];
+        const instW = expandedBlocks[inst.instName] ? 240 : 160;
+        outputs.forEach(out => {
+          if (inst.portList.includes(out.name)) {
+            const outPos = p['dyn_out_' + out.name];
+            const wPath = orthoWirePath(instPos.x + instW, instPos.y + 45, outPos.x, outPos.y + 20);
+            svgHtml += svgWire(`w_${inst.instName}_${out.name}`, wPath, true);
+          }
+        });
+      });
+
+      svgHtml += `</g>`;
+
+      // Render Input Buttons
+      inputs.forEach(inp => {
+        const id = 'dyn_in_' + inp.name;
+        const pos = p[id];
+        svgHtml += svgButtonInput(id, pos.x, pos.y, inp.name + (inp.isBus ? `[${inp.msb}:0]` : ''), inp.name, [inp.lineNum]);
+      });
+
+      // Render Subcircuit Instances
+      instances.forEach(inst => {
+        const id = 'dyn_inst_' + inst.instName;
+        const pos = p[id];
+        const isExp = expandedBlocks[inst.instName] || false;
+        const instW = isExp ? 250 : 160;
+        const instH = isExp ? 180 : 85;
+        const innerSvg = `
+          <rect width="230" height="140" fill="#f8fafc" rx="4" stroke="#cbd5e1"/>
+          <text x="10" y="20" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">// Internal ${inst.modType} structure</text>
+          ${svgAndGate(20, 35, `${inst.instName}_g1`, 'gate_1', false)}
+          ${svgOrGate(120, 35, `${inst.instName}_g2`, 'gate_2', false)}
+          <text x="10" y="125" fill="#64748b" font-size="8.5" font-family="monospace">Ports: ${inst.portList.join(', ')}</text>
+        `;
+        const ins = inst.portList.slice(0, Math.ceil(inst.portList.length / 2)).map((nm, i) => ({ name: nm, y: 35 + i * 20 }));
+        const outs = inst.portList.slice(Math.ceil(inst.portList.length / 2)).map((nm, i) => ({ name: nm, y: 35 + i * 20 }));
+        svgHtml += renderSubcircuitBox(
+          id, inst.instName, inst.modType, isExp, instW, instH, pos.x, pos.y, [inst.lineNum],
+          innerSvg, ins, outs.length ? outs : [{ name: 'out', y: 45 }]
+        );
+      });
+
+      // Render Primitive Gates
+      gates.forEach(g => {
+        const id = 'dyn_gate_' + g.name;
+        const pos = p[id];
+        if (g.type === 'not') {
+          svgHtml += svgNotGate(id, pos.x, pos.y, g.name, [g.lineNum]);
+        } else if (g.type === 'and') {
+          svgHtml += svgAndGate(pos.x, pos.y, id, g.name, false, [g.lineNum]);
+        } else if (g.type === 'nand') {
+          svgHtml += svgNandGate(pos.x, pos.y, id, g.name, [g.lineNum]);
+        } else if (g.type === 'or') {
+          svgHtml += svgOrGate(pos.x, pos.y, id, g.name, false, [g.lineNum]);
+        } else if (g.type === 'xor') {
+          svgHtml += svgXorGate(pos.x, pos.y, id, g.name, true, [g.lineNum]);
+        } else {
+          svgHtml += svgAndGate(pos.x, pos.y, id, g.name, false, [g.lineNum]);
+        }
+      });
+
+      // Render Assign Blocks
+      assigns.forEach(asg => {
+        const id = 'dyn_asg_' + asg.lhs;
+        const pos = p[id];
+        svgHtml += `
+          <g id="elem-${id}" class="djs-draggable comp-box" transform="translate(${pos.x}, ${pos.y})" style="cursor: grab;" onclick="selectGate('${id}')" onmouseenter="highlightCodeLines([${asg.lineNum}])" onmouseleave="clearCodeHighlight()">
+            <rect width="130" height="45" rx="5" fill="#f8fafc" stroke="#6366f1" stroke-width="1.8" onmousedown="djsStartDrag(event, '${id}')"/>
+            <text x="10" y="18" fill="#4338ca" font-size="9" font-family="monospace" font-weight="bold">ASSIGN LOGIC</text>
+            <text x="10" y="34" fill="#1e293b" font-size="9.5" font-family="monospace">${asg.lhs} &lt;= ${asg.rhs.length > 10 ? asg.rhs.substring(0, 10) + '..' : asg.rhs}</text>
+          </g>
+        `;
+      });
+
+      // Render Output Lamps
+      outputs.forEach((out, idx) => {
+        const id = 'dyn_out_' + out.name;
+        const pos = p[id];
+        svgHtml += svgLampOutput(id, pos.x, pos.y, out.name + (out.isBus ? `[${out.msb}:0]` : ''), 1, [out.lineNum]);
+      });
+
+      // Live Information Banner at the bottom
+      svgHtml += `
+        <g transform="translate(40, 500)">
+          <rect width="880" height="46" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="16" y="18" fill="#0284c7" font-size="11" font-weight="bold" font-family="monospace">DYNAMIC GATE NETLIST SYNTHESIZED:</text>
+          <text x="16" y="34" fill="#334155" font-size="10.5" font-family="monospace">
+            Module: ${parsed.moduleName} | ${inputs.length} inputs, ${outputs.length} outputs, ${instances.length} subcircuits, ${gates.length} gates | Hover any component to highlight code in yellow!
+          </text>
+        </g>
+      `;
+
+      return svgHtml;
+    }
 
     function renderCurrentCircuit() {
       const container = document.getElementById("djsCircuitGroup");
       if (!container) return;
 
       const badge = document.getElementById("djsHudModeBadge");
+      const currentCode = HDL_PRESETS[currentModule] || userSubmittedCode || "";
+      const parsed = parseVerilogCode(currentCode);
 
-      if (currentModule === "dff_master_slave.sv") {
+      // Check whether this code matches specific standard designs or general design
+      const isDff = currentCode.includes("dff_master_slave") || currentCode.includes("d_latch") || currentModule.includes("dff");
+      const isAluOnly = (currentCode.includes("rv32i_alu") || currentModule.includes("alu")) && !currentCode.includes("rv32i_core");
+      const isSrLatch = currentCode.includes("sr_neg_latch") || (currentCode.includes("nand g1") && currentCode.includes("nand g2"));
+      const isFullAdder = currentCode.includes("full_adder") || currentCode.includes("fulladder");
+      const isRv32iCore = currentCode.includes("rv32i_core") || (currentCode.includes("pc_reg") && currentCode.includes("alu_out"));
+
+      if (isDff) {
         container.innerHTML = renderDffMasterSlaveCircuit();
         if (badge) badge.textContent = "[DFF MASTER-SLAVE LATCH ENGINE]";
         selectGate("dff_dl2");
-      } else if (currentModule === "sr_neg_gate.sv") {
+      } else if (isSrLatch) {
         container.innerHTML = renderSrLatchCircuit();
         if (badge) badge.textContent = "[SR LATCH GATE MODEL]";
         selectGate("sr_nand1");
-      } else if (currentModule === "rv32i_alu.sv") {
+      } else if (isAluOnly) {
         container.innerHTML = renderAluCircuit();
         if (badge) badge.textContent = "[32-BIT ALU HOTSPOT]";
         selectGate("alu_xor1");
-      } else {
+      } else if (isRv32iCore) {
         container.innerHTML = renderProcessorCoreCircuit();
         if (badge) badge.textContent = "[RV32I GATE NETLIST]";
         selectGate("rv_ex_stage");
+      } else {
+        // ANY GENERAL ARBITRARY USER VERILOG CODE!
+        container.innerHTML = renderDynamicSynthesizedCircuit(currentCode, parsed);
+        if (badge) badge.textContent = `[SYNTHESIZED: ${parsed.moduleName.toUpperCase()}]`;
+        if (parsed.instances.length > 0) {
+          selectGate('dyn_inst_' + parsed.instances[0].instName);
+        } else if (parsed.gates.length > 0) {
+          selectGate('dyn_gate_' + parsed.gates[0].name);
+        }
       }
 
       updateSignalHud();
     }
 
     function updateCircuitWires() {
-      // Re-renders during smooth mouse drag without full DOM recreation
       renderCurrentCircuit();
     }
 
     function toggleSubcircuit(stageId) {
-      // Extracts subcircuit key ('dl1', 'dl2', 'rv_if', 'rv_id', 'rv_reg', 'rv_ex')
-      const cleanKey = stageId.replace('dff_', '').replace('_stage', '');
+      const cleanKey = stageId.replace('dff_', '').replace('_stage', '').replace('dyn_inst_', '');
       expandedBlocks[cleanKey] = !expandedBlocks[cleanKey];
       renderCurrentCircuit();
     }
@@ -2090,12 +2469,11 @@ endmodule`
         .replace(/>/g, "&gt;");
     }
 
-    // Code formatter with syntax highlighting and individual line wrappers for yellow cross-highlighting
+    // Single-pass tokenizer syntax highlighter (Guarantees zero corrupt style numbers or 600;"> leaks)
     function syntaxHighlightVerilogLines(code) {
+      if (!code) return '';
       const lines = code.split("\n");
-      const keywordRegex = /\b(module|endmodule|input|output|inout|wire|reg|logic|assign|always|always_ff|always_comb|begin|end|case|endcase|if|else|parameter|localparam|posedge|negedge)\b/g;
-      const gateRegex = /\b(and|nand|or|nor|xor|xnor|not|buf)\b/g;
-      const numRegex = /\b(\d+'[bBoOdDhH][0-9a-fA-F_]+|\d+)\b/g;
+      const tokenRegex = /\b(module|endmodule|input|output|inout|wire|reg|logic|assign|always|always_ff|always_comb|begin|end|case|endcase|if|else|parameter|localparam|posedge|negedge)\b|\b(and|nand|or|nor|xor|xnor|not|buf)\b|\b(\d+'[bBoOdDhH][0-9a-fA-F_]+|\d+)\b/g;
 
       return lines.map((line, idx) => {
         const lineNum = idx + 1;
@@ -2104,18 +2482,22 @@ endmodule`
         if (commentIdx !== -1) {
           const codePart = line.substring(0, commentIdx);
           const commentPart = line.substring(commentIdx);
-          const highlightedCode = escapeHtml(codePart)
-            .replace(keywordRegex, '<span style="color: #6f42c1; font-weight: 600;">$1</span>')
-            .replace(gateRegex, '<span style="color: #0284c7; font-weight: 600;">$1</span>')
-            .replace(numRegex, '<span style="color: #0550ae;">$1</span>');
-          lineHtml = highlightedCode + `<span style="color: #b45309; font-style: italic;">${escapeHtml(commentPart)}</span>`;
+          const highlightedCode = escapeHtml(codePart).replace(tokenRegex, (match, p1, p2, p3) => {
+            if (p1) return `<span class="tok-kw">${p1}</span>`;
+            if (p2) return `<span class="tok-gate">${p2}</span>`;
+            if (p3) return `<span class="tok-num">${p3}</span>`;
+            return match;
+          });
+          lineHtml = highlightedCode + `<span class="tok-comment">${escapeHtml(commentPart)}</span>`;
         } else {
-          lineHtml = escapeHtml(line)
-            .replace(keywordRegex, '<span style="color: #6f42c1; font-weight: 600;">$1</span>')
-            .replace(gateRegex, '<span style="color: #0284c7; font-weight: 600;">$1</span>')
-            .replace(numRegex, '<span style="color: #0550ae;">$1</span>');
+          lineHtml = escapeHtml(line).replace(tokenRegex, (match, p1, p2, p3) => {
+            if (p1) return `<span class="tok-kw">${p1}</span>`;
+            if (p2) return `<span class="tok-gate">${p2}</span>`;
+            if (p3) return `<span class="tok-num">${p3}</span>`;
+            return match;
+          });
         }
-        return `<div id="djs-line-${lineNum}" class="djs-code-line" style="padding: 0 4px; border-left: 3px solid transparent; transition: background 0.15s ease; min-height: 17px;">${lineHtml || ' '}</div>`;
+        return `<div id="djs-line-${lineNum}" class="djs-code-line" style="padding: 0 4px; border-left: 3px solid transparent; transition: background 0.15s ease; min-height: 17px;">${lineHtml || '&nbsp;'}</div>`;
       }).join("");
     }
 
@@ -2142,34 +2524,12 @@ endmodule`
     function djsSelectModule(filename) {
       currentModule = filename;
 
-      // Update active tab styles
-      ["rv32i", "dff", "alu"].forEach(key => {
-        const tab = document.getElementById("djsSubTabCode_" + key);
-        if (tab) {
-          const isTarget = (key === "rv32i" && filename === "rv32i_core.sv") ||
-                           (key === "dff" && filename === "dff_master_slave.sv") ||
-                           (key === "alu" && filename === "rv32i_alu.sv");
-          if (isTarget) {
-            tab.classList.add("active");
-            tab.style.background = "#ffffff";
-            tab.style.border = "1px solid #dee2e6";
-            tab.style.borderBottom = "1px solid #ffffff";
-            tab.style.color = "#495057";
-          } else {
-            tab.classList.remove("active");
-            tab.style.background = "transparent";
-            tab.style.border = "1px solid transparent";
-            tab.style.color = "#0d6efd";
-          }
-        }
-      });
-
       // Update active tab label
       const tabLabel = document.getElementById("djsActiveFileTabName");
       if (tabLabel) tabLabel.textContent = filename;
 
       // Update Code display
-      const code = HDL_PRESETS[filename] || HDL_PRESETS["rv32i_core.sv"];
+      const code = HDL_PRESETS[filename] || userSubmittedCode || HDL_PRESETS["rv32i_core.sv"];
       const codeEl = document.getElementById("djsCodeDisplay");
       if (codeEl) codeEl.innerHTML = syntaxHighlightVerilogLines(code);
 
@@ -2262,14 +2622,14 @@ endmodule`
       const codeEl = document.getElementById("djsCodeDisplay");
       if (codeEl) {
         const rawCode = codeEl.innerText || codeEl.textContent;
-        if (rawCode && rawCode.trim().length > 10) {
+        if (rawCode && rawCode.trim().length > 0) {
           HDL_PRESETS[currentModule] = rawCode;
-          if (rawCode.includes("dff_master_slave") || rawCode.includes("d_latch")) {
-            currentModule = "dff_master_slave.sv";
-          } else if (rawCode.includes("rv32i_core")) {
-            currentModule = "rv32i_core.sv";
-          } else if (rawCode.includes("rv32i_alu")) {
-            currentModule = "rv32i_alu.sv";
+          const parsed = parseVerilogCode(rawCode);
+          if (parsed.moduleName && parsed.moduleName !== "user_design") {
+            currentModule = parsed.moduleName + ".sv";
+            HDL_PRESETS[currentModule] = rawCode;
+            const tabLabel = document.getElementById("djsActiveFileTabName");
+            if (tabLabel) tabLabel.textContent = currentModule;
           }
         }
       }
@@ -2279,7 +2639,6 @@ endmodule`
       } else {
         advanceTick();
       }
-      renderCurrentCircuit();
     }
 
     function djsPauseSim() {
@@ -2580,6 +2939,12 @@ endmodule`
     // Initialize DigitalJS Workbench & Layer Routing Density Heatmaps on Load
     window.addEventListener("DOMContentLoaded", () => {
       drawAllLayerHeatmaps();
+      if (userSubmittedCode && userSubmittedCode.trim().length > 0) {
+        const parsed = parseVerilogCode(userSubmittedCode);
+        const moduleFileName = (parsed.moduleName ? parsed.moduleName : "user_design") + ".sv";
+        HDL_PRESETS[moduleFileName] = userSubmittedCode;
+        currentModule = moduleFileName;
+      }
       djsSelectModule(currentModule);
       startSimLoop();
     });
