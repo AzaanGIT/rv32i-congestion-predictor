@@ -782,75 +782,75 @@ endmodule`
 
       <div class="input-box">
         <label>UTILIZATION <span class="badge">%</span></label>
-        <div class="val">57.0</div>
+        <div class="val" id="disp_sidebar_util">57.0</div>
       </div>
       <div class="input-box">
         <label>ASPECT RATIO <span class="badge">ratio</span></label>
-        <div class="val">1.5</div>
+        <div class="val" id="disp_sidebar_aspect">1.5</div>
       </div>
       <div class="input-box">
         <label>CORE MARGIN <span class="badge">MM</span></label>
-        <div class="val">3.0</div>
+        <div class="val" id="disp_sidebar_margin">3.0</div>
       </div>
       <div class="input-box">
         <label>DENSITY</label>
-        <div class="val">0.56</div>
+        <div class="val" id="disp_sidebar_density">0.56</div>
       </div>
       <div class="input-box">
         <label>LAYER ADJUSTMENT</label>
-        <div class="val">0.6</div>
+        <div class="val" id="disp_sidebar_layer_adj">0.6</div>
       </div>
 
       <div class="section-label">PER-METAL-LAYER ROUTING RESOURCE</div>
       
       <div class="input-box">
         <label>METAL 1</label>
-        <div class="val">0.0</div>
+        <div class="val" id="disp_sidebar_metal_1">0.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 2</label>
-        <div class="val">27540.0</div>
+        <div class="val" id="disp_sidebar_metal_2">27540.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 3</label>
-        <div class="val">37221.0</div>
+        <div class="val" id="disp_sidebar_metal_3">37221.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 4</label>
-        <div class="val">18450.0</div>
+        <div class="val" id="disp_sidebar_metal_4">18450.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 5</label>
-        <div class="val">18096.0</div>
+        <div class="val" id="disp_sidebar_metal_5">18096.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 6</label>
-        <div class="val">18450.0</div>
+        <div class="val" id="disp_sidebar_metal_6">18450.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 7</label>
-        <div class="val">5699.0</div>
+        <div class="val" id="disp_sidebar_metal_7">5699.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 8</label>
-        <div class="val">5796.0</div>
+        <div class="val" id="disp_sidebar_metal_8">5796.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 9</label>
-        <div class="val">2758.0</div>
+        <div class="val" id="disp_sidebar_metal_9">2758.0</div>
       </div>
       
       <div class="input-box">
         <label>METAL 10</label>
-        <div class="val">2772.0</div>
+        <div class="val" id="disp_sidebar_metal_10">2772.0</div>
       </div>
       
     </div>
@@ -1105,12 +1105,12 @@ endmodule`
         <div class="card" style="margin-bottom: 0; padding: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Routing Feasibility</span>
-            <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+            <span id="kpiSuccessBadge" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
               ROUTABLE
             </span>
           </div>
           <div style="margin-top: 10px;">
-            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">100.0%</h1>
+            <h1 id="kpiSuccessProb" style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">100.0%</h1>
             <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Feasibility Success Probability</span>
           </div>
         </div>
@@ -1119,12 +1119,12 @@ endmodule`
         <div class="card" style="margin-bottom: 0; padding: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Max Wire Pressure</span>
-            <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+            <span id="kpiPeakBadge" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
               M2 BOTTLENECK
             </span>
           </div>
           <div style="margin-top: 10px;">
-            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #15803d;">50.8%</h1>
+            <h1 id="kpiPeakPct" style="margin: 0; font-size: 32px; font-weight: 800; color: #15803d;">50.8%</h1>
             <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Peak Layer Track Saturation</span>
           </div>
         </div>
@@ -1133,13 +1133,13 @@ endmodule`
         <div class="card" style="margin-bottom: 0; padding: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <span style="color: #6b21a8; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Thermal Risk Index</span>
-            <span class="heat-pill" style="background:#15803d; color:#ffffff; font-weight: 800; font-size: 10px; padding: 2px 8px; border-radius: 6px;">
+            <span id="kpiThermalBadge" class="heat-pill" style="background:#15803d; color:#ffffff; font-weight: 800; font-size: 10px; padding: 2px 8px; border-radius: 6px;">
               NORMAL / SAFE
             </span>
           </div>
           <div style="margin-top: 10px;">
-            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">41.9</h1>
-            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Est. Peak Temp: <b style="color:#ea580c;">56.4 °C</b></span>
+            <h1 id="kpiThermalVal" style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">41.9</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Est. Peak Temp: <b id="kpiPeakTemp" style="color:#ea580c;">56.4 °C</b></span>
           </div>
         </div>
 
@@ -1152,8 +1152,8 @@ endmodule`
             </span>
           </div>
           <div style="margin-top: 10px;">
-            <h1 style="margin: 0; font-size: 32px; font-weight: 800; color: #7c3aed;">57.0%</h1>
-            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Placement Density: <b>0.56</b></span>
+            <h1 id="kpiCoreUtil" style="margin: 0; font-size: 32px; font-weight: 800; color: #7c3aed;">57.0%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Placement Density: <b id="kpiCoreDensity">0.56</b></span>
           </div>
         </div>
 
@@ -1192,7 +1192,7 @@ endmodule`
 
 
       <!-- 2D CELLULAR HEATMAP VIEWER -->
-      <div class="card">
+      <div class="card" id="layerDensityCard">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
           <div>
             <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</span>
@@ -1207,100 +1207,100 @@ endmodule`
 
         <div class="grid-heatmaps">
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M1">
             <div class="heatmap-header">
               <span>M1 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">0.0%</span>
+              <span id="pct-M1" style="color: #15803d; font-weight: 800;">0.0%</span>
             </div>
             <canvas id="cvs-M1" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M1')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M2">
             <div class="heatmap-header">
               <span>M2 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">50.8%</span>
+              <span id="pct-M2" style="color: #15803d; font-weight: 800;">50.8%</span>
             </div>
             <canvas id="cvs-M2" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M2')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M3">
             <div class="heatmap-header">
               <span>M3 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">46.0%</span>
+              <span id="pct-M3" style="color: #15803d; font-weight: 800;">46.0%</span>
             </div>
             <canvas id="cvs-M3" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M3')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M4">
             <div class="heatmap-header">
               <span>M4 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">36.1%</span>
+              <span id="pct-M4" style="color: #15803d; font-weight: 800;">36.1%</span>
             </div>
             <canvas id="cvs-M4" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M4')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M5">
             <div class="heatmap-header">
               <span>M5 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">25.2%</span>
+              <span id="pct-M5" style="color: #15803d; font-weight: 800;">25.2%</span>
             </div>
             <canvas id="cvs-M5" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M5')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M6">
             <div class="heatmap-header">
               <span>M6 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">25.0%</span>
+              <span id="pct-M6" style="color: #15803d; font-weight: 800;">25.0%</span>
             </div>
             <canvas id="cvs-M6" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M6')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M7">
             <div class="heatmap-header">
               <span>M7 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">14.7%</span>
+              <span id="pct-M7" style="color: #15803d; font-weight: 800;">14.7%</span>
             </div>
             <canvas id="cvs-M7" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M7')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M8">
             <div class="heatmap-header">
               <span>M8 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">14.8%</span>
+              <span id="pct-M8" style="color: #15803d; font-weight: 800;">14.8%</span>
             </div>
             <canvas id="cvs-M8" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M8')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M9">
             <div class="heatmap-header">
               <span>M9 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">17.7%</span>
+              <span id="pct-M9" style="color: #15803d; font-weight: 800;">17.7%</span>
             </div>
             <canvas id="cvs-M9" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M9')">Fix this layer</button>
           </div>
           
-          <div class="heatmap-card">
+          <div class="heatmap-card" id="card-M10">
             <div class="heatmap-header">
               <span>M10 • ROUTING</span>
-              <span style="color: #15803d; font-weight: 800;">15.5%</span>
+              <span id="pct-M10" style="color: #15803d; font-weight: 800;">15.5%</span>
             </div>
             <canvas id="cvs-M10" class="canvas-sim" width="50" height="50"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
@@ -1316,7 +1316,7 @@ endmodule`
           <div>
             <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Input Changes</span>
             <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
-            <p style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is 50.8% on M2. Click to apply calculated design rules and bring wire density below 80%.</p>
+            <p id="recDesc" style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is 50.8% on M2. Click to apply calculated design rules and bring wire density below 80%.</p>
           </div>
           <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
         </div>
@@ -1447,7 +1447,7 @@ endmodule`
         ${Object.keys(allSuggestedResources).map(k => `<input type="hidden" name="metal_${k.replace('M','')}" value="${allSuggestedResources[k]}">`).join('')}
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
-          <button type="submit" class="btn-3d">Apply Fixes & Re-run</button>
+          <button type="button" class="btn-3d" onclick="handleFixSubmit(event, null)">Apply Fixes & Re-run</button>
         </div>
       `;
 
@@ -1501,11 +1501,238 @@ endmodule`
         }).join('')}
         <div style="display:flex; justify-content:flex-end; gap:10px;">
           <button type="button" class="btn-nav" onclick="closeFixModal()">Cancel</button>
-          <button type="submit" class="btn-3d">Apply ${layer} Fix & Re-run</button>
+          <button type="button" class="btn-3d" onclick="handleFixSubmit(event, '${layer}')">Apply ${layer} Fix & Re-run</button>
         </div>
       `;
 
       document.getElementById('fixModal').style.display = 'flex';
+    }
+
+    function handleFixSubmit(event, layer) {
+      if (event) event.preventDefault();
+      const form = document.getElementById('fixForm');
+      if (!form) return;
+
+      const controlsView = document.getElementById('controlsView');
+      if (controlsView && typeof applyFloorplanAnalysis === 'function') {
+        const formData = new FormData(form);
+        if (formData.has('utilization')) {
+          const u = document.getElementById('inp_util'); if (u) u.value = formData.get('utilization');
+        }
+        if (formData.has('aspect_ratio')) {
+          const a = document.getElementById('inp_aspect'); if (a) a.value = formData.get('aspect_ratio');
+        }
+        if (formData.has('core_margin')) {
+          const m = document.getElementById('inp_margin'); if (m) m.value = formData.get('core_margin');
+        }
+        if (formData.has('density')) {
+          const d = document.getElementById('inp_density'); if (d) d.value = formData.get('density');
+        }
+        if (formData.has('layer_adjustment')) {
+          const l = document.getElementById('inp_layer_adj'); if (l) l.value = formData.get('layer_adjustment');
+        }
+        for (let i = 1; i <= 10; i++) {
+          if (formData.has('metal_' + i)) {
+            const inp = document.querySelector(`input[name="metal_${i}"]`);
+            if (inp) inp.value = formData.get('metal_' + i);
+          }
+        }
+        closeFixModal();
+        applyFloorplanAnalysis(true, layer);
+      } else {
+        form.submit();
+      }
+    }
+
+    function applyFloorplanAnalysis(isFix, targetFixedLayer) {
+      const util = parseFloat(document.getElementById('inp_util')?.value) || currentParams.utilization || 57.0;
+      const aspect = parseFloat(document.getElementById('inp_aspect')?.value) || currentParams.aspect_ratio || 1.5;
+      const margin = parseFloat(document.getElementById('inp_margin')?.value) || currentParams.core_margin || 3.0;
+      const density = parseFloat(document.getElementById('inp_density')?.value) || currentParams.density || 0.56;
+      const layerAdj = parseFloat(document.getElementById('inp_layer_adj')?.value) || currentParams.layer_adjustment || 0.6;
+
+      // 1. Update physical VLSI feature metrics
+      const pin = (util * density * 1.85).toFixed(2);
+      const hpwl = (Math.sqrt(Math.max(0.1, util * aspect)) * margin * 14.2).toFixed(2);
+      const blk = ((1.0 - density) * (util / 100.0) * 100.0).toFixed(1);
+      const via = (density * layerAdj * 1.25).toFixed(2);
+
+      const pinEl = document.querySelector('#valPin'); if (pinEl) pinEl.innerHTML = pin + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span>';
+      const hpwlEl = document.querySelector('#valHpwl'); if (hpwlEl) hpwlEl.innerHTML = hpwl + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span>';
+      const blkEl = document.querySelector('#valBlock'); if (blkEl) blkEl.innerHTML = blk + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span>';
+      const viaEl = document.querySelector('#valVia'); if (viaEl) viaEl.innerHTML = via + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span>';
+
+      // 2. Read Tracks (Resources) per metal layer
+      const resources = {};
+      for (let i = 1; i <= 10; i++) {
+        const k = "M" + i;
+        const inp = document.querySelector(`input[name="metal_${i}"]`);
+        resources[k] = inp ? (parseFloat(inp.value) || allResources[k] || 0) : (allResources[k] || 0);
+      }
+
+      // 3. Demand stress model (Matches backend XGBoost / analytical physics)
+      const stress = (util / 57.0) * (density / 0.56) * (3.0 / Math.max(0.5, margin));
+      const baseDemands = {
+        M1: 0, M2: 14186, M3: 16986, M4: 6621, M5: 4580,
+        M6: 4547, M7: 860, M8: 783, M9: 470, M10: 410
+      };
+
+      const demands = {};
+      const layerUsage = {};
+      let peakLayer = "M2";
+      let peakVal = 0;
+      let sumUsage = 0;
+
+      for (let i = 1; i <= 10; i++) {
+        const k = "M" + i;
+        const d = Math.round(baseDemands[k] * stress * 10) / 10;
+        demands[k] = d;
+        const cap = resources[k] || 0;
+        let pct = 0;
+        if (cap > 0) {
+          pct = Math.round((d / cap) * 1000) / 10;
+        }
+        layerUsage[k] = Math.min(100.0, pct);
+        sumUsage += layerUsage[k];
+        if (pct > peakVal) {
+          peakVal = pct;
+          peakLayer = k;
+        }
+      }
+
+      const avgUsage = Math.round((sumUsage / 10) * 10) / 10;
+      const isCongested = (peakVal >= 85.0) || (util > 80.0);
+      const isRoutable = !isCongested;
+      const successProb = Math.min(99.4, Math.max(12.0, Math.round((100.0 - (peakVal * 0.42) - (util * 0.25)) * 10) / 10));
+      const thermalIndex = Math.round(Math.min(100.0, (density * 30.0) + (avgUsage * 0.40) + (peakVal * 0.30)) * 10) / 10;
+      const peakTemp = Math.round((38.0 + (thermalIndex * 0.44)) * 10) / 10;
+
+      // 4. Update Global State
+      rawData = layerUsage;
+      allDemands = demands;
+      allResources = resources;
+      currentParams = {
+        utilization: util,
+        aspect_ratio: aspect,
+        core_margin: margin,
+        density: density,
+        layer_adjustment: layerAdj
+      };
+
+      allSuggestedParams = {
+        utilization: Math.round(Math.max(25.0, Math.min(util * 0.80, 48.0)) * 10) / 10,
+        aspect_ratio: 1.0,
+        core_margin: Math.round((margin + 1.5) * 10) / 10,
+        density: Math.round(Math.max(0.30, Math.min(density * 0.75, 0.45)) * 100) / 100,
+        layer_adjustment: Math.round(Math.max(0.20, Math.min(layerAdj * 0.70, 0.40)) * 100) / 100
+      };
+
+      allSuggestedResources = {};
+      for (let i = 1; i <= 10; i++) {
+        const k = "M" + i;
+        const d = demands[k] || 0;
+        const res = resources[k] || 0;
+        if (res > 0 && (d / res > 0.80)) {
+          allSuggestedResources[k] = Math.ceil(d / 0.70);
+        } else {
+          allSuggestedResources[k] = res;
+        }
+      }
+
+      // 5. Update KPI Cards
+      const kpiProb = document.getElementById('kpiSuccessProb'); if (kpiProb) kpiProb.innerText = successProb + '%';
+      const kpiBadge = document.getElementById('kpiSuccessBadge');
+      if (kpiBadge) {
+        kpiBadge.innerText = isRoutable ? 'ROUTABLE' : 'DRC FAIL';
+        kpiBadge.style.background = isRoutable ? '#f0fdf4' : '#fef2f2';
+        kpiBadge.style.borderColor = isRoutable ? '#bbf7d0' : '#fca5a5';
+        kpiBadge.style.color = isRoutable ? '#15803d' : '#b91c1c';
+      }
+
+      const kpiPeak = document.getElementById('kpiPeakPct');
+      if (kpiPeak) {
+        kpiPeak.innerText = peakVal + '%';
+        kpiPeak.style.color = isCongested ? '#dc2626' : '#15803d';
+      }
+      const kpiPeakB = document.getElementById('kpiPeakBadge');
+      if (kpiPeakB) {
+        kpiPeakB.innerText = peakLayer + ' BOTTLENECK';
+        kpiPeakB.style.background = isCongested ? '#fef2f2' : '#f0fdf4';
+        kpiPeakB.style.borderColor = isCongested ? '#fca5a5' : '#bbf7d0';
+        kpiPeakB.style.color = isCongested ? '#b91c1c' : '#15803d';
+      }
+
+      const kpiTherm = document.getElementById('kpiThermalVal'); if (kpiTherm) kpiTherm.innerText = thermalIndex;
+      const kpiTemp = document.getElementById('kpiPeakTemp'); if (kpiTemp) kpiTemp.innerText = peakTemp + ' °C';
+      const kpiUtil = document.getElementById('kpiCoreUtil'); if (kpiUtil) kpiUtil.innerText = util + '%';
+      const kpiDense = document.getElementById('kpiCoreDensity'); if (kpiDense) kpiDense.innerHTML = `Placement Density: <b>${density}</b>`;
+
+      const recP = document.getElementById('recDesc');
+      if (recP) {
+        recP.innerText = `Peak usage is ${peakVal}% on ${peakLayer}. Click to apply calculated design rules and bring wire density below 80%.`;
+      }
+
+      // 6. Update Per-Layer UI Cards (percentage and color)
+      for (let i = 1; i <= 10; i++) {
+        const k = "M" + i;
+        const pctVal = layerUsage[k] || 0;
+        const el = document.getElementById("pct-" + k);
+        if (el) {
+          el.innerText = pctVal + "%";
+          el.style.color = (pctVal >= 85.0) ? "#dc2626" : (pctVal >= 70.0) ? "#ea580c" : "#15803d";
+        }
+      }
+
+      // 7. Update Left Sidebar on Results View
+      const sUtil = document.getElementById('disp_sidebar_util'); if (sUtil) sUtil.innerText = util;
+      const sAspect = document.getElementById('disp_sidebar_aspect'); if (sAspect) sAspect.innerText = aspect;
+      const sMargin = document.getElementById('disp_sidebar_margin'); if (sMargin) sMargin.innerText = margin;
+      const sDense = document.getElementById('disp_sidebar_density'); if (sDense) sDense.innerText = density;
+      const sLayerAdj = document.getElementById('disp_sidebar_layer_adj'); if (sLayerAdj) sLayerAdj.innerText = layerAdj;
+      for (let i = 1; i <= 10; i++) {
+        const sMet = document.getElementById('disp_sidebar_metal_' + i);
+        if (sMet) sMet.innerText = resources['M' + i].toLocaleString();
+      }
+
+      // 8. Redraw 10 Heatmaps
+      if (typeof drawAllLayerHeatmaps === 'function') {
+        drawAllLayerHeatmaps();
+      }
+
+      // 9. DigitalJS Module sync
+      const selectedHdl = document.getElementById('selectedHdlFilenameInput')?.value || 'rv32i_core.sv';
+      const userCode = document.getElementById('hdlCodeTextarea')?.value;
+      if (userCode && typeof HDL_PRESETS !== 'undefined') {
+        HDL_PRESETS[selectedHdl] = userCode;
+      }
+      if (typeof djsSelectModule === 'function') {
+        djsSelectModule(selectedHdl);
+      }
+
+      // 10. Focus / Smooth Scroll Context
+      const controlsEl = document.getElementById('controlsView');
+      const resultsEl = document.getElementById('resultsView');
+      if (controlsEl) controlsEl.style.display = 'none';
+      if (resultsEl) resultsEl.style.display = 'block';
+
+      if (isFix) {
+        if (targetFixedLayer) {
+          const card = document.getElementById('card-' + targetFixedLayer);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.style.transition = '0.3s';
+            card.style.boxShadow = '0 0 0 3px #10b981';
+            setTimeout(() => { card.style.boxShadow = ''; }, 2200);
+          }
+        } else {
+          const heatmapsCard = document.getElementById('layerDensityCard') || document.querySelector('.grid-heatmaps');
+          if (heatmapsCard) {
+            heatmapsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
 
     // ═════════════════════════════════════════════════════════════════════════
@@ -2434,41 +2661,8 @@ endmodule`
     }
 
     function triggerAnalysisFromForm() {
-      const util = parseFloat(document.getElementById('inp_util').value) || 57.0;
-      const aspect = parseFloat(document.getElementById('inp_aspect').value) || 1.5;
-      const margin = parseFloat(document.getElementById('inp_margin').value) || 3.0;
-      const density = parseFloat(document.getElementById('inp_density').value) || 0.56;
-      const layerAdj = parseFloat(document.getElementById('inp_layer_adj').value) || 0.6;
-
-      // Update physical VLSI feature metrics
-      const pin = (util * density * 1.85).toFixed(2);
-      const hpwl = (Math.sqrt(Math.max(0.1, util * aspect)) * margin * 14.2).toFixed(2);
-      const blk = ((1.0 - density) * (util / 100.0) * 100.0).toFixed(1);
-      const via = (density * layerAdj * 1.25).toFixed(2);
-
-      const pinEl = document.querySelector('#valPin'); if (pinEl) pinEl.innerHTML = pin + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span>';
-      const hpwlEl = document.querySelector('#valHpwl'); if (hpwlEl) hpwlEl.innerHTML = hpwl + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span>';
-      const blkEl = document.querySelector('#valBlock'); if (blkEl) blkEl.innerHTML = blk + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span>';
-      const viaEl = document.querySelector('#valVia'); if (viaEl) viaEl.innerHTML = via + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span>';
-
-      document.getElementById('controlsView').style.display = 'none';
-      document.getElementById('resultsView').style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Synchronize HDL Code & Module Selection to DigitalJS Workbench
-      const selectedHdl = document.getElementById('selectedHdlFilenameInput')?.value || 'rv32i_core.sv';
-      const userCode = document.getElementById('hdlCodeTextarea')?.value;
-      if (userCode && typeof HDL_PRESETS !== 'undefined') {
-        HDL_PRESETS[selectedHdl] = userCode;
-      }
-      if (typeof djsSelectModule === 'function') {
-        djsSelectModule(selectedHdl);
-      }
-      if (typeof djsResumeSim === 'function') {
-        djsResumeSim();
-      }
-      if (typeof drawAllLayerHeatmaps === 'function') {
-        drawAllLayerHeatmaps();
+      if (typeof applyFloorplanAnalysis === 'function') {
+        applyFloorplanAnalysis(false, null);
       }
     }
 
@@ -2487,32 +2681,9 @@ endmodule`
     document.addEventListener('submit', (e) => {
       if (e.target && e.target.id === 'fixForm') {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        
-        if (formData.has('utilization')) {
-          const u = document.getElementById('inp_util'); if (u) u.value = formData.get('utilization');
+        if (typeof handleFixSubmit === 'function') {
+          handleFixSubmit(e, null);
         }
-        if (formData.has('aspect_ratio')) {
-          const a = document.getElementById('inp_aspect'); if (a) a.value = formData.get('aspect_ratio');
-        }
-        if (formData.has('core_margin')) {
-          const m = document.getElementById('inp_margin'); if (m) m.value = formData.get('core_margin');
-        }
-        if (formData.has('density')) {
-          const d = document.getElementById('inp_density'); if (d) d.value = formData.get('density');
-        }
-        if (formData.has('layer_adjustment')) {
-          const l = document.getElementById('inp_layer_adj'); if (l) l.value = formData.get('layer_adjustment');
-        }
-        for (let i = 1; i <= 10; i++) {
-          if (formData.has('metal_' + i)) {
-            const inp = document.querySelector(`input[name="metal_${i}"]`);
-            if (inp) inp.value = formData.get('metal_' + i);
-          }
-        }
-
-        if (typeof closeFixModal === 'function') closeFixModal();
-        triggerAnalysisFromForm();
       }
     });
   </script>
