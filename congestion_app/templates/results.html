@@ -449,7 +449,7 @@
 
             <!-- Tab Pane 1: Code View (Default) -->
             <div id="djsLeftCodePane" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; background: #ffffff;">
-              <div style="display: flex; flex: 1; overflow: auto; background: #ffffff;">
+              <div id="djsCodeScrollBox" style="display: flex; flex: 1; overflow: auto; background: #ffffff;">
                 <!-- Line Numbers Gutter -->
                 <div id="djsCodeGutter" style="background: #f8f9fa; color: #adb5bd; padding: 10px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 1.5; text-align: right; width: 34px; flex-shrink: 0; border-right: 1px solid #dee2e6; user-select: none;">
                   1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22
@@ -1921,7 +1921,8 @@ endmodule`
           
           <!-- Hover zone for code cross-highlighting & Gate selection -->
           <rect x="0" y="24" width="${w}" height="${h-24}" fill="transparent" 
-            onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)}); selectGate('${id}')" 
+            onclick="selectGate('${id}')"
+            onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)}, false)" 
             onmouseleave="clearCodeHighlight()" 
             onmousedown="djsStartDrag(event, '${id}')" />
 
@@ -3175,33 +3176,33 @@ endmodule`
         if (svgEl) svgEl.setAttribute("viewBox", "0 0 1680 720");
         container.innerHTML = renderPipelinedRV32ICircuit();
         if (badge) badge.textContent = "[5-STAGE PIPELINED RV32I SYNTHESIZED NETLIST]";
-        selectGate("pip_ex_stage");
       } else if (isDff) {
         if (svgEl) svgEl.setAttribute("viewBox", "0 0 960 560");
         container.innerHTML = renderDffMasterSlaveCircuit();
         if (badge) badge.textContent = "[DFF MASTER-SLAVE LATCH ENGINE]";
-        selectGate("dff_dl2");
       } else if (isSrLatch) {
         container.innerHTML = renderSrLatchCircuit();
         if (badge) badge.textContent = "[SR LATCH GATE MODEL]";
-        selectGate("sr_nand1");
       } else if (isAluOnly) {
         container.innerHTML = renderAluCircuit();
         if (badge) badge.textContent = "[32-BIT ALU HOTSPOT]";
-        selectGate("alu_xor1");
       } else if (isRv32iCore) {
         container.innerHTML = renderProcessorCoreCircuit();
         if (badge) badge.textContent = "[RV32I GATE NETLIST]";
-        selectGate("rv_ex_stage");
       } else {
         // ANY GENERAL ARBITRARY USER VERILOG CODE!
         container.innerHTML = renderDynamicSynthesizedCircuit(currentCode, parsed);
         if (badge) badge.textContent = `[SYNTHESIZED: ${parsed.moduleName.toUpperCase()}]`;
-        if (parsed.instances.length > 0) {
-          selectGate('dyn_inst_' + parsed.instances[0].instName);
-        } else if (parsed.gates.length > 0) {
-          selectGate('dyn_gate_' + parsed.gates[0].name);
-        }
+      }
+
+      // Re-apply active visual selection on canvas if user previously clicked a gate or wire
+      if (currentSelectedGateKey) {
+        const target = document.getElementById("elem-" + currentSelectedGateKey) || document.getElementById(currentSelectedGateKey);
+        if (target) target.classList.add("comp-selected");
+      }
+      if (currentSelectedWireId) {
+        const wireEl = document.getElementById(currentSelectedWireId);
+        if (wireEl) wireEl.classList.add("wire-selected");
       }
 
       updateSignalHud();
@@ -3275,8 +3276,13 @@ endmodule`
       return true;
     }
 
+    let currentSelectedGateKey = null;
+    let currentSelectedWireId = null;
+    let isUserManuallyScrollingCode = false;
+    let userScrollTimeout = null;
+
     // Two-Way Code Cross-Highlighting (Yellow highlight matching video recording)
-    function highlightCodeLines(lineNums, smoothScroll=true) {
+    function highlightCodeLines(lineNums, smoothScroll=false) {
       clearCodeHighlight();
       if (!lineNums || !lineNums.length) return;
 
@@ -3289,10 +3295,18 @@ endmodule`
         if (el) el.classList.add("djs-line-highlighted");
       });
 
-      if (smoothScroll && validNums.length > 0) {
+      // ONLY scroll if explicitly requested on direct user click AND user is not manually scrolling
+      if (smoothScroll && !isUserManuallyScrollingCode && validNums.length > 0) {
         const firstEl = document.getElementById("djs-line-" + validNums[0]);
-        if (firstEl) {
-          firstEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const scrollBox = document.getElementById("djsCodeScrollBox") || (firstEl ? firstEl.closest('[style*="overflow"]') : null);
+        if (firstEl && scrollBox) {
+          const boxRect = scrollBox.getBoundingClientRect();
+          const elRect = firstEl.getBoundingClientRect();
+          const isVisible = (elRect.top >= boxRect.top + 20 && elRect.bottom <= boxRect.bottom - 20);
+          if (!isVisible) {
+            const targetTop = scrollBox.scrollTop + (elRect.top - boxRect.top) - (boxRect.height / 2) + (elRect.height / 2);
+            scrollBox.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+          }
         }
       }
     }
@@ -3551,8 +3565,12 @@ endmodule`
     function handleCircuitSelection(data) {
       if (!data) return;
 
-      // Automatically switch code tab so user sees highlighted lines
-      switchDjsLeftTab('code');
+      if (data.isClick) {
+        // Explicit click: reset scroll lock and ensure code tab is visible
+        isUserManuallyScrollingCode = false;
+        clearTimeout(userScrollTimeout);
+        switchDjsLeftTab('code');
+      }
 
       let candidateLines = [];
       if (data.lineNums && Array.isArray(data.lineNums) && data.lineNums.length > 0) {
@@ -3662,6 +3680,9 @@ endmodule`
     }
 
     function selectWire(wireId, explicitLines) {
+      currentSelectedWireId = wireId;
+      currentSelectedGateKey = null;
+      document.querySelectorAll(".comp-box").forEach(el => el.classList.remove("comp-selected"));
       document.querySelectorAll(".wire-selected").forEach(w => w.classList.remove("wire-selected"));
       const wireEl = document.getElementById(wireId);
       if (wireEl) wireEl.classList.add("wire-selected");
@@ -3827,6 +3848,20 @@ endmodule`
       // Populate I/O tab
       updateDjsIoPanel(filename);
 
+      // Reset selection state and clear highlights
+      currentSelectedGateKey = null;
+      currentSelectedWireId = null;
+      clearCodeHighlight();
+      const banner = document.getElementById("djsSelectionBanner");
+      if (banner) banner.style.display = "none";
+
+      const scrollBox = document.getElementById("djsCodeScrollBox");
+      if (scrollBox) scrollBox.scrollTop = 0;
+
+      // Pre-populate inspector info without scrolling
+      const defaultGate = filename.includes("dff") ? "dff_dl2" : (filename.includes("alu") ? "alu_xor1" : "pip_ex_stage");
+      updateInspectorInfo(defaultGate);
+
       // Render the gate schematic
       renderCurrentCircuit();
     }
@@ -3870,9 +3905,9 @@ endmodule`
       return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
-    function selectGate(gateKey) {
+    function updateInspectorInfo(gateKey) {
       const g = gateDatabase[gateKey] || gateDatabase.rv_ex_stage || gateDatabase.alu_xor1;
-      
+      if (!g) return;
       const badge = document.getElementById("inspGateBadge");
       const name = document.getElementById("inspGateName");
       const sub = document.getElementById("inspGateSub");
@@ -3892,9 +3927,16 @@ endmodule`
       if (pinCount) pinCount.textContent = g.cellPins;
       if (trans) trans.textContent = g.transistors;
       if (impact) impact.textContent = g.impact;
+    }
+
+    function selectGate(gateKey) {
+      currentSelectedGateKey = gateKey;
+      currentSelectedWireId = null;
+      updateInspectorInfo(gateKey);
 
       // Visual highlight on canvas
       document.querySelectorAll(".comp-box").forEach(el => el.classList.remove("comp-selected"));
+      document.querySelectorAll(".wire-selected").forEach(w => w.classList.remove("wire-selected"));
       const target = document.getElementById("elem-" + gateKey) || document.getElementById(gateKey);
       if (target) target.classList.add("comp-selected");
 
@@ -3908,7 +3950,7 @@ endmodule`
 
       handleCircuitSelection({
         isLink: false,
-        wireName: (mapEntry && mapEntry.name) || (g && g.name) || gateKey,
+        wireName: (mapEntry && mapEntry.name) || (gateDatabase[gateKey] && gateDatabase[gateKey].name) || gateKey,
         label: gateKey,
         cellType: (mapEntry && mapEntry.type) || "GATE",
         lineNums: lines,
@@ -3998,7 +4040,9 @@ endmodule`
       }
       updateTickDisplay();
       updateHudClock();
-      renderCurrentCircuit();
+      if (currentDjsEngineMode !== 'live') {
+        renderCurrentCircuit();
+      }
     }
 
     function updateTickDisplay() {
@@ -4254,6 +4298,18 @@ endmodule`
       }
       djsSelectModule(currentModule);
       startSimLoop();
+
+      // Listen for manual user scrolling in the code viewer to prevent auto-scroll jumps
+      const scrollBox = document.getElementById("djsCodeScrollBox");
+      if (scrollBox) {
+        scrollBox.addEventListener("scroll", () => {
+          isUserManuallyScrollingCode = true;
+          clearTimeout(userScrollTimeout);
+          userScrollTimeout = setTimeout(() => {
+            isUserManuallyScrollingCode = false;
+          }, 1500);
+        }, { passive: true });
+      }
     });
 </script>
 </body>
