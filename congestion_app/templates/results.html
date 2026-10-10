@@ -429,6 +429,21 @@
           </div>
         </div>
 
+        <!-- Design Presets Bar on Page 2 -->
+        <div style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 7px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px;">HDL Presets:</span>
+            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('rv32i_core.sv')">⚡ RV32I Core</button>
+            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('dff_master_slave.sv')">🔄 D Flip-Flop</button>
+            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('fulladder.sv')">➕ Full Adder</button>
+            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('sr_neg_gate.sv')">🔲 SR Latch</button>
+            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('rv32i_alu.sv')">🧮 32-Bit ALU</button>
+          </div>
+          <div style="font-size: 11px; color: #64748b;">
+            💡 <i>Edit Verilog on left &amp; click <b>Run</b> to synthesize gate netlist in real-time</i>
+          </div>
+        </div>
+
         <!-- 2. WORKBENCH: SIDE-BY-SIDE LAYOUT (||) - CODE ON LEFT, GATE LEVEL CANVAS ON RIGHT -->
         <div id="djsWorkbenchLayout" class="editor-circuit-wrapper" style="display: grid; grid-template-columns: minmax(380px, 460px) 10px 1fr; height: 640px; min-height: 560px; max-height: calc(100vh - 120px); overflow: hidden; background: #ffffff;">
           
@@ -441,7 +456,7 @@
                 <button type="button" id="djsSubTabSetup" onclick="switchDjsLeftTab('setup')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">Setup</button>
                 <button type="button" id="djsSubTabIo" onclick="switchDjsLeftTab('io')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">I/O</button>
                 <button type="button" id="djsSubTabCode" onclick="switchDjsLeftTab('code')" class="nav-item nav-link active" style="background: #ffffff; border: 1px solid #dee2e6; border-bottom: 1px solid #ffffff; color: #495057; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px;">
-                  <span id="djsActiveFileTabName">user_design.sv</span>
+                  <span id="djsActiveFileTabName">empty_design.sv</span>
                   <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
                 </button>
               </div>
@@ -1083,20 +1098,33 @@
 
       // 9. DigitalJS Module sync
       const userCode = document.getElementById('hdlCodeTextarea')?.value;
-      let targetModule = 'user_design.sv';
       if (userCode && userCode.trim().length > 0) {
+        const trimmed = userCode.trim();
+        let targetModule = 'user_design.sv';
         if (typeof parseVerilogCode === 'function') {
-          const parsed = parseVerilogCode(userCode);
-          targetModule = (parsed.moduleName ? parsed.moduleName : "user_design") + ".sv";
+          const parsed = parseVerilogCode(trimmed);
+          targetModule = (parsed.moduleName && parsed.moduleName !== 'user_design' ? parsed.moduleName : "user_design") + ".sv";
         }
+        if (trimmed.includes("rv32i_pipeline_top")) targetModule = "rv32i_pipeline_top.sv";
+        else if (trimmed.includes("rv32i_core")) targetModule = "rv32i_core.sv";
+        else if (trimmed.includes("dff_master_slave") || trimmed.includes("d_latch")) targetModule = "dff_master_slave.sv";
+        else if (trimmed.includes("sr_neg_latch")) targetModule = "sr_neg_gate.sv";
+        else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) targetModule = "fulladder.sv";
+        else if (trimmed.includes("rv32i_alu")) targetModule = "rv32i_alu.sv";
+
+        window.userSubmittedCode = trimmed;
         if (typeof HDL_PRESETS !== 'undefined') {
-          HDL_PRESETS[targetModule] = userCode;
+          HDL_PRESETS[targetModule] = trimmed;
+        }
+        if (typeof djsSelectModule === 'function') {
+          djsSelectModule(targetModule);
         }
       } else {
-        targetModule = document.getElementById('selectedHdlFilenameInput')?.value || 'rv32i_core.sv';
-      }
-      if (typeof djsSelectModule === 'function') {
-        djsSelectModule(targetModule);
+        // User inputted NO code: keep Page 2 empty!
+        window.userSubmittedCode = "";
+        if (typeof djsSelectModule === 'function') {
+          djsSelectModule("empty_design.sv");
+        }
       }
 
       if (isFix) {
@@ -1262,17 +1290,18 @@ endmodule`
 
     // User-submitted Verilog code from Form
     const userSubmittedCode = {{ (selected_hdl_code or '')|tojson }};
-    const userSubmittedFilename = {{ (selected_hdl_filename or 'user_design.sv')|tojson }};
+    const userSubmittedFilename = {{ (selected_hdl_filename or '')|tojson }};
     if (userSubmittedCode && userSubmittedCode.trim().length > 0) {
-      HDL_PRESETS[userSubmittedFilename] = userSubmittedCode;
+      const activeFile = userSubmittedFilename || 'user_design.sv';
+      HDL_PRESETS[activeFile] = userSubmittedCode;
     }
 
     // ═════════════════════════════════════════════════════════════════════════
     // 2. SIMULATION STATE, INTERACTIVE DRAG COORDINATES & SUB-CIRCUIT EXPANSIONS
     // ═════════════════════════════════════════════════════════════════════════
     let currentModule = (userSubmittedCode && userSubmittedCode.trim().length > 0) 
-      ? userSubmittedFilename 
-      : "{{ selected_hdl_filename or 'rv32i_core.sv' }}";
+      ? (userSubmittedFilename || 'user_design.sv') 
+      : "empty_design.sv";
     let isSimRunning = true;
     let simTimer = null;
     let simTick = 32351;
@@ -3076,15 +3105,76 @@ endmodule`
       return svgHtml;
     }
 
+    function renderEmptyCircuitState() {
+      const container = document.getElementById("djsCircuitGroup");
+      if (!container) return;
+      const badge = document.getElementById("djsHudModeBadge");
+      if (badge) badge.textContent = "[WAITING FOR VERILOG CODE]";
+
+      const svgEl = document.getElementById("djsCircuitSvg");
+      if (svgEl) svgEl.setAttribute("viewBox", "0 0 960 560");
+
+      container.innerHTML = `
+        <g transform="translate(480, 180)" text-anchor="middle">
+          <!-- Pulse Circle Icon -->
+          <circle cx="0" cy="0" r="48" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 3"/>
+          <text x="0" y="14" font-size="34" text-anchor="middle">⚡</text>
+
+          <!-- Primary Heading -->
+          <text x="0" y="80" fill="#1e293b" font-size="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800">
+            NO VERILOG HDL CODE INPUTTED
+          </text>
+
+          <!-- Subtitle description -->
+          <text x="0" y="110" fill="#64748b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="500">
+            Type or paste your Verilog HDL design into the code editor on the left and click "Run" ▶
+          </text>
+          <text x="0" y="132" fill="#64748b" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+            — or select a template preset below to synthesize and form the gate-level circuit netlist:
+          </text>
+
+          <!-- Clickable Interactive Preset Badges right on canvas -->
+          <g transform="translate(-280, 160)">
+            <!-- RV32I Button -->
+            <g class="comp-box" onclick="djsSelectModule('rv32i_core.sv')" style="cursor: pointer;">
+              <rect x="0" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
+              <text x="65" y="25" fill="#7c3aed" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">⚡ RV32I Core</text>
+            </g>
+            <!-- D Flip-Flop Button -->
+            <g class="comp-box" onclick="djsSelectModule('dff_master_slave.sv')" style="cursor: pointer;">
+              <rect x="145" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
+              <text x="210" y="25" fill="#0284c7" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">🔄 D Flip-Flop</text>
+            </g>
+            <!-- Full Adder Button -->
+            <g class="comp-box" onclick="djsSelectModule('fulladder.sv')" style="cursor: pointer;">
+              <rect x="290" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.8"/>
+              <text x="355" y="25" fill="#16a34a" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">➕ Full Adder</text>
+            </g>
+            <!-- SR Latch Button -->
+            <g class="comp-box" onclick="djsSelectModule('sr_neg_gate.sv')" style="cursor: pointer;">
+              <rect x="435" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="1.8"/>
+              <text x="500" y="25" fill="#d97706" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">🔲 SR Latch</text>
+            </g>
+          </g>
+        </g>
+      `;
+    }
+
     function renderCurrentCircuit() {
       const container = document.getElementById("djsCircuitGroup");
       if (!container) return;
 
       const badge = document.getElementById("djsHudModeBadge");
-      const currentCode = HDL_PRESETS[currentModule] || userSubmittedCode || "";
+      const currentCode = (currentModule === "empty_design.sv") ? "" : (HDL_PRESETS[currentModule] || userSubmittedCode || "");
+
+      if (!currentCode || currentCode.trim().length === 0 || currentModule === "empty_design.sv") {
+        renderEmptyCircuitState();
+        return;
+      }
+
       const parsed = parseVerilogCode(currentCode);
 
-      if (typeof updateLiveDigitalJsFrame === 'function') {
+      if (typeof updateLiveDigitalJsFrame === 'function' && DIGITALJS_LIVE_HASHES[currentModule]) {
         updateLiveDigitalJsFrame(currentModule);
       }
 
@@ -3688,7 +3778,10 @@ endmodule`
     }
 
     function updateLiveDigitalJsFrame(moduleFilename) {
-      const hash = DIGITALJS_LIVE_HASHES[moduleFilename] || "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
+      if (!DIGITALJS_LIVE_HASHES[moduleFilename]) {
+        return;
+      }
+      const hash = DIGITALJS_LIVE_HASHES[moduleFilename];
       const targetUrl = "digitaljs_view.html?v=20261009-v3.3#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
@@ -3735,22 +3828,39 @@ endmodule`
     function djsSelectModule(filename) {
       currentModule = filename;
 
-      // Update Live DigitalJS iframe for selected module
-      if (typeof updateLiveDigitalJsFrame === 'function') {
-        updateLiveDigitalJsFrame(filename);
-      }
-
       // Update active tab label
       const tabLabel = document.getElementById("djsActiveFileTabName");
       if (tabLabel) tabLabel.textContent = filename;
 
-      // Update Code display
-      const code = HDL_PRESETS[filename] || userSubmittedCode || HDL_PRESETS["rv32i_core.sv"];
       const codeEl = document.getElementById("djsCodeDisplay");
+      const gutter = document.getElementById("djsCodeGutter");
+
+      const code = (filename === "empty_design.sv") 
+        ? "" 
+        : (HDL_PRESETS[filename] || userSubmittedCode || "");
+
+      if (!code || code.trim().length === 0 || filename === "empty_design.sv") {
+        if (codeEl) {
+          codeEl.innerHTML = `<span class="tok-comment">// No Verilog HDL code entered on Input page.</span>\n<span class="tok-comment">// Type or paste your Verilog module here and click "Run" ▶</span>\n<span class="tok-comment">// Or select one of the design presets above.</span>\n`;
+        }
+        if (gutter) {
+          gutter.innerHTML = "1<br>2<br>3<br>4<br>";
+        }
+        currentSelectedGateKey = null;
+        currentSelectedWireId = null;
+        clearCodeHighlight();
+        const banner = document.getElementById("djsSelectionBanner");
+        if (banner) banner.style.display = "none";
+
+        switchDjsEngineMode('congestion');
+        renderEmptyCircuitState();
+        return;
+      }
+
+      // Update Code display
       if (codeEl) codeEl.innerHTML = syntaxHighlightVerilogLines(code);
 
       // Update Line numbers gutter
-      const gutter = document.getElementById("djsCodeGutter");
       if (gutter) {
         const lines = code.split("\n").length;
         let numbersHtml = "";
@@ -3774,6 +3884,17 @@ endmodule`
       // Pre-populate inspector info without scrolling
       const defaultGate = filename.includes("dff") ? "dff_dl2" : (filename.includes("alu") ? "alu_xor1" : "pip_ex_stage");
       updateInspectorInfo(defaultGate);
+
+      // If this module has a live DigitalJS hash, initialize live DigitalJS mode
+      if (DIGITALJS_LIVE_HASHES[filename]) {
+        if (typeof updateLiveDigitalJsFrame === 'function') {
+          updateLiveDigitalJsFrame(filename);
+        }
+        switchDjsEngineMode('live');
+      } else {
+        // Custom user code: use dynamic SVG synthesized gate schematic
+        switchDjsEngineMode('congestion');
+      }
 
       // Render the gate schematic
       renderCurrentCircuit();
@@ -4448,14 +4569,33 @@ endmodule`
       if (codeEl) {
         const rawCode = codeEl.innerText || codeEl.textContent;
         if (rawCode && rawCode.trim().length > 0) {
-          HDL_PRESETS[currentModule] = rawCode;
-          const parsed = parseVerilogCode(rawCode);
-          if (parsed.moduleName && parsed.moduleName !== "user_design") {
-            currentModule = parsed.moduleName + ".sv";
-            HDL_PRESETS[currentModule] = rawCode;
-            const tabLabel = document.getElementById("djsActiveFileTabName");
-            if (tabLabel) tabLabel.textContent = currentModule;
+          const trimmed = rawCode.trim();
+          const parsed = parseVerilogCode(trimmed);
+          let targetMod = (parsed.moduleName && parsed.moduleName !== "user_design" ? parsed.moduleName : "user_design") + ".sv";
+          if (trimmed.includes("rv32i_core")) targetMod = "rv32i_core.sv";
+          else if (trimmed.includes("dff_master_slave")) targetMod = "dff_master_slave.sv";
+          else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) targetMod = "fulladder.sv";
+          else if (trimmed.includes("sr_neg_latch")) targetMod = "sr_neg_gate.sv";
+          else if (trimmed.includes("rv32i_alu")) targetMod = "rv32i_alu.sv";
+
+          currentModule = targetMod;
+          HDL_PRESETS[currentModule] = trimmed;
+          window.userSubmittedCode = trimmed;
+          const tabLabel = document.getElementById("djsActiveFileTabName");
+          if (tabLabel) tabLabel.textContent = currentModule;
+
+          if (DIGITALJS_LIVE_HASHES[currentModule]) {
+            if (typeof updateLiveDigitalJsFrame === 'function') {
+              updateLiveDigitalJsFrame(currentModule);
+            }
+            switchDjsEngineMode('live');
+          } else {
+            switchDjsEngineMode('congestion');
           }
+          renderCurrentCircuit();
+        } else {
+          currentModule = "empty_design.sv";
+          renderEmptyCircuitState();
         }
       }
 
@@ -4816,6 +4956,8 @@ endmodule`
         const moduleFileName = (parsed.moduleName ? parsed.moduleName : "user_design") + ".sv";
         HDL_PRESETS[moduleFileName] = userSubmittedCode;
         currentModule = moduleFileName;
+      } else {
+        currentModule = "empty_design.sv";
       }
       djsSelectModule(currentModule);
       setDjsLayout('side');

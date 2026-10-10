@@ -98,6 +98,26 @@
       gap: 10px;
       margin-bottom: 24px;
     }
+    .btn-preset-chip {
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-preset-chip:hover {
+      background: #f5f3ff;
+      border-color: #7c3aed;
+      color: #7c3aed;
+      transform: translateY(-1px);
+    }
     .btn-preset {
       background: rgba(255, 255, 255, 0.9);
       border: 1px solid #e2e8f0;
@@ -406,6 +426,19 @@
         </div>
       </div>
 
+      <!-- HDL Presets / Templates Quick-Select Bar -->
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px;">HDL Presets:</span>
+          <button type="button" class="btn-preset-chip" onclick="loadHdlPreset('rv32i_core.sv')">⚡ RV32I Processor</button>
+          <button type="button" class="btn-preset-chip" onclick="loadHdlPreset('dff_master_slave.sv')">🔄 D Flip-Flop</button>
+          <button type="button" class="btn-preset-chip" onclick="loadHdlPreset('fulladder.sv')">➕ Full Adder</button>
+          <button type="button" class="btn-preset-chip" onclick="loadHdlPreset('sr_neg_gate.sv')">🔲 SR Latch</button>
+          <button type="button" class="btn-preset-chip" onclick="loadHdlPreset('rv32i_alu.sv')">🧮 32-Bit ALU</button>
+        </div>
+        <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s;">🗑️ Clear (Blank)</button>
+      </div>
+
       <!-- DigitalJS-Themed Tab Bar -->
       <div style="background: #f8fafc; border-radius: 10px 10px 0 0; padding: 8px 14px 0 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
         <div style="display: flex; gap: 4px; align-items: center;">
@@ -487,7 +520,7 @@
       </div>
 
       <!-- Hidden input for file name -->
-      <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="rv32i_core.sv">
+      <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="">
     </div>
 
 
@@ -772,7 +805,7 @@ endmodule`
 {% endraw %}
 
     function loadHdlPreset(filename) {
-      const code = HDL_PRESETS[filename] || HDL_PRESETS["rv32i_core.sv"];
+      const code = HDL_PRESETS[filename] || "";
       const textarea = document.getElementById("hdlCodeTextarea");
       const hiddenInput = document.getElementById("selectedHdlFilenameInput");
       const tabLabel = document.getElementById("tabFilenameLabel");
@@ -783,20 +816,12 @@ endmodule`
 
       updateLineNumbers();
       updateIoPortList(filename);
+      switchHdlTab('code');
     }
 
     function selectHdlPreset(filename) {
       loadHdlPreset(filename);
       switchHdlTab('code');
-      const tabRv = document.getElementById("tab_editor_code_rv32i");
-      const tabDff = document.getElementById("tab_editor_code_dff");
-      if (filename === "dff_master_slave.sv") {
-        if (tabDff) { tabDff.classList.add("active"); tabDff.style.background = "#ffffff"; tabDff.style.color = "#7c3aed"; tabDff.style.border = "1px solid #e2e8f0"; tabDff.style.borderBottom = "2px solid #7c3aed"; }
-        if (tabRv) { tabRv.classList.remove("active"); tabRv.style.background = "transparent"; tabRv.style.color = "#64748b"; tabRv.style.border = "none"; tabRv.style.borderBottom = "none"; }
-      } else {
-        if (tabRv) { tabRv.classList.add("active"); tabRv.style.background = "#ffffff"; tabRv.style.color = "#7c3aed"; tabRv.style.border = "1px solid #e2e8f0"; tabRv.style.borderBottom = "2px solid #7c3aed"; }
-        if (tabDff) { tabDff.classList.remove("active"); tabDff.style.background = "transparent"; tabDff.style.color = "#64748b"; tabDff.style.border = "none"; tabDff.style.borderBottom = "none"; }
-      }
     }
 
     function switchHdlTab(tabName) {
@@ -834,9 +859,12 @@ endmodule`
       const textarea = document.getElementById("hdlCodeTextarea");
       const gutter = document.getElementById("hdlLineNumbers");
       const charCount = document.getElementById("hdlCharCount");
+      const tabLabel = document.getElementById("tabFilenameLabel");
+      const hiddenInput = document.getElementById("selectedHdlFilenameInput");
       if (!textarea || !gutter) return;
 
-      const lines = textarea.value.split("\n").length;
+      const codeVal = textarea.value || "";
+      const lines = codeVal.split("\n").length;
       let numbersHtml = "";
       for (let i = 1; i <= Math.max(lines, 20); i++) {
         numbersHtml += i + "<br>";
@@ -844,7 +872,23 @@ endmodule`
       gutter.innerHTML = numbersHtml;
 
       if (charCount) {
-        charCount.textContent = textarea.value.length.toLocaleString() + " characters (" + lines + " lines)";
+        charCount.textContent = (codeVal.length === 0 ? "0" : codeVal.length.toLocaleString()) + " characters (" + (codeVal.length === 0 ? "0" : lines) + " lines)";
+      }
+
+      if (codeVal.trim().length > 0) {
+        const modMatch = codeVal.match(/\bmodule\s+([a-zA-Z0-9_$]+)/);
+        if (modMatch && modMatch[1]) {
+          const autoName = modMatch[1] + ".sv";
+          if (tabLabel && (!hiddenInput || !hiddenInput.value || hiddenInput.value === 'user_design.sv')) {
+            tabLabel.textContent = autoName;
+          }
+          if (hiddenInput && (!hiddenInput.value || hiddenInput.value === 'user_design.sv')) {
+            hiddenInput.value = autoName;
+          }
+        }
+      } else {
+        if (tabLabel) tabLabel.textContent = "user_design.sv";
+        if (hiddenInput) hiddenInput.value = "";
       }
     }
 
@@ -874,10 +918,14 @@ endmodule`
 
     function clearHdlCode() {
       const textarea = document.getElementById("hdlCodeTextarea");
+      const hiddenInput = document.getElementById("selectedHdlFilenameInput");
+      const tabLabel = document.getElementById("tabFilenameLabel");
       if (textarea) {
         textarea.value = "";
-        updateLineNumbers();
       }
+      if (hiddenInput) hiddenInput.value = "";
+      if (tabLabel) tabLabel.textContent = "user_design.sv";
+      updateLineNumbers();
     }
 
     async function pasteHdlCode() {

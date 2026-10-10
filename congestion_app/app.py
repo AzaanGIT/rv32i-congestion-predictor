@@ -207,7 +207,7 @@ def predict():
     xgb_acc = meta_info.get("xgboost_accuracy", 0.9915) * 100.0
     avg_r2 = meta_info.get("xgboost_avg_r2", 0.9886)
 
-    selected_hdl_filename = request.form.get("selected_hdl_filename", "rv32i_core.sv")
+    selected_hdl_filename = request.form.get("selected_hdl_filename", "")
     selected_hdl_code = request.form.get("selected_hdl_code", "")
 
     return render_template(
