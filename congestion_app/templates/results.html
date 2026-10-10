@@ -3094,55 +3094,12 @@ endmodule`
       const container = document.getElementById("djsCircuitGroup");
       if (!container) return;
       const badge = document.getElementById("djsHudModeBadge");
-      if (badge) badge.textContent = "[WAITING FOR VERILOG CODE]";
+      if (badge) badge.textContent = "";
 
       const svgEl = document.getElementById("djsCircuitSvg");
       if (svgEl) svgEl.setAttribute("viewBox", "0 0 960 560");
 
-      container.innerHTML = `
-        <g transform="translate(480, 180)" text-anchor="middle">
-          <!-- Pulse Circle Icon -->
-          <circle cx="0" cy="0" r="48" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2" stroke-dasharray="6 3"/>
-          <text x="0" y="14" font-size="34" text-anchor="middle">⚡</text>
-
-          <!-- Primary Heading -->
-          <text x="0" y="80" fill="#1e293b" font-size="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800">
-            NO VERILOG HDL CODE INPUTTED
-          </text>
-
-          <!-- Subtitle description -->
-          <text x="0" y="110" fill="#64748b" font-size="13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="500">
-            Type or paste your Verilog HDL design into the code editor on the left and click "Run" ▶
-          </text>
-          <text x="0" y="132" fill="#64748b" font-size="12" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
-            — or select a template preset below to synthesize and form the gate-level circuit netlist:
-          </text>
-
-          <!-- Clickable Interactive Preset Badges right on canvas -->
-          <g transform="translate(-280, 160)">
-            <!-- RV32I Button -->
-            <g class="comp-box" onclick="djsSelectModule('rv32i_core.sv')" style="cursor: pointer;">
-              <rect x="0" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#7c3aed" stroke-width="1.8"/>
-              <text x="65" y="25" fill="#7c3aed" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">⚡ RV32I Core</text>
-            </g>
-            <!-- D Flip-Flop Button -->
-            <g class="comp-box" onclick="djsSelectModule('dff_master_slave.sv')" style="cursor: pointer;">
-              <rect x="145" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
-              <text x="210" y="25" fill="#0284c7" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">🔄 D Flip-Flop</text>
-            </g>
-            <!-- Full Adder Button -->
-            <g class="comp-box" onclick="djsSelectModule('fulladder.sv')" style="cursor: pointer;">
-              <rect x="290" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.8"/>
-              <text x="355" y="25" fill="#16a34a" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">➕ Full Adder</text>
-            </g>
-            <!-- SR Latch Button -->
-            <g class="comp-box" onclick="djsSelectModule('sr_neg_gate.sv')" style="cursor: pointer;">
-              <rect x="435" y="0" width="130" height="40" rx="8" fill="#ffffff" stroke="#d97706" stroke-width="1.8"/>
-              <text x="500" y="25" fill="#d97706" font-size="12" font-weight="bold" font-family="-apple-system, sans-serif" text-anchor="middle">🔲 SR Latch</text>
-            </g>
-          </g>
-        </g>
-      `;
+      container.innerHTML = "";
     }
 
     function renderCurrentCircuit() {
@@ -3826,10 +3783,10 @@ endmodule`
 
       if (!code || code.trim().length === 0 || filename === "empty_design.sv") {
         if (codeEl) {
-          codeEl.innerHTML = `<span class="tok-comment">// No Verilog HDL code entered on Input page.</span>\n<span class="tok-comment">// Type or paste your Verilog module here and click "Run" ▶</span>\n<span class="tok-comment">// Or select one of the design presets above.</span>\n`;
+          codeEl.innerHTML = "";
         }
         if (gutter) {
-          gutter.innerHTML = "1<br>2<br>3<br>4<br>";
+          gutter.innerHTML = "1<br>";
         }
         currentSelectedGateKey = null;
         currentSelectedWireId = null;
