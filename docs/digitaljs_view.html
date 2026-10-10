@@ -37,12 +37,36 @@
           if (typeof window.onpopstate === "function") {
             window.onpopstate();
           }
+          let hashPauseTries = 0;
+          const hashPauseInterval = setInterval(() => {
+            hashPauseTries++;
+            const pauseBtn = document.querySelector('button[name="pause"]');
+            if (pauseBtn) {
+              pauseBtn.click();
+              clearInterval(hashPauseInterval);
+            } else if (hashPauseTries > 30) {
+              clearInterval(hashPauseInterval);
+            }
+          }, 150);
         } else if (event.data.type === "simCommand") {
           const btn = document.querySelector("button[name=" + event.data.cmd + "]");
           if (btn) btn.click();
         }
       }
     });
+
+    // Ensure simulation starts in PAUSED state until user explicitly clicks Run
+    let initialPauseTries = 0;
+    const initialPauseInterval = setInterval(() => {
+      initialPauseTries++;
+      const pauseBtn = document.querySelector('button[name="pause"]');
+      if (pauseBtn) {
+        pauseBtn.click();
+        clearInterval(initialPauseInterval);
+      } else if (initialPauseTries > 60) {
+        clearInterval(initialPauseInterval);
+      }
+    }, 100);
 
     // Real-time tick synchronization with parent workbench
     setInterval(() => {

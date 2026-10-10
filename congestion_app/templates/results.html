@@ -391,7 +391,7 @@
               <div class="input-group-prepend" style="background: #e9ecef; border-right: 1px solid #ced4da; padding: 5px 10px; display: flex; align-items: center; color: #495057;">
                 <span title="Current tick" style="font-size: 13px;">⏱</span>
               </div>
-              <input type="text" id="djsTickVal" value="45620" readonly style="background: #ffffff; border: none; padding: 5px 10px; font-family: monospace; font-size: 13px; width: 7.5em; color: #212529; outline: none;" />
+              <input type="text" id="djsTickVal" value="0" readonly style="background: #ffffff; border: none; padding: 5px 10px; font-family: monospace; font-size: 13px; width: 7.5em; color: #212529; outline: none;" />
             </div>
 
             <!-- File Actions Button Group -->
@@ -1287,9 +1287,9 @@ endmodule`
     let currentModule = (userSubmittedCode && userSubmittedCode.trim().length > 0) 
       ? (userSubmittedFilename || 'user_design.sv') 
       : "empty_design.sv";
-    let isSimRunning = true;
+    let isSimRunning = false;
     let simTimer = null;
-    let simTick = 32351;
+    let simTick = 0;
     let simClock = 0;
     let simZoom = 1.0;
 
@@ -4538,19 +4538,22 @@ endmodule`
         } else {
           currentModule = "empty_design.sv";
           renderEmptyCircuitState();
+          djsPauseSim();
+          return;
         }
       }
 
       if (!isSimRunning) {
         djsResumeSim();
       } else {
-        advanceTick();
+        djsPauseSim();
       }
     }
 
     function djsPauseSim() {
       isSimRunning = false;
       clearInterval(simTimer);
+      simTimer = null;
       const btn = document.getElementById("djsRunBtn");
       const txt = document.getElementById("djsRunBtnText");
       if (btn) btn.style.background = "#0d6efd";
@@ -4584,7 +4587,7 @@ endmodule`
     }
 
     function djsResetSim() {
-      simTick = 32351;
+      simTick = 0;
       simClock = 0;
       pinState.dff_d = 1;
       pinState.dff_clk = 0;
@@ -4903,7 +4906,9 @@ endmodule`
       }
       djsSelectModule(currentModule);
       setDjsLayout('side');
-      startSimLoop();
+      // Keep simulation initially paused until user clicks Run
+      djsPauseSim();
+      updateTickDisplay();
 
       // Listen for manual user scrolling in the code viewer to prevent auto-scroll jumps
       const scrollBox = document.getElementById("djsCodeScrollBox");
