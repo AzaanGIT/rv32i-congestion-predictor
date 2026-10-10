@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261010-v3.9';
+      const BUILD_VER = '20261010-v4.0';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -370,51 +370,51 @@
       </div>
 
       <!-- DigitalJS-Themed Tab Bar -->
-      <div style="background: #1e293b; border-radius: 10px 10px 0 0; padding: 8px 14px 0 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+      <div style="background: #f8fafc; border-radius: 10px 10px 0 0; padding: 8px 14px 0 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
         <div style="display: flex; gap: 4px; align-items: center;">
           <div style="background: #7c3aed; color: #ffffff; font-weight: 900; font-size: 11px; padding: 4px 9px; border-radius: 5px; margin-right: 8px; letter-spacing: 0.5px;">DigitalJS</div>
-          <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">Setup</button>
-          <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #94a3b8; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">I/O</button>
-          <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #0f172a; color: #38bdf8; border: none; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid #38bdf8; display: flex; align-items: center; gap: 6px;">
+          <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #64748b; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">Setup</button>
+          <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #64748b; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">I/O</button>
+          <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #ffffff; color: #7c3aed; border: 1px solid #e2e8f0; border-bottom: 2px solid #7c3aed; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 6px;">
             <span id="tabFilenameLabel">user_design.sv</span>
             <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
           </button>
         </div>
 
         <div style="display: flex; gap: 8px; align-items: center; padding-bottom: 4px;">
-          <button type="button" onclick="pasteHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">📋 Paste</button>
-          <button type="button" onclick="copyHdlCode()" style="background: #334155; color: #e2e8f0; border: none; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">📑 Copy</button>
-          <button type="button" onclick="clearHdlCode()" style="background: #334155; color: #ef4444; border: 1px solid #7f1d1d; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">✕ Clear</button>
+          <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">📋 Paste</button>
+          <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">📑 Copy</button>
+          <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">✕ Clear</button>
         </div>
       </div>
 
       <!-- Tab Content 1: Code View -->
-      <div id="hdlTabCodeView" style="display: block; background: #0f172a; border-radius: 0 0 10px 10px; border: 1px solid #1e293b; border-top: none; position: relative;">
+      <div id="hdlTabCodeView" style="display: block; background: #ffffff; border-radius: 0 0 10px 10px; border: 1px solid #e2e8f0; border-top: none; position: relative;">
         <div style="display: flex; min-height: 290px; max-height: 420px; overflow: hidden;">
           <!-- Line numbers gutter -->
-          <div id="hdlLineNumbers" style="background: #090d16; color: #475569; padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; text-align: right; user-select: none; width: 44px; flex-shrink: 0; border-right: 1px solid #1e293b; overflow: hidden;">
+          <div id="hdlLineNumbers" style="background: #f8fafc; color: #94a3b8; padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; text-align: right; user-select: none; width: 44px; flex-shrink: 0; border-right: 1px solid #e2e8f0; overflow: hidden;">
             1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20
           </div>
           <!-- Editable code textarea (Empty by default for user input) -->
           <textarea id="hdlCodeTextarea" name="selected_hdl_code" placeholder="// Type or paste your Verilog / SystemVerilog code here...&#10;// Example:&#10;// module my_processor(input clk, reset, input [31:0] instr, output [31:0] pc, alu_out);&#10;//   ... write your gates, modules or RTL here ...&#10;// endmodule" spellcheck="false" oninput="updateLineNumbers()"
-            style="flex: 1; background: #0f172a; color: #e2e8f0; border: none; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; resize: vertical; min-height: 290px; max-height: 420px; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; tab-size: 2;"></textarea>
+            style="flex: 1; background: #ffffff; color: #1e293b; border: none; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; resize: vertical; min-height: 290px; max-height: 420px; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; tab-size: 2;"></textarea>
         </div>
-        <div style="background: #090d16; border-top: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #94a3b8; border-radius: 0 0 10px 10px;">
+        <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; border-radius: 0 0 10px 10px;">
           <span style="display: flex; align-items: center; gap: 8px;">
             <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
-            <span>Target: <b>User Verilog HDL Code ──► Synthesized Gate-Level Netlist</b></span>
+            <span style="color: #334155;">Target: <b>User Verilog HDL Code ──► Synthesized Gate-Level Netlist</b></span>
           </span>
           <span id="hdlCharCount" style="color: #64748b; font-family: monospace;">0 characters (0 lines)</span>
         </div>
       </div>
 
       <!-- Tab Content 2: Setup View -->
-      <div id="hdlTabSetupView" style="display: none; background: #0f172a; color: #e2e8f0; border-radius: 0 0 10px 10px; border: 1px solid #1e293b; border-top: none; padding: 22px;">
-        <div style="font-weight: 800; font-size: 13px; color: #38bdf8; margin-bottom: 12px;">DigitalJS / Yosys Synthesis Options</div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 12px; color: #cbd5e1;">
+      <div id="hdlTabSetupView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 10px 10px; border: 1px solid #e2e8f0; border-top: none; padding: 22px;">
+        <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 12px;">DigitalJS / Yosys Synthesis Options</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 12px; color: #334155;">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" checked disabled>
-            <span><b>Optimize in Yosys</b> (<code style="color: #f472b6;">opt -full</code>)</span>
+            <span><b>Optimize in Yosys</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 6px; border-radius: 4px;">opt -full</code>)</span>
           </label>
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" checked disabled>
@@ -422,22 +422,22 @@
           </label>
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" checked disabled>
-            <span><b>Convert to logic gates</b> (<code style="color: #f472b6;">techmap</code> gate level)</span>
+            <span><b>Convert to logic gates</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 6px; border-radius: 4px;">techmap</code> gate level)</span>
           </label>
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" checked disabled>
             <span><b>Gate subset mapping</b> (AND, NAND, OR, NOR, XOR, MUX)</span>
           </label>
         </div>
-        <div style="margin-top: 14px; font-size: 11px; color: #94a3b8; background: #1e293b; padding: 10px 14px; border-radius: 6px;">
+        <div style="margin-top: 14px; font-size: 11px; color: #5b21b6; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 10px 14px; border-radius: 6px;">
           ℹ️ When you click <b>Find Congestion</b>, the HDL code is mapped to logic gates and analyzed by the XGBoost backend model to predict silicon routing tracks.
         </div>
       </div>
 
       <!-- Tab Content 3: I/O View -->
-      <div id="hdlTabIoView" style="display: none; background: #0f172a; color: #e2e8f0; border-radius: 0 0 10px 10px; border: 1px solid #1e293b; border-top: none; padding: 22px;">
-        <div style="font-weight: 800; font-size: 13px; color: #38bdf8; margin-bottom: 12px;">Synthesized Module Ports (I/O)</div>
-        <div id="hdlIoPortList" style="font-size: 11px; font-family: monospace; color: #cbd5e1; line-height: 1.8;">
+      <div id="hdlTabIoView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 10px 10px; border: 1px solid #e2e8f0; border-top: none; padding: 22px;">
+        <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 12px;">Synthesized Module Ports (I/O)</div>
+        <div id="hdlIoPortList" style="font-size: 11px; font-family: monospace; color: #334155; line-height: 1.8;">
           • input wire clk [1 bit] - System Clock<br>
           • input wire reset [1 bit] - Synchronous Core Reset<br>
           • input wire [31:0] instr - Fetched Machine Instruction<br>
@@ -754,11 +754,11 @@ endmodule`
       const tabRv = document.getElementById("tab_editor_code_rv32i");
       const tabDff = document.getElementById("tab_editor_code_dff");
       if (filename === "dff_master_slave.sv") {
-        if (tabDff) { tabDff.classList.add("active"); tabDff.style.background = "#0f172a"; tabDff.style.color = "#38bdf8"; tabDff.style.borderBottom = "2px solid #38bdf8"; }
-        if (tabRv) { tabRv.classList.remove("active"); tabRv.style.background = "transparent"; tabRv.style.color = "#94a3b8"; tabRv.style.borderBottom = "none"; }
+        if (tabDff) { tabDff.classList.add("active"); tabDff.style.background = "#ffffff"; tabDff.style.color = "#7c3aed"; tabDff.style.border = "1px solid #e2e8f0"; tabDff.style.borderBottom = "2px solid #7c3aed"; }
+        if (tabRv) { tabRv.classList.remove("active"); tabRv.style.background = "transparent"; tabRv.style.color = "#64748b"; tabRv.style.border = "none"; tabRv.style.borderBottom = "none"; }
       } else {
-        if (tabRv) { tabRv.classList.add("active"); tabRv.style.background = "#0f172a"; tabRv.style.color = "#38bdf8"; tabRv.style.borderBottom = "2px solid #38bdf8"; }
-        if (tabDff) { tabDff.classList.remove("active"); tabDff.style.background = "transparent"; tabDff.style.color = "#94a3b8"; tabDff.style.borderBottom = "none"; }
+        if (tabRv) { tabRv.classList.add("active"); tabRv.style.background = "#ffffff"; tabRv.style.color = "#7c3aed"; tabRv.style.border = "1px solid #e2e8f0"; tabRv.style.borderBottom = "2px solid #7c3aed"; }
+        if (tabDff) { tabDff.classList.remove("active"); tabDff.style.background = "transparent"; tabDff.style.color = "#64748b"; tabDff.style.border = "none"; tabDff.style.borderBottom = "none"; }
       }
     }
 
@@ -766,7 +766,8 @@ endmodule`
       document.querySelectorAll(".djs-tab-btn").forEach(b => {
         b.classList.remove("active");
         b.style.background = "transparent";
-        b.style.color = "#94a3b8";
+        b.style.color = "#64748b";
+        b.style.border = "none";
         b.style.borderBottom = "none";
       });
 
@@ -781,9 +782,10 @@ endmodule`
       const btn = document.getElementById("tab_editor_" + tabName);
       if (btn) {
         btn.classList.add("active");
-        btn.style.background = "#0f172a";
-        btn.style.color = "#38bdf8";
-        btn.style.borderBottom = "2px solid #38bdf8";
+        btn.style.background = "#ffffff";
+        btn.style.color = "#7c3aed";
+        btn.style.border = "1px solid #e2e8f0";
+        btn.style.borderBottom = "2px solid #7c3aed";
       }
 
       if (tabName === "code" && codeTab) codeTab.style.display = "block";
