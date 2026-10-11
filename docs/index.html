@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261011-v4.7';
+      const BUILD_VER = '20261011-v4.8';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -140,7 +140,7 @@
     .grid-heatmaps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 14px; }
     .heatmap-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03); }
     .heatmap-header { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #2d3748; margin-bottom: 8px; }
-    .canvas-sim { width: 100%; height: 120px; border-radius: 6px; image-rendering: pixelated; background: #0f172a; }
+    .canvas-sim { width: 100%; height: 125px; border-radius: 6px; image-rendering: auto; background: #070d18; display: block; }
     .btn-fix { background: #ffffff; border: 1px solid #cbd5e1; color: #4a5568; padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .btn-fix:hover { color: #7c3aed; border-color: #7c3aed; background: #f5f3ff; }
 
@@ -1345,7 +1345,7 @@ endmodule`
               <span>M1 • ROUTING</span>
               <span id="pct-M1" style="color: #15803d; font-weight: 800;">0.0%</span>
             </div>
-            <canvas id="cvs-M1" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M1" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M1')">Fix this layer</button>
           </div>
@@ -1355,7 +1355,7 @@ endmodule`
               <span>M2 • ROUTING</span>
               <span id="pct-M2" style="color: #15803d; font-weight: 800;">50.8%</span>
             </div>
-            <canvas id="cvs-M2" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M2" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M2')">Fix this layer</button>
           </div>
@@ -1365,7 +1365,7 @@ endmodule`
               <span>M3 • ROUTING</span>
               <span id="pct-M3" style="color: #15803d; font-weight: 800;">46.0%</span>
             </div>
-            <canvas id="cvs-M3" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M3" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M3')">Fix this layer</button>
           </div>
@@ -1375,7 +1375,7 @@ endmodule`
               <span>M4 • ROUTING</span>
               <span id="pct-M4" style="color: #15803d; font-weight: 800;">36.1%</span>
             </div>
-            <canvas id="cvs-M4" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M4" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M4')">Fix this layer</button>
           </div>
@@ -1385,7 +1385,7 @@ endmodule`
               <span>M5 • ROUTING</span>
               <span id="pct-M5" style="color: #15803d; font-weight: 800;">25.2%</span>
             </div>
-            <canvas id="cvs-M5" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M5" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M5')">Fix this layer</button>
           </div>
@@ -1395,7 +1395,7 @@ endmodule`
               <span>M6 • ROUTING</span>
               <span id="pct-M6" style="color: #15803d; font-weight: 800;">25.0%</span>
             </div>
-            <canvas id="cvs-M6" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M6" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M6')">Fix this layer</button>
           </div>
@@ -1405,7 +1405,7 @@ endmodule`
               <span>M7 • ROUTING</span>
               <span id="pct-M7" style="color: #15803d; font-weight: 800;">14.7%</span>
             </div>
-            <canvas id="cvs-M7" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M7" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M7')">Fix this layer</button>
           </div>
@@ -1415,7 +1415,7 @@ endmodule`
               <span>M8 • ROUTING</span>
               <span id="pct-M8" style="color: #15803d; font-weight: 800;">14.8%</span>
             </div>
-            <canvas id="cvs-M8" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M8" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M8')">Fix this layer</button>
           </div>
@@ -1425,7 +1425,7 @@ endmodule`
               <span>M9 • ROUTING</span>
               <span id="pct-M9" style="color: #15803d; font-weight: 800;">17.7%</span>
             </div>
-            <canvas id="cvs-M9" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M9" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M9')">Fix this layer</button>
           </div>
@@ -1435,7 +1435,7 @@ endmodule`
               <span>M10 • ROUTING</span>
               <span id="pct-M10" style="color: #15803d; font-weight: 800;">15.5%</span>
             </div>
-            <canvas id="cvs-M10" class="canvas-sim" width="50" height="50"></canvas>
+            <canvas id="cvs-M10" class="canvas-sim" width="220" height="135"></canvas>
             <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
             <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M10')">Fix this layer</button>
           </div>
@@ -1496,39 +1496,124 @@ endmodule`
     };
 
     let rawData = {"M1": 0.0, "M10": 15.5, "M2": 50.8, "M3": 46.0, "M4": 36.1, "M5": 25.2, "M6": 25.0, "M7": 14.7, "M8": 14.8, "M9": 17.7};
-    const gridSize = 50;
+    function seededLayerRandom(s) {
+      const x = Math.sin(s) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function drawCadenceInnovusLayerHeatmap(cvs, layer, val) {
+      if (!cvs) return;
+      const ctx = cvs.getContext("2d");
+      const w = cvs.width;
+      const h = cvs.height;
+      const layerNum = parseInt(layer.replace("M", ""), 10) || 1;
+      const isVert = (layerNum % 2 === 0);
+
+      const padX = 7;
+      const padY = 6;
+      const cw = w - 2 * padX;
+      const ch = h - 2 * padY;
+      const cx = w / 2.0;
+      const cy = h / 2.0;
+
+      const cols = 50;
+      const rows = 30;
+      const gw = cw / cols;
+      const gh = ch / rows;
+
+      const c1 = [13, 56, 120];
+      const c2 = [20, 110, 160];
+      const c3 = [30, 160, 150];
+      const c4 = [80, 200, 80];
+      const c5 = [220, 200, 40];
+      const c6 = [240, 120, 30];
+      const c7 = [220, 40, 40];
+
+      // 0. Base dark substrate
+      ctx.fillStyle = "#070d18";
+      ctx.fillRect(0, 0, w, h);
+
+      // 1. Draw cellular congestion map matching Cadence GCell grid
+      let seed = layerNum * 1049 + 37;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x0 = padX + c * gw;
+          const y0 = padY + r * gh;
+
+          const dx = ((x0 + gw / 2) - cx) / (cw / 2.0);
+          const dy = ((y0 + gh / 2) - cy) / (ch / 2.0);
+          const dist = Math.sqrt(dx * dx * 0.90 + dy * dy * 1.10);
+
+          seed++;
+          const rnd = seededLayerRandom(seed);
+          const noise = rnd * 0.8 - 0.4;
+
+          const dirBias = isVert ? (0.04 * Math.sin(c * 0.8)) : (0.04 * Math.sin(r * 0.8));
+          const intensity = (val / 100.0) - (dist * 0.90) + noise + dirBias;
+
+          let rgb;
+          if (intensity > 0.7) rgb = c7;
+          else if (intensity > 0.4) rgb = c6;
+          else if (intensity > 0.1) rgb = c5;
+          else if (intensity > -0.2) rgb = c4;
+          else if (intensity > -0.5) rgb = c3;
+          else if (intensity > -0.8) rgb = c2;
+          else rgb = c1;
+
+          ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+          ctx.fillRect(x0, y0, gw + 0.3, gh + 0.3);
+        }
+      }
+
+      // 2. Cadence Innovus Floorplan Core Boundary
+      ctx.setLineDash([]);
+      ctx.strokeStyle = "rgba(160, 210, 255, 0.9)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(padX, padY, cw, ch);
+
+      // Corner fiducial crosshairs (+)
+      const ck = 3.5;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1;
+      const corners = [[padX, padY], [padX + cw, padY], [padX, padY + ch], [padX + cw, padY + ch]];
+      corners.forEach(([px, py]) => {
+        ctx.beginPath();
+        ctx.moveTo(px - ck, py); ctx.lineTo(px + ck, py);
+        ctx.moveTo(px, py - ck); ctx.lineTo(px, py + ck);
+        ctx.stroke();
+      });
+
+      // Micro gold I/O pad cell pitch marks along chip margins
+      ctx.fillStyle = "#f5b037";
+      for (let px = padX + 6; px < padX + cw - 6; px += 8) {
+        ctx.fillRect(px, padY - 2.5, 1.5, 2.5);
+        ctx.fillRect(px, padY + ch, 1.5, 2.5);
+      }
+      for (let py = padY + 5; py < padY + ch - 5; py += 8) {
+        ctx.fillRect(padX - 2.5, py, 2.5, 1.5);
+        ctx.fillRect(padX + cw, py, 2.5, 1.5);
+      }
+
+      // Faint Macro Blocks (Memory SRAM blocks in core)
+      ctx.setLineDash([3, 2]);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.28)";
+      ctx.lineWidth = 0.8;
+      // SRAM_0
+      ctx.strokeRect(padX + 5, padY + 4, cw * 0.30, ch * 0.45);
+      // SRAM_1
+      ctx.strokeRect(padX + cw * 0.65, padY + ch * 0.50, cw * 0.30, ch * 0.44);
+
+      // Label inside canvas: Layer & routing direction tag
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.font = "bold 8px monospace";
+      ctx.fillText(layer + " • " + (isVert ? "VERT [V]" : "HORIZ [H]"), padX + 3, padY + 9);
+    }
 
     function generateExactReferenceHeatmap(val) {
       const cvs = document.createElement("canvas");
-      cvs.width = gridSize; cvs.height = gridSize;
-      const ctx = cvs.getContext("2d");
-      const imgData = ctx.createImageData(gridSize, gridSize);
-
-      const c1 = [13, 56, 120];  const c2 = [20, 110, 160]; const c3 = [30, 160, 150]; 
-      const c4 = [80, 200, 80];  const c5 = [220, 200, 40]; const c6 = [240, 120, 30]; const c7 = [220, 40, 40];
-
-      for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-          const dx = (x - 25) / 25.0;
-          const dy = (y - 25) / 25.0;
-          const dist = Math.sqrt(dx*dx + dy*dy);
-          
-          let int = (val / 100.0) - (dist * 0.9) + (Math.random() * 0.8 - 0.4);
-
-          let r, g, b;
-          if (int > 0.7) { r=c7[0]; g=c7[1]; b=c7[2]; }
-          else if (int > 0.4) { r=c6[0]; g=c6[1]; b=c6[2]; }
-          else if (int > 0.1) { r=c5[0]; g=c5[1]; b=c5[2]; }
-          else if (int > -0.2) { r=c4[0]; g=c4[1]; b=c4[2]; }
-          else if (int > -0.5) { r=c3[0]; g=c3[1]; b=c3[2]; }
-          else if (int > -0.8) { r=c2[0]; g=c2[1]; b=c2[2]; }
-          else { r=c1[0]; g=c1[1]; b=c1[2]; }
-
-          const idx = (y * gridSize + x) * 4;
-          imgData.data[idx] = r; imgData.data[idx+1] = g; imgData.data[idx+2] = b; imgData.data[idx+3] = 255;
-        }
-      }
-      ctx.putImageData(imgData, 0, 0);
+      cvs.width = 220; cvs.height = 135;
+      drawCadenceInnovusLayerHeatmap(cvs, "M2", val);
       return cvs;
     }
 
@@ -1537,9 +1622,7 @@ endmodule`
       Object.keys(rawData).forEach(layer => {
         const cvs = document.getElementById("cvs-" + layer);
         if (cvs) {
-          const ctx = cvs.getContext("2d");
-          ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(generateExactReferenceHeatmap(rawData[layer]), 0, 0, cvs.width, cvs.height);
+          drawCadenceInnovusLayerHeatmap(cvs, layer, rawData[layer]);
         }
       });
     }
