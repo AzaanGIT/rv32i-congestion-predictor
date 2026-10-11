@@ -3865,9 +3865,9 @@ endmodule`
 
       // Update Line numbers gutter
       if (gutter) {
-        const lines = code.split("\n").length;
+        const lines = code.split(/\r\n|\r|\n/).length;
         let numbersHtml = "";
-        for (let i = 1; i <= Math.max(lines, 24); i++) numbersHtml += i + "<br>";
+        for (let i = 1; i <= Math.max(lines, 25); i++) numbersHtml += i + "<br>";
         gutter.innerHTML = numbersHtml;
       }
 
@@ -3906,12 +3906,12 @@ endmodule`
     function onDjsCodeInput() {
       const codeEl = document.getElementById("djsCodeDisplay");
       if (!codeEl) return;
-      const text = codeEl.innerText || codeEl.textContent;
-      const lines = text.split("\n").length;
+      const text = codeEl.innerText || codeEl.textContent || "";
+      const lines = text.split(/\r\n|\r|\n/).length;
       const gutter = document.getElementById("djsCodeGutter");
       if (gutter) {
         let numbersHtml = "";
-        for (let i = 1; i <= Math.max(lines, 24); i++) numbersHtml += i + "<br>";
+        for (let i = 1; i <= Math.max(lines, 25); i++) numbersHtml += i + "<br>";
         gutter.innerHTML = numbersHtml;
       }
     }
