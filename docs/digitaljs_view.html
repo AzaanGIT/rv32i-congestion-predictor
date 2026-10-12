@@ -1,13 +1,23 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/symbola"/><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/site.webmanifest"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><meta name="msapplication-TileColor" content="#da532c"><meta name="theme-color" content="#ffffff"><title>DigitalJS Online</title>
   <script>
-    // In-memory custom circuit store
+    // ─────────────────────────────────────────────────────────────────────────
+    // In-memory custom circuit store (keyed by hash)
+    // ─────────────────────────────────────────────────────────────────────────
     window.customCircuits = window.customCircuits || {};
 
-    // Intercept circuit API: load in-memory custom JSONs, local pre-synthesized JSONs, with fallback to upstream
+    // Queue for circuits that arrived before DigitalJS bundle was ready
+    window._pendingCircuit = null;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Intercept circuit API fetches:
+    //   1. Check in-memory customCircuits first
+    //   2. Try local circuits/<hash>.json
+    //   3. Fall back to upstream digitaljs.tilk.eu
+    // ─────────────────────────────────────────────────────────────────────────
     const origFetch = window.fetch;
     window.fetch = function(url, opts) {
       if (typeof url === "string" && url.includes("/api/circuit/")) {
-        const hash = url.substring(url.indexOf("/api/circuit/") + 13).replace(/[^a-zA-Z0-9_]/g, "");
+        const hash = url.substring(url.indexOf("/api/circuit/") + 13).replace(/[^a-zA-Z0-9_\-]/g, "");
         if (window.customCircuits && window.customCircuits[hash]) {
           return Promise.resolve(new Response(JSON.stringify(window.customCircuits[hash]), {
             status: 200,
@@ -26,62 +36,136 @@
       return origFetch(url, opts);
     };
 
-    // Default hash to pipelined RV32I processor if none provided
+    // ─────────────────────────────────────────────────────────────────────────
+    // Default hash: RV32I pipeline if page loaded without one
+    // ─────────────────────────────────────────────────────────────────────────
     if (!window.location.hash || window.location.hash.length < 5) {
       window.location.hash = "#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
     }
 
-    // Handle hash changes dynamically
+    // ─────────────────────────────────────────────────────────────────────────
+    // Robust circuit loader — waits until DigitalJS bundle sets window.onpopstate
+    // then triggers circuit reload for the current hash.
+    // ─────────────────────────────────────────────────────────────────────────
+    function triggerCircuitLoad() {
+      // DigitalJS bundle sets window.onpopstate when ready
+      if (typeof window.onpopstate === "function") {
+        window.onpopstate();
+        return true;
+      }
+      // Also try dispatching hashchange event (works if bundle uses addEventListener)
+      try {
+        window.dispatchEvent(new PopStateEvent("popstate", { state: {} }));
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      } catch(e) {}
+      return false;
+    }
+
+    // Retry triggerCircuitLoad every 100ms until onpopstate is ready (max 15s)
+    function waitAndTrigger(maxMs) {
+      const start = Date.now();
+      const t = setInterval(() => {
+        if (typeof window.onpopstate === "function") {
+          clearInterval(t);
+          window.onpopstate();
+          ensureSimulationPaused();
+          // If there's a pending custom circuit that arrived early, apply it now
+          if (window._pendingCircuit) {
+            const p = window._pendingCircuit;
+            window._pendingCircuit = null;
+            applyCircuitData(p.circuit, p.hash);
+          }
+        }
+        if (Date.now() - start > (maxMs || 15000)) {
+          clearInterval(t);
+        }
+      }, 100);
+    }
+
+    // Apply a custom circuit to DigitalJS (store + change hash + trigger reload)
+    function applyCircuitData(circuitJson, hashKey) {
+      window.customCircuits = window.customCircuits || {};
+      window.customCircuits[hashKey] = circuitJson;
+      // Change the hash (triggers hashchange event)
+      if (window.location.hash !== "#" + hashKey) {
+        window.location.hash = "#" + hashKey;
+      }
+      // Fire onpopstate if ready, otherwise schedule retry
+      if (typeof window.onpopstate === "function") {
+        window.onpopstate();
+        ensureSimulationPaused();
+      } else {
+        // Bundle not ready yet — queue it and waitAndTrigger will pick it up
+        window._pendingCircuit = { circuit: circuitJson, hash: hashKey };
+        waitAndTrigger(15000);
+      }
+    }
+
+    // Handle hash changes (DigitalJS may use addEventListener instead of window.onpopstate)
     window.addEventListener("hashchange", () => {
       if (typeof window.onpopstate === "function") {
         window.onpopstate();
       }
     });
 
-    // Robust helper to force circuit simulation into PAUSED state until user clicks Run
+    // ─────────────────────────────────────────────────────────────────────────
+    // Force simulation into PAUSED state (keeps firing until pause button appears)
+    // ─────────────────────────────────────────────────────────────────────────
     function ensureSimulationPaused() {
       let attempts = 0;
       const pauseInt = setInterval(() => {
         attempts++;
         const pauseBtn = document.querySelector('button[name="pause"]');
-        if (pauseBtn) {
+        if (pauseBtn && !pauseBtn.disabled) {
           pauseBtn.click();
         }
-        if (attempts > 30) {
+        if (attempts > 40) {
           clearInterval(pauseInt);
         }
-      }, 50);
+      }, 75);
     }
 
-    // Handle simulation and hash commands from parent workbench
+    // ─────────────────────────────────────────────────────────────────────────
+    // Message handler — receives commands from parent workbench (results.html)
+    // ─────────────────────────────────────────────────────────────────────────
     window.addEventListener("message", (event) => {
-      if (event.data) {
-        if (event.data.type === "loadHash") {
-          window.location.hash = "#" + event.data.hash;
+      if (!event.data) return;
+
+      if (event.data.type === "loadHash") {
+        // Load a pre-synthesized circuit by its hash
+        const h = event.data.hash;
+        if (window.location.hash !== "#" + h) {
+          window.location.hash = "#" + h;
+        } else {
+          // Hash unchanged — manually trigger reload
           if (typeof window.onpopstate === "function") {
             window.onpopstate();
+          } else {
+            waitAndTrigger(10000);
           }
-          ensureSimulationPaused();
-        } else if (event.data.type === "loadCircuitData") {
-          const hash = event.data.hash || ("custom_" + Math.random().toString(36).substring(2, 10));
-          window.customCircuits = window.customCircuits || {};
-          window.customCircuits[hash] = event.data.circuit;
-          window.location.hash = "#" + hash;
-          if (typeof window.onpopstate === "function") {
-            window.onpopstate();
-          }
-          ensureSimulationPaused();
-        } else if (event.data.type === "simCommand") {
-          const btn = document.querySelector("button[name=" + event.data.cmd + "]");
-          if (btn) btn.click();
         }
+        ensureSimulationPaused();
+
+      } else if (event.data.type === "loadCircuitData") {
+        // Load a dynamically synthesized circuit from Yosys JSON
+        const hash = event.data.hash || ("custom_" + Math.random().toString(36).substring(2, 10));
+        applyCircuitData(event.data.circuit, hash);
+
+      } else if (event.data.type === "simCommand") {
+        const btn = document.querySelector("button[name=" + event.data.cmd + "]");
+        if (btn) btn.click();
       }
     });
 
-    // Ensure simulation is PAUSED on initial page load
+    // ─────────────────────────────────────────────────────────────────────────
+    // On initial page load: ensure simulation paused + wait for bundle readiness
+    // ─────────────────────────────────────────────────────────────────────────
     ensureSimulationPaused();
+    waitAndTrigger(15000);
 
-    // Ensure circuit tab is active on load and attach cell selection fallbacks
+    // ─────────────────────────────────────────────────────────────────────────
+    // After DOM ready: activate circuit tab + attach JointJS cell click handler
+    // ─────────────────────────────────────────────────────────────────────────
     window.addEventListener("DOMContentLoaded", () => {
       const cTab = document.querySelector(".tab-wrapper.circuit-tab");
       if (cTab) cTab.classList.add("active");
@@ -203,4 +287,4 @@
       box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
     }
   </style>
-</head><body><input type="file" style="display:none" id="input_load"/><div class="main-wrapper-grid"><div id="toolbar"><div class="btn-toolbar" role="toolbar" aria-label="Toolbar"><div class="me-2 upper-toolbar-group digitaljs-logo" title="DigitalJS"></div><div id="synthesize-bar"><form><button name="synthesize-btn" title="Synthesize and simulate!" type="button" class="btn btn-primary"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run</button></form></div><div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Time control"><button name="pause" type="button" class="btn btn-secondary" title="Pause simulation" disabled="true">⏸</button> <button name="resume" type="button" class="btn btn-secondary" title="Resume simulation" disabled="true">▶</button> <button name="fastfw" type="button" class="btn btn-secondary" title="Fast-forward simulation" disabled="true">⏩</button> <button name="single" type="button" class="btn btn-secondary" title="Run single time step" disabled="true">→</button> <button name="next" type="button" class="btn btn-secondary" title="Run until next event" disabled="true">⇥</button></div><div class="input-group me-2 upper-toolbar-group"><div class="input-group-prepend"><span class="symbola input-group-text" title="Current tick">⏱</span></div><input class="form-control" disabled="disabled" id="tick"/></div><div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Saving and sharing"><button name="load" type="button" class="btn btn-secondary" title="Load from file" disabled="true">📁</button> <button name="save" type="button" class="btn btn-secondary" title="Save to file" disabled="true">💾</button> <button name="link" type="button" class="btn btn-secondary" title="Get link" disabled="true">🔗</button></div></div></div><div class="grid"><div class="editor-circuit-wrapper"><div id="editor-tab" class="tab-wrapper editor-tab active"><nav><div class="nav nav-tabs" role="tablist"><a href="#start" class="nav-item nav-link active" role="tab" data-bs-toggle="tab" aria-controls="start" aria-selected="true">Setup</a> <a href="#iopanel" class="nav-item nav-link" role="tab" data-bs-toggle="tab" aria-controls="start" aria-selected="true">I/O</a></div></nav><div class="tab-content"><div role="tabpanel" class="tab-pane tab-padded active" id="start"><h1 class="text-primary">DigitalJS Online</h1><p>This is a demonstration app for the <a href="https://github.com/tilk/digitaljs">DigitalJS</a> digital logic simulator and the <a href="https://github.com/tilk/yosys2digitaljs">yosys2digitaljs</a> netlist format converter, by <a href="http://www.tilk.eu/">Marek Materzok</a>, <a href="http://www.ii.uni.wroc.pl/">University of Wrocław</a>. The source files <a href="https://github.com/tilk/digitaljs_online">are on Github</a>. Contributions are welcome! This was made possible by the <a href="http://www.clifford.at/yosys/">Yosys</a> open-source hardware synthesis framework.</p><p>Create a new tab and enter your HDL code, or load an example by using the dropdown menu, and press the <em>Run</em> button at the top to start the simulation.</p><div class="row row-cols-lg-auto mb-3"><div class="col-12"><input name="newtabname" placeholder="file name" pattern="[a-zA-Z0-9_\-]*" spellcheck="false" autocapitalize="false" autocomplete="false" defaultvalue="input" class="form-control"></div><div class="dropdown"><button class="btn btn-secondary dropdown-toggle" type="button" id="exten" data-extension="sv" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">.sv</button><div class="dropdown-menu" aria-labelledby="excode" id="extens"><a class="dropdown-item" href="#" data-extension="sv">.sv (SystemVerilog, Yosys native)</a> <a class="dropdown-item" href="#" data-extension="v">.v (Verilog, Yosys native)</a> <a class="dropdown-item" href="#" data-extension="vh">.vh (Verilog hex file)</a> <a class="dropdown-item" href="#" data-extension="py">.py (Amaranth HDL, requires WASM)</a> <a class="dropdown-item" href="#" data-extension="lua">.lua (Lua script)</a></div></div><button class="btn btn-primary" type="button" id="newtab">Create file</button></div><div id="dropzone">Drop your files here or click for a file dialog</div><div class="mb-3"><div class="dropdown"><button class="btn btn-secondary dropdown-toggle" type="button" id="excode" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Load example code</button><div class="dropdown-menu" aria-labelledby="excode" id="excodes"></div></div></div><form><div class="mb-3"><label class="form-label" for="files">Additional SystemVerilog files:</label> <input type="file" class="form-control" id="files" multiple="true"></div><fieldset><legend>Circuit synthesis</legend><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Enables Yosys optimizations of the synthesized circuit. This might make the circuit differ significantly to its HDL specification. This corresponds to the 'opt -full' Yosys command."><input type="checkbox" id="opt" class="form-check-input"> <label for="opt" class="form-check-label">Optimize in Yosys</label></div><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Enables post-processing of Yosys output to reduce the number of components and improve readability."><input type="checkbox" id="transform" class="form-check-input" checked="checked"> <label for="transform" class="form-check-label">Simplify diagram</label></div><div class="mb-3" data-bs-toggle="tooltip" title="Enables finite state machine processing in Yosys. This corresponds to the 'fsm' and 'fsm -nomap' Yosys commands."><label class="form-label" for="fsm">FSM transform (experimental)</label> <select id="fsm" class="form-control"><option value="">No FSM transform</option><option value="yes">FSM transform</option><option value="nomap">FSM as circuit element</option></select></div><div class="ms-4 mb-3 form-check collapse" data-bs-toggle="tooltip" id="fsmOptions" title="This corresponds to the 'fsm_expand' Yosys command."><input type="checkbox" id="fsmexpand" class="form-check-input"> <label for="fsmexpand" class="form-check-label">Merge more logic into FSM</label></div><div class="mb-2 form-check" data-bs-toggle="tooltip" title="This corresponds to the 'techmap' Yosys command."><input type="checkbox" id="techmap" class="form-check-input"> <label for="techmap" class="form-check-label">Convert to logic gates</label></div><div class="ms-4 collapse" id="techmapOptions"><div class="mb-2 form-check" data-bs-toggle="tooltip" title="Don't run the 'abc' Yosys command."><input type="radio" id="abc_disable" name="abc" class="form-check-input" checked="checked"> <label for="abc_disable" class="form-check-label">Keep gates unprocessed</label></div><div class="mb-2 form-check" data-bs-toggle="tooltip" title="This corresponds to the 'abc -g GATELIST' Yosys command."><input type="radio" id="abc_gates" name="abc" class="form-check-input"> <label for="abc_gates" class="form-check-label">Map into subset of gates</label></div><div class="ms-4 mb-2 collapse" id="abcGateOptions"><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_AND" value="AND" checked="checked"> <label class="form-check-label" for="abc_gates_AND">AND</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_NAND" value="NAND" checked="checked"> <label class="form-check-label" for="abc_gates_NAND">NAND</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_OR" value="OR" checked="checked"> <label class="form-check-label" for="abc_gates_OR">OR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_NOR" value="NOR" checked="checked"> <label class="form-check-label" for="abc_gates_NOR">NOR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_XOR" value="XOR" checked="checked"> <label class="form-check-label" for="abc_gates_XOR">XOR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_XNOR" value="XNOR" checked="checked"> <label class="form-check-label" for="abc_gates_XNOR">XNOR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_MUX" value="MUX" checked="checked"> <label class="form-check-label" for="abc_gates_MUX">MUX</label></div></div><div class="mb-2 form-check" data-bs-toggle="tooltip" title="This corresponds to the 'abc -lut N' Yosys command."><input type="radio" id="abc_luts" name="abc" class="form-check-input"> <label for="abc_luts" class="form-check-label">Map into LUTs</label></div><div class="ms-4 mb-3 row g-3 align-items-center collapse" id="abcLutOptions"><div class="col-auto"><input type="number" id="abc_luts_width" value="4" class="form-control" min="2" max="8" step="1" aria-describedby="abc_luts_help"></div><div class="col-auto"><span id="abc_luts_help" class="form-text">Width of generated LUTs</span></div></div></div><div class="mb-3" data-bs-toggle="tooltip" title="Changes how the circuit is being synthesized."><label class="form-label" for="synthesis-mode">Synthesis mode</label> <select id="synthesis-mode" class="form-control"><option value="wasm">WebAssembly (faster and local)</option><option value="server">Server side (legacy, works with older browsers)</option></select></div></fieldset><fieldset><legend>Simulation</legend><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Can cause simulation to break if combinational loops are present."><input type="checkbox" id="no-comb-delay" class="form-check-input"> <label for="no-comb-delay" class="form-check-label">Zero combinational propagation delay</label></div><div class="mb-3" data-bs-toggle="tooltip" title="Changes how the synthesized circuit is simulated. The synchronous engine is well tested, but it's also very slow."><label class="form-label" for="engine">Simulation engine</label> <select id="engine" class="form-control"><option value="worker">WebWorker (faster and responsive)</option><option value="synch">Synchronous (extensible but slow)</option></select></div></fieldset><fieldset><legend>User interface</legend><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Enables checking for common problems using the Verilator compiler."><input type="checkbox" id="lint" class="form-check-input" checked="checked"> <label for="lint" class="form-check-label">Lint source code using <a href="https://verilator.org/">Verilator</a></label></div><div class="mb-3" data-bs-toggle="tooltip" title="Changes how the circuit elements are automatically positioned after synthesis."><label class="form-label" for="layout">Layout engine</label> <select id="layout" class="form-control"><option value="elkjs">ElkJS (more readable)</option><option value="dagre">Dagre (legacy)</option></select></div></fieldset></form></div><div role="tabpanel" class="tab-pane tab-padded" id="iopanel"></div></div></div><div id="gutter_horiz" class="gutter gutter-horizontal"></div><div class="tab-wrapper circuit-tab"><div class="btn-group zoom-buttons-wrapper"><button class="btn btn-secondary" name="zoom-out">–</button> <button class="btn btn-secondary" name="zoom-in">+</button></div><div id="paper"></div></div></div><div id="gutter_vert" class="gutter gutter-vertical"></div><div id="monitorbox"><div class="btn-toolbar" role="toolbar" aria-label="Toolbar"><div class="symbola btn-group me-2" role="group" aria-label="Scale control"><button name="ppt_up" type="button" class="btn btn-secondary" title="Increase pixels per tick" disabled="true">+</button> <button name="ppt_down" type="button" class="btn btn-secondary" title="Decrease pixels per tick" disabled="true">-</button></div><div class="input-group me-2"><div class="input-group-prepend"><span class="input-group-text" title="Ticks per grid line">scale</span></div><input class="form-control" disabled="disabled" name="scale"/></div><div class="symbola btn-group me-2" role="group" aria-label="Time control"><button name="live" type="button" class="btn btn-secondary" title="Live mode" disabled="true">▶</button> <button name="left" type="button" class="btn btn-secondary" title="Move left" disabled="true">←</button> <button name="right" type="button" class="btn btn-secondary" title="Move right" disabled="true">→</button></div><div class="input-group me-2"><div class="input-group-prepend"><span class="input-group-text" title="Display range">range</span></div><input class="form-control" disabled="disabled" name="rangel"/><div class="input-group-prepend input-group-append"><span class="input-group-text">–</span></div><input class="form-control" disabled="disabled" name="rangeh"/></div></div><div id="monitor"></div></div></div></div><div id="tab-buttons-wrapper"><button class="tab-btn editor-tab active"><strong style="font-size: 1.2em">&lt;/&gt;</strong><br><span style="line-height: 90%">Code</span></button> <button class="tab-btn circuit-tab"><svg alt=""  height="27" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 224 224" xml:space="preserve"><path d="M200 122c-11.869 0-21.725 8.668-23.639 20H160c-13.234 0-24 10.76-24 23.986V210h8v-44.014c0-8.814 7.178-15.986 16-15.986h16.361c1.913 11.332 11.77 20 23.639 20 13.234 0 24-10.766 24-24s-10.766-24-24-24zm0 40c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16zM92 62H76c0-13.234-10.766-24-24-24S28 48.766 28 62s10.766 24 24 24c10.426 0 19.295-6.693 22.6-16H92c8.822 0 16 7.188 16 16.024V210h8V86.024C116 72.777 105.234 62 92 62zM52 78c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16z"/><path d="M64 122H47.639c-1.914-11.332-11.77-20-23.639-20-13.234 0-24 10.766-24 24s10.766 24 24 24c11.869 0 21.725-8.668 23.639-20H64c8.822 0 16 7.184 16 16.014V210h8v-63.986C88 132.774 77.234 122 64 122zm-40 20c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16zM163.461 94h12.9c1.913 11.332 11.77 20 23.639 20 13.234 0 24-10.766 24-24s-10.766-24-24-24c-11.869 0-21.725 8.668-23.639 20h-12.9c-6.297 0-11.42-5.125-11.42-11.426V14h-8v60.574c0 10.711 8.711 19.426 19.42 19.426zM200 74c8.822 0 16 7.178 16 16s-7.178 16-16 16-16-7.178-16-16 7.178-16 16-16z"/></svg><br>Circuit</button></div></body></html>
+</head><body><input type="file" style="display:none" id="input_load"/><div class="main-wrapper-grid"><div id="toolbar"><div class="btn-toolbar" role="toolbar" aria-label="Toolbar"><div class="me-2 upper-toolbar-group digitaljs-logo" title="DigitalJS"></div><div id="synthesize-bar"><form><button name="synthesize-btn" title="Synthesize and simulate!" type="button" class="btn btn-primary"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run</button></form></div><div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Time control"><button name="pause" type="button" class="btn btn-secondary" title="Pause simulation" disabled="true">⏸</button> <button name="resume" type="button" class="btn btn-secondary" title="Resume simulation" disabled="true">▶</button> <button name="fastfw" type="button" class="btn btn-secondary" title="Fast-forward simulation" disabled="true">⏩</button> <button name="single" type="button" class="btn btn-secondary" title="Run single time step" disabled="true">→</button> <button name="next" type="button" class="btn btn-secondary" title="Run until next event" disabled="true">⇥</button></div><div class="input-group me-2 upper-toolbar-group"><div class="input-group-prepend"><span class="symbola input-group-text" title="Current tick">⏱</span></div><input class="form-control" disabled="disabled" id="tick"/></div><div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Saving and sharing"><button name="load" type="button" class="btn btn-secondary" title="Load from file" disabled="true">📁</button> <button name="save" type="button" class="btn btn-secondary" title="Save to file" disabled="true">💾</button> <button name="link" type="button" class="btn btn-secondary" title="Get link" disabled="true">🔗</button></div></div></div><div class="grid"><div class="editor-circuit-wrapper"><div id="editor-tab" class="tab-wrapper editor-tab active"><nav><div class="nav nav-tabs" role="tablist"><a href="#start" class="nav-item nav-link active" role="tab" data-bs-toggle="tab" aria-controls="start" aria-selected="true">Setup</a> <a href="#iopanel" class="nav-item nav-link" role="tab" data-bs-toggle="tab" aria-controls="start" aria-selected="true">I/O</a></div></nav><div class="tab-content"><div role="tabpanel" class="tab-pane tab-padded active" id="start"><h1 class="text-primary">DigitalJS Online</h1><p>This is a demonstration app for the <a href="https://github.com/tilk/digitaljs">DigitalJS</a> digital logic simulator and the <a href="https://github.com/tilk/yosys2digitaljs">yosys2digitaljs</a> netlist format converter, by <a href="http://www.tilk.eu/">Marek Materzok</a>, <a href="http://www.ii.uni.wroc.pl/">University of Wrocław</a>. The source files <a href="https://github.com/tilk/digitaljs_online">are on Github</a>. Contributions are welcome! This was made possible by the <a href="http://www.clifford.at/yosys/">Yosys</a> open-source hardware synthesis framework.</p><p>Create a new tab and enter your HDL code, or load an example by using the dropdown menu, and press the <em>Run</em> button at the top to start the simulation.</p><div class="row row-cols-lg-auto mb-3"><div class="col-12"><input name="newtabname" placeholder="file name" pattern="[a-zA-Z0-9_\-]*" spellcheck="false" autocapitalize="false" autocomplete="false" defaultvalue="input" class="form-control"></div><div class="dropdown"><button class="btn btn-secondary dropdown-toggle" type="button" id="exten" data-extension="sv" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">.sv</button><div class="dropdown-menu" aria-labelledby="excode" id="extens"><a class="dropdown-item" href="#" data-extension="sv">.sv (SystemVerilog, Yosys native)</a> <a class="dropdown-item" href="#" data-extension="v">.v (Verilog, Yosys native)</a> <a class="dropdown-item" href="#" data-extension="vh">.vh (Verilog hex file)</a> <a class="dropdown-item" href="#" data-extension="py">.py (Amaranth HDL, requires WASM)</a> <a class="dropdown-item" href="#" data-extension="lua">.lua (Lua script)</a></div></div><button class="btn btn-primary" type="button" id="newtab">Create file</button></div><div id="dropzone">Drop your files here or click for a file dialog</div><div class="mb-3"><div class="dropdown"><button class="btn btn-secondary dropdown-toggle" type="button" id="excode" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Load example code</button><div class="dropdown-menu" aria-labelledby="excode" id="excodes"></div></div></div><form><div class="mb-3"><label class="form-label" for="files">Additional SystemVerilog files:</label> <input type="file" class="form-control" id="files" multiple="true"></div><fieldset><legend>Circuit synthesis</legend><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Enables Yosys optimizations of the synthesized circuit. This might make the circuit differ significantly to its HDL specification. This corresponds to the 'opt -full' Yosys command."><input type="checkbox" id="opt" class="form-check-input"> <label for="opt" class="form-check-label">Optimize in Yosys</label></div><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Enables post-processing of Yosys output to reduce the number of components and improve readability."><input type="checkbox" id="transform" class="form-check-input" checked="checked"> <label for="transform" class="form-check-label">Simplify diagram</label></div><div class="mb-3" data-bs-toggle="tooltip" title="Enables finite state machine processing in Yosys. This corresponds to the 'fsm' and 'fsm -nomap' Yosys commands."><label class="form-label" for="fsm">FSM transform (experimental)</label> <select id="fsm" class="form-control"><option value="">No FSM transform</option><option value="yes">FSM transform</option><option value="nomap">FSM as circuit element</option></select></div><div class="ms-4 mb-3 form-check collapse" data-bs-toggle="tooltip" id="fsmOptions" title="This corresponds to the 'fsm_expand' Yosys command."><input type="checkbox" id="fsmexpand" class="form-check-input"> <label for="fsmexpand" class="form-check-label">Merge more logic into FSM</label></div><div class="mb-2 form-check" data-bs-toggle="tooltip" title="This corresponds to the 'techmap' Yosys command."><input type="checkbox" id="techmap" class="form-check-input"> <label for="techmap" class="form-check-label">Convert to logic gates</label></div><div class="ms-4 collapse" id="techmapOptions"><div class="mb-2 form-check" data-bs-toggle="tooltip" title="Don't run the 'abc' Yosys command."><input type="radio" id="abc_disable" name="abc" class="form-check-input" checked="checked"> <label for="abc_disable" class="form-check-label">Keep gates unprocessed</label></div><div class="mb-2 form-check" data-bs-toggle="tooltip" title="This corresponds to the 'abc -g GATELIST' Yosys command."><input type="radio" id="abc_gates" name="abc" class="form-check-input"> <label for="abc_gates" class="form-check-label">Map into subset of gates</label></div><div class="ms-4 mb-2 collapse" id="abcGateOptions"><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_AND" value="AND" checked="checked"> <label class="form-check-label" for="abc_gates_AND">AND</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_NAND" value="NAND" checked="checked"> <label class="form-check-label" for="abc_gates_NAND">NAND</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_OR" value="OR" checked="checked"> <label class="form-check-label" for="abc_gates_OR">OR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_NOR" value="NOR" checked="checked"> <label class="form-check-label" for="abc_gates_NOR">NOR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_XOR" value="XOR" checked="checked"> <label class="form-check-label" for="abc_gates_XOR">XOR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_XNOR" value="XNOR" checked="checked"> <label class="form-check-label" for="abc_gates_XNOR">XNOR</label></div><div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" id="abc_gates_MUX" value="MUX" checked="checked"> <label class="form-check-label" for="abc_gates_MUX">MUX</label></div></div><div class="mb-2 form-check" data-bs-toggle="tooltip" title="This corresponds to the 'abc -lut N' Yosys command."><input type="radio" id="abc_luts" name="abc" class="form-check-input"> <label for="abc_luts" class="form-check-label">Map into LUTs</label></div><div class="ms-4 mb-3 row g-3 align-items-center collapse" id="abcLutOptions"><div class="col-auto"><input type="number" id="abc_luts_width" value="4" class="form-control" min="2" max="8" step="1" aria-describedby="abc_luts_help"></div><div class="col-auto"><span id="abc_luts_help" class="form-text">Width of generated LUTs</span></div></div></div><div class="mb-3" data-bs-toggle="tooltip" title="Changes how the circuit is being synthesized."><label class="form-label" for="synthesis-mode">Synthesis mode</label> <select id="synthesis-mode" class="form-control"><option value="wasm">WebAssembly (faster and local)</option><option value="server">Server side (legacy, works with older browsers)</option></select></div></fieldset><fieldset><legend>Simulation</legend><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Can cause simulation to break if combinational loops are present."><input type="checkbox" id="no-comb-delay" class="form-check-input"> <label for="no-comb-delay" class="form-check-label">Zero combinational propagation delay</label></div><div class="mb-3" data-bs-toggle="tooltip" title="Changes how the synthesized circuit is simulated. The synchronous engine is well tested, but it's also very slow."><label class="form-label" for="engine">Simulation engine</label> <select id="engine" class="form-control"><option value="worker">WebWorker (faster and responsive)</option><option value="synch">Synchronous (extensible but slow)</option></select></div></fieldset><fieldset><legend>User interface</legend><div class="mb-3 form-check" data-bs-toggle="tooltip" title="Enables checking for common problems using the Verilator compiler."><input type="checkbox" id="lint" class="form-check-input" checked="checked"> <label for="lint" class="form-check-label">Lint source code using <a href="https://verilator.org/">Verilator</a></label></div><div class="mb-3" data-bs-toggle="tooltip" title="Changes how the circuit elements are automatically positioned after synthesis."><label class="form-label" for="layout">Layout engine</label> <select id="layout" class="form-control"><option value="elkjs">ElkJS (more readable)</option><option value="dagre">Dagre (legacy)</option></select></div></fieldset></form></div><div role="tabpanel" class="tab-pane tab-padded" id="iopanel"></div></div></div><div id="gutter_horiz" class="gutter gutter-horizontal"></div><div class="tab-wrapper circuit-tab"><div class="btn-group zoom-buttons-wrapper"><button class="btn btn-secondary" name="zoom-out">–</button> <button class="btn btn-secondary" name="zoom-in">+</button></div><div id="paper"></div></div></div></div><div id="gutter_vert" class="gutter gutter-vertical"></div><div id="monitorbox"><div class="btn-toolbar" role="toolbar" aria-label="Toolbar"><div class="symbola btn-group me-2" role="group" aria-label="Scale control"><button name="ppt_up" type="button" class="btn btn-secondary" title="Increase pixels per tick" disabled="true">+</button> <button name="ppt_down" type="button" class="btn btn-secondary" title="Decrease pixels per tick" disabled="true">-</button></div><div class="input-group me-2"><div class="input-group-prepend"><span class="input-group-text" title="Ticks per grid line">scale</span></div><input class="form-control" disabled="disabled" name="scale"/></div><div class="symbola btn-group me-2" role="group" aria-label="Time control"><button name="live" type="button" class="btn btn-secondary" title="Live mode" disabled="true">▶</button> <button name="left" type="button" class="btn btn-secondary" title="Move left" disabled="true">←</button> <button name="right" type="button" class="btn btn-secondary" title="Move right" disabled="true">→</button></div><div class="input-group me-2"><div class="input-group-prepend"><span class="input-group-text" title="Display range">range</span></div><input class="form-control" disabled="disabled" name="rangel"/><div class="input-group-prepend input-group-append"><span class="input-group-text">–</span></div><input class="form-control" disabled="disabled" name="rangeh"/></div></div><div id="monitor"></div></div></div></div><div id="tab-buttons-wrapper"><button class="tab-btn editor-tab active"><strong style="font-size: 1.2em">&lt;/&gt;</strong><br><span style="line-height: 90%">Code</span></button> <button class="tab-btn circuit-tab"><svg alt=""  height="27" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 224 224" xml:space="preserve"><path d="M200 122c-11.869 0-21.725 8.668-23.639 20H160c-13.234 0-24 10.76-24 23.986V210h8v-44.014c0-8.814 7.178-15.986 16-15.986h16.361c1.913 11.332 11.77 20 23.639 20 13.234 0 24-10.766 24-24s-10.766-24-24-24zm0 40c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16zM92 62H76c0-13.234-10.766-24-24-24S28 48.766 28 62s10.766 24 24 24c10.426 0 19.295-6.693 22.6-16H92c8.822 0 16 7.188 16 16.024V210h8V86.024C116 72.777 105.234 62 92 62zM52 78c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16z"/><path d="M64 122H47.639c-1.914-11.332-11.77-20-23.639-20-13.234 0-24 10.766-24 24s10.766 24 24 24c11.869 0 21.725-8.668 23.639-20H64c8.822 0 16 7.184 16 16.014V210h8v-63.986C88 132.774 77.234 122 64 122zm-40 20c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16zM163.461 94h12.9c1.913 11.332 11.77 20 23.639 20 13.234 0 24-10.766 24-24s-10.766-24-24-24c-11.869 0-21.725 8.668-23.639 20h-12.9c-6.297 0-11.42-5.125-11.42-11.426V14h-8v60.574c0 10.711 8.711 19.426 19.42 19.426zM200 74c8.822 0 16 7.178 16 16s-7.178 16-16 16-16-7.178-16-16 7.178-16 16-16z"/></svg><br>Circuit</button></div></body></html>
