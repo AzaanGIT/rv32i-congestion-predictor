@@ -3163,9 +3163,70 @@ endmodule`
       container.innerHTML = "";
     }
 
+    function renderStandbyCircuitState(moduleName) {
+      const container = document.getElementById("djsCircuitGroup");
+      if (!container) return;
+      const badge = document.getElementById("djsHudModeBadge");
+      if (badge) badge.textContent = "[STANDBY — CLICK RUN TO SYNTHESIZE]";
+
+      const svgEl = document.getElementById("djsCircuitSvg");
+      if (svgEl) svgEl.setAttribute("viewBox", "0 0 960 560");
+
+      const cleanModName = (moduleName || currentModule || "user_design.sv").replace(".sv", "");
+
+      container.innerHTML = `
+        <g id="djsStandbyGroup" transform="translate(480, 260)">
+          <!-- Standby Backdrop Card with Elevation Shadow -->
+          <rect x="-260" y="-130" width="520" height="260" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.8" filter="drop-shadow(0 8px 24px rgba(0,0,0,0.07))"/>
+          
+          <!-- Chip Synthesis Icon -->
+          <circle cx="0" cy="-55" r="30" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8"/>
+          <text x="0" y="-47" text-anchor="middle" font-size="24" fill="#2563eb">⚡</text>
+
+          <!-- Module Name Pill Badge -->
+          <rect x="-100" y="-12" width="200" height="22" rx="11" fill="#f1f5f9" stroke="#e2e8f0"/>
+          <text x="0" y="3" text-anchor="middle" font-size="10.5" font-weight="700" fill="#475569" font-family="ui-monospace, monospace">
+            MODULE: ${cleanModName}
+          </text>
+
+          <!-- Main Status Title -->
+          <text x="0" y="36" text-anchor="middle" font-size="16" font-weight="800" fill="#0f172a" font-family="system-ui, -apple-system, sans-serif">
+            Gate-Level Netlist Ready to Synthesize
+          </text>
+
+          <!-- Action Prompt Description -->
+          <text x="0" y="60" text-anchor="middle" font-size="11.5" fill="#64748b" font-family="system-ui, -apple-system, sans-serif">
+            Click <tspan font-weight="bold" fill="#0d6efd">"▶ Run"</tspan> in the toolbar above to synthesize gate netlist
+          </text>
+          <text x="0" y="78" text-anchor="middle" font-size="11.5" fill="#64748b" font-family="system-ui, -apple-system, sans-serif">
+            and start interactive gate-level logic simulation.
+          </text>
+
+          <!-- Prominent Action Button -->
+          <g class="comp-box" style="cursor: pointer;" onclick="djsToggleRun()">
+            <rect x="-120" y="96" width="240" height="38" rx="7" fill="#0d6efd" stroke="#0b5ed7" stroke-width="1.2"/>
+            <text x="0" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif">
+              ▶ Synthesize &amp; Run Circuit
+            </text>
+          </g>
+        </g>
+      `;
+
+      // Update signal HUD to show Standby status
+      const sigEl = document.getElementById("djsSignalSummary");
+      if (sigEl) {
+        sigEl.innerHTML = `<span style="color: #64748b;">STATUS:</span> Standby &bull; Verilog code loaded &bull; Click <b style="color: #0d6efd;">▶ Run</b> to synthesize gate netlist`;
+      }
+    }
+
     function renderCurrentCircuit() {
       const container = document.getElementById("djsCircuitGroup");
       if (!container) return;
+
+      if (!isCircuitSynthesized) {
+        renderStandbyCircuitState(currentModule);
+        return;
+      }
 
       const badge = document.getElementById("djsHudModeBadge");
       const currentCode = (currentModule === "empty_design.sv") ? "" : (HDL_PRESETS[currentModule] || userSubmittedCode || "");
@@ -3731,6 +3792,7 @@ endmodule`
     // DUAL ENGINE COLLABORATION: REAL DIGITALJS ONLINE + BEOL CONGESTION ENGINE
     // ═════════════════════════════════════════════════════════════════════════
     let currentDjsEngineMode = 'live';
+    let isCircuitSynthesized = false;
 
     const DIGITALJS_LIVE_HASHES = {
       "rv32i_pipeline_top.sv": "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573",
@@ -3887,6 +3949,13 @@ endmodule`
       // Pre-populate inspector info without scrolling
       const defaultGate = filename.includes("dff") ? "dff_dl2" : (filename.includes("alu") ? "alu_xor1" : "pip_ex_stage");
       updateInspectorInfo(defaultGate);
+
+      // Before user clicks Run, keep circuit in standby mode (NOT visible yet)
+      if (!isCircuitSynthesized) {
+        switchDjsEngineMode('congestion');
+        renderStandbyCircuitState(filename);
+        return;
+      }
 
       // If this module has a live DigitalJS hash, initialize live DigitalJS mode
       if (DIGITALJS_LIVE_HASHES[filename]) {
@@ -4567,6 +4636,9 @@ endmodule`
     }
 
     function djsToggleRun() {
+      // Mark circuit synthesized when user initiates Run
+      isCircuitSynthesized = true;
+
       // Re-synthesize code currently in editor
       const codeEl = document.getElementById("djsCodeDisplay");
       if (codeEl) {
@@ -4648,6 +4720,7 @@ endmodule`
     }
 
     function djsResetSim() {
+      isCircuitSynthesized = true;
       simTick = 0;
       simClock = 0;
       pinState.dff_d = 1;
@@ -4658,6 +4731,9 @@ endmodule`
     }
 
     function advanceTick() {
+      if (!isCircuitSynthesized) {
+        isCircuitSynthesized = true;
+      }
       simTick++;
       simClock = 1 - simClock;
       pinState.clk_val = simClock;
