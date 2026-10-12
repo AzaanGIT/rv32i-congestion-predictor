@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261012-v5.7';
+      const BUILD_VER = '20261012-v5.8';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -4860,78 +4860,71 @@ endmodule`
         return;
       }
 
-      // 2. Ensure iframe is pre-loaded with digitaljs_view.html before synthesis
-      //    so the DigitalJS bundle + waitAndTrigger() are already running when we send data
-      const DJS_VIEW_URL = 'digitaljs_view.html?v=20261012-v5.7';
-      if (iframe) {
-        const iframeAlreadyLoaded = iframe.src && !iframe.src.includes('about:blank') &&
-                                    iframe.src !== window.location.href &&
-                                    iframe.contentDocument && iframe.contentDocument.readyState === 'complete';
-        if (!iframeAlreadyLoaded && (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href)) {
-          // Set src now so it loads while we fetch from Yosys
-          iframe.src = DJS_VIEW_URL;
-        }
-      }
-
-      // 3. Synthesize custom Verilog code via DigitalJS Yosys backend API
+      // 2. Synthesize custom Verilog via DigitalJS Yosys API
       try {
         const payload = {
           files: { [filename || "custom_design.sv"]: trimmed },
           options: { optimize: true, fsm: "nomap", fsmexpand: false }
         };
-        if (liveBadge) liveBadge.textContent = "Calling Yosys API...";
+        if (liveBadge) liveBadge.textContent = "Synthesizing with Yosys…";
+        if (badge) badge.textContent = "[CALLING YOSYS API...]";
+
         const response = await fetch("https://digitaljs.tilk.eu/api/yosys2digitaljs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
+
         if (response.ok) {
           const resData = await response.json();
           if (resData && resData.output) {
-            const customHash = "user_" + Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
-            switchDjsEngineMode('live');
+            // Use a unique hash so every new synthesis forces a fresh load
+            const customHash = "usr" + Date.now().toString(36);
+
+            // ─── KEY FIX ───────────────────────────────────────────────────────
+            // localStorage is shared across all same-origin browsing contexts,
+            // including iframes. Write the circuit BEFORE reloading the iframe
+            // so it is available the moment digitaljs_view.html's inline script runs.
+            // This avoids all XHR-vs-fetch and timing race conditions entirely.
+            // ──────────────────────────────────────────────────────────────────
+            try {
+              // Clean up old custom circuits (keep storage lean)
+              for (let i = localStorage.length - 1; i >= 0; i--) {
+                const k = localStorage.key(i);
+                if (k && k.startsWith("djs_circuit_usr")) localStorage.removeItem(k);
+              }
+              localStorage.setItem("djs_circuit_" + customHash, JSON.stringify(resData.output));
+            } catch(e) { console.warn("localStorage write failed:", e); }
 
             const devCount = resData.output.devices ? Object.keys(resData.output.devices).length : 0;
             const netCount = resData.output.connectors ? resData.output.connectors.length : 0;
             if (badge) badge.textContent = `[DIGITALJS YOSYS NETLIST: ${devCount} GATES / ${netCount} NETS]`;
             if (liveBadge) liveBadge.textContent = `${devCount} Gates / ${netCount} Nets`;
 
-            // Send circuit to iframe. Retry multiple times to handle slow bundle load.
-            // The iframe's waitAndTrigger() polls for onpopstate readiness so retries are safe.
-            function postCircuit() {
-              const fr = document.getElementById("djsLiveFrame");
-              if (fr && fr.contentWindow) {
-                fr.contentWindow.postMessage({
-                  type: 'loadCircuitData',
-                  circuit: resData.output,
-                  hash: customHash
-                }, '*');
-              }
-            }
+            switchDjsEngineMode('live');
 
-            // Ensure iframe has src loaded
-            const fr2 = document.getElementById("djsLiveFrame");
-            if (fr2 && (!fr2.src || fr2.src === 'about:blank' || fr2.src === window.location.href)) {
-              fr2.onload = () => { fr2.onload = null; postCircuit(); setTimeout(postCircuit, 600); setTimeout(postCircuit, 1500); };
-              fr2.src = DJS_VIEW_URL;
-            } else {
-              // Already loaded: send immediately + retry to be safe
-              postCircuit();
-              setTimeout(postCircuit, 500);
-              setTimeout(postCircuit, 1200);
-              setTimeout(postCircuit, 2500);
+            // Reload iframe with the custom hash baked into both ?custom= param and #hash
+            // digitaljs_view.html reads ?custom= on startup, pre-loads the circuit into
+            // window.customCircuits BEFORE DigitalJS bundle runs — guaranteed correct load.
+            const fr = document.getElementById("djsLiveFrame");
+            if (fr) {
+              fr.src = "digitaljs_view.html?custom=" + customHash + "&t=" + Date.now() + "#" + customHash;
             }
             return;
           }
+        } else {
+          const errText = await response.text().catch(() => "(no body)");
+          console.warn("Yosys API error", response.status, errText);
+          if (badge) badge.textContent = `[YOSYS API ERROR ${response.status}]`;
         }
       } catch (err) {
         console.warn("DigitalJS remote synthesis failed:", err);
         if (badge) badge.textContent = `[SYNTHESIS ERROR — check console]`;
       }
 
-      // 4. Fallback: activate live DigitalJS mode with default hash
+      // Fallback: stay in live mode with whatever was last loaded
       switchDjsEngineMode('live');
-      if (badge) badge.textContent = `[DIGITALJS NETLIST: ${filename.toUpperCase()}]`;
+      if (badge) badge.textContent = `[DIGITALJS NETLIST: ${(filename || "design").toUpperCase()}]`;
       if (liveBadge) liveBadge.textContent = "DigitalJS Gate Netlist Active";
     }
 
