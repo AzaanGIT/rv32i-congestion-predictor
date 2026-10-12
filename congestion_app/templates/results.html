@@ -4874,33 +4874,69 @@ endmodule`
         errors.push("No code entered. Please write or load RV32I Verilog HDL code.");
         return errors;
       }
-      const hasModule    = /\bmodule\b/.test(code);
-      const hasEndModule = /\bendmodule\b/.test(code);
-      if (!hasModule)    errors.push("Missing 'module' keyword — not valid Verilog HDL.");
-      if (!hasEndModule) errors.push("Missing 'endmodule' keyword — module is not closed.");
-
-      // Check balanced begin/end (rough heuristic)
-      const beginCount = (code.match(/\bbegin\b/g) || []).length;
-      const endCount   = (code.match(/\bend\b/g)   || []).length;
-      // endmodule counts as 'end', subtract it
-      const endModuleCount = (code.match(/\bendmodule\b/g) || []).length;
-      const netEnd = endCount - endModuleCount;
-      if (Math.abs(beginCount - netEnd) > 2) {
-        errors.push(`Unbalanced begin/end blocks (${beginCount} begin vs ${netEnd} end) — check your always/if blocks.`);
+      // Check for module declaration
+      if (!/\bmodule\b/.test(code)) {
+        errors.push("Missing 'module' keyword — not valid Verilog HDL.");
+      }
+      // Check for endmodule
+      if (!/\bendmodule\b/.test(code)) {
+        errors.push("Missing 'endmodule' keyword — module is not closed.");
       }
       return errors;
     }
 
     // ── Detect which RV32I preset module the code belongs to ────────────────
     function detectRv32iModule(code) {
+      const lower = (code || "").toLowerCase();
+
+      // 1. Top-level RV32I Pipelined Processor
+      if (lower.includes("rv32i_pipeline_top") || lower.includes("rv32i_pipeline") ||
+          lower.includes("5-stage pipelined rv32i") ||
+          (lower.includes("debug_pc") && lower.includes("debug_alu_result")) ||
+          (lower.includes("instruction_memory") && lower.includes("regfile")) ||
+          (lower.includes("ifid_") && lower.includes("idex_")) ||
+          (lower.includes("load_use_stall") && lower.includes("branch_taken_ex"))) {
+        return "rv32i_pipeline_top.sv";
+      }
+
+      // 2. RV32I Single-cycle / Core Processor
+      if (lower.includes("rv32i_core") || (lower.includes("pc_reg") && lower.includes("alu_out"))) {
+        return "rv32i_core.sv";
+      }
+
+      // 3. RV32I ALU
+      if (lower.includes("rv32i_alu") || (lower.includes("alu") && lower.includes("funct3") && !lower.includes("ifid_"))) {
+        return "rv32i_alu.sv";
+      }
+
+      // 4. Sequential / Latches / Standard Cells
+      if (lower.includes("dff_master_slave") || lower.includes("d_latch") || lower.includes("master_slave")) {
+        return "dff_master_slave.sv";
+      }
+      if (lower.includes("sr_neg_latch") || lower.includes("sr_neg_gate")) {
+        return "sr_neg_gate.sv";
+      }
+      if (lower.includes("sr_latch") || (lower.includes("nor g1") && lower.includes("nor g2"))) {
+        return "sr_latch.sv";
+      }
+      if (lower.includes("full_adder") || lower.includes("fulladder")) {
+        return "fulladder.sv";
+      }
+
+      // 5. Fallback check by parsed module name or standard RV32I identifiers
       for (const [keyword, filename] of Object.entries(SUPPORTED_MODULE_MAP)) {
         if (code.includes(keyword)) return filename;
       }
-      // Also check by parsed module name
+
       const parsed = parseVerilogCode(code);
-      if (parsed && parsed.moduleName && SUPPORTED_MODULE_MAP[parsed.moduleName]) {
-        return SUPPORTED_MODULE_MAP[parsed.moduleName];
+      if (parsed && parsed.moduleName) {
+        const mod = parsed.moduleName.toLowerCase();
+        if (SUPPORTED_MODULE_MAP[mod]) return SUPPORTED_MODULE_MAP[mod];
+        if (mod.includes("rv32i") || mod.includes("pipeline") || mod.includes("riscv") || mod.includes("processor") || mod === "top") {
+          return "rv32i_pipeline_top.sv";
+        }
       }
+
       return null;
     }
 
