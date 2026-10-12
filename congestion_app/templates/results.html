@@ -4867,52 +4867,147 @@ endmodule`
       });
     }
 
+    // ── Supported RV32I module identifiers → mapped to preset filename ──────────
+    const SUPPORTED_MODULE_MAP = {
+      "rv32i_pipeline_top":    "rv32i_pipeline_top.sv",
+      "rv32i_pipeline_clean":  "rv32i_pipeline_clean.sv",
+      "rv32i_core":            "rv32i_core.sv",
+      "rv32i_alu":             "rv32i_alu.sv",
+      "dff_master_slave":      "dff_master_slave.sv",
+      "sr_latch":              "sr_latch.sv",
+      "sr_neg_latch":          "sr_neg_gate.sv",
+      "full_adder":            "fulladder.sv",
+      "fulladder":             "fulladder.sv"
+    };
+
+    // ── Basic Verilog syntax checker ─────────────────────────────────────────
+    function validateVerilogCode(code) {
+      const errors = [];
+      if (!code || code.trim().length === 0) {
+        errors.push("No code entered. Please write or load RV32I Verilog HDL code.");
+        return errors;
+      }
+      const hasModule    = /\bmodule\b/.test(code);
+      const hasEndModule = /\bendmodule\b/.test(code);
+      if (!hasModule)    errors.push("Missing 'module' keyword — not valid Verilog HDL.");
+      if (!hasEndModule) errors.push("Missing 'endmodule' keyword — module is not closed.");
+
+      // Check balanced begin/end (rough heuristic)
+      const beginCount = (code.match(/\bbegin\b/g) || []).length;
+      const endCount   = (code.match(/\bend\b/g)   || []).length;
+      // endmodule counts as 'end', subtract it
+      const endModuleCount = (code.match(/\bendmodule\b/g) || []).length;
+      const netEnd = endCount - endModuleCount;
+      if (Math.abs(beginCount - netEnd) > 2) {
+        errors.push(`Unbalanced begin/end blocks (${beginCount} begin vs ${netEnd} end) — check your always/if blocks.`);
+      }
+      return errors;
+    }
+
+    // ── Detect which RV32I preset module the code belongs to ────────────────
+    function detectRv32iModule(code) {
+      for (const [keyword, filename] of Object.entries(SUPPORTED_MODULE_MAP)) {
+        if (code.includes(keyword)) return filename;
+      }
+      // Also check by parsed module name
+      const parsed = parseVerilogCode(code);
+      if (parsed && parsed.moduleName && SUPPORTED_MODULE_MAP[parsed.moduleName]) {
+        return SUPPORTED_MODULE_MAP[parsed.moduleName];
+      }
+      return null;
+    }
+
+    // ── Show error state in circuit canvas ──────────────────────────────────
+    function renderErrorCircuitState(errors) {
+      isCircuitSynthesized = false;
+      switchDjsEngineMode('congestion');
+      const container = document.getElementById("djsCircuitGroup");
+      const svgEl     = document.getElementById("djsCircuitSvg");
+      const badge      = document.getElementById("djsHudModeBadge");
+      const sigEl      = document.getElementById("djsSignalSummary");
+
+      if (badge) badge.textContent = "[ERROR: CODE NOT ACCEPTED]";
+      if (sigEl) {
+        sigEl.innerHTML = `<span style="color:#dc2626;font-weight:600;">✖ Error:</span> ${errors[0] || "Invalid code"}`;
+      }
+      if (svgEl) svgEl.setAttribute("viewBox", "0 0 680 340");
+      if (container) {
+        const errLines = errors.map((e, i) =>
+          `<tspan x="0" dy="${i === 0 ? 0 : 24}" font-size="13" fill="#dc2626">⚠ ${e}</tspan>`
+        ).join('');
+        container.innerHTML = `
+          <g transform="translate(340,170)">
+            <rect x="-300" y="-140" width="600" height="280" rx="12"
+              fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
+            <text x="-270" y="-100" font-size="18" font-weight="700"
+              fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">
+              ✖ Code Error — Cannot Synthesize
+            </text>
+            <text x="-270" y="-68" font-family="monospace" text-anchor="start">
+              ${errLines}
+            </text>
+            <rect x="-270" y="-30" width="540" height="1" fill="#fca5a5"/>
+            <text x="-270" y="14" font-size="12" fill="#6b7280"
+              font-family="system-ui, -apple-system, sans-serif">
+              Supported modules:
+            </text>
+            <text x="-270" y="34" font-size="12" fill="#374151"
+              font-family="monospace">
+              rv32i_pipeline_top  •  rv32i_core  •  rv32i_alu
+            </text>
+            <text x="-270" y="54" font-size="12" fill="#374151"
+              font-family="monospace">
+              dff_master_slave  •  sr_latch  •  sr_neg_latch  •  full_adder
+            </text>
+            <text x="-270" y="82" font-size="11" fill="#9ca3af"
+              font-family="system-ui, -apple-system, sans-serif">
+              Load a preset from the toolbar or fix the errors above, then click ▶ Run.
+            </text>
+          </g>`;
+      }
+      djsPauseSim();
+    }
+
     function djsToggleRun() {
-      // Mark circuit synthesized when user initiates Run
-      isCircuitSynthesized = true;
-
-      // Re-synthesize code currently in editor
       const codeEl = document.getElementById("djsCodeDisplay");
-      if (codeEl) {
-        const rawCode = codeEl.innerText || codeEl.textContent;
-        if (rawCode && rawCode.trim().length > 0) {
-          const trimmed = rawCode.trim();
-          const parsed = parseVerilogCode(trimmed);
-          let targetMod = (parsed.moduleName && parsed.moduleName !== "user_design" ? parsed.moduleName : "user_design") + ".sv";
-          if (trimmed.includes("rv32i_core")) targetMod = "rv32i_core.sv";
-          else if (trimmed.includes("dff_master_slave")) targetMod = "dff_master_slave.sv";
-          else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) targetMod = "fulladder.sv";
-          else if (trimmed.includes("sr_neg_latch")) targetMod = "sr_neg_gate.sv";
-          else if (trimmed.includes("sr_latch") || (trimmed.includes("nor g1") && trimmed.includes("nor g2"))) targetMod = "sr_latch.sv";
-          else if (trimmed.includes("rv32i_alu")) targetMod = "rv32i_alu.sv";
+      if (!codeEl) return;
+      const rawCode = codeEl.innerText || codeEl.textContent || "";
+      const trimmed = rawCode.trim();
 
-          currentModule = targetMod;
-          HDL_PRESETS[currentModule] = trimmed;
-          window.userSubmittedCode = trimmed;
-          const tabLabel = document.getElementById("djsActiveFileTabName");
-          if (tabLabel) tabLabel.textContent = currentModule;
-
-          if (DIGITALJS_LIVE_HASHES[currentModule]) {
-            // Preset circuit: load via hash into live iframe
-            if (typeof updateLiveDigitalJsFrame === 'function') {
-              updateLiveDigitalJsFrame(currentModule);
-            }
-            switchDjsEngineMode('live');
-            renderCurrentCircuit();
-          } else {
-            // Custom/arbitrary Verilog: synthesize via Yosys then show in live iframe
-            synthesizeWithDigitalJsBackground(trimmed, currentModule);
-            if (typeof updateSignalHud === 'function') updateSignalHud();
-          }
-        } else {
-          currentModule = "empty_design.sv";
-          renderEmptyCircuitState();
-          djsPauseSim();
-          return;
-        }
+      // ── Step 1: Basic Verilog syntax validation ────────────────────────────
+      const syntaxErrors = validateVerilogCode(trimmed);
+      if (syntaxErrors.length > 0) {
+        renderErrorCircuitState(syntaxErrors);
+        return;
       }
 
-      // Toggle simulation: start timer on first Run, pause/resume on subsequent clicks
+      // ── Step 2: Check if this is a supported RV32I module ─────────────────
+      const detectedFile = detectRv32iModule(trimmed);
+      if (!detectedFile) {
+        renderErrorCircuitState([
+          "Only RV32I-related HDL code is supported.",
+          "Module name not recognised as a supported RV32I design.",
+          "Load a preset from the toolbar or use a supported module name."
+        ]);
+        return;
+      }
+
+      // ── Step 3: Accepted — mark synthesized and load the preset circuit ────
+      isCircuitSynthesized = true;
+      currentModule = detectedFile;
+      HDL_PRESETS[currentModule] = trimmed;
+      window.userSubmittedCode = trimmed;
+
+      const tabLabel = document.getElementById("djsActiveFileTabName");
+      if (tabLabel) tabLabel.textContent = currentModule;
+
+      if (typeof updateLiveDigitalJsFrame === 'function') {
+        updateLiveDigitalJsFrame(currentModule);
+      }
+      switchDjsEngineMode('live');
+      renderCurrentCircuit();
+
+      // ── Step 4: Toggle timer ───────────────────────────────────────────────
       if (!isSimRunning) {
         djsResumeSim();
       } else {
