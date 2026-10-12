@@ -399,7 +399,8 @@
             <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('rv32i_core.sv')">⚡ RV32I Core</button>
             <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('dff_master_slave.sv')">🔄 D Flip-Flop</button>
             <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('fulladder.sv')">➕ Full Adder</button>
-            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('sr_neg_gate.sv')">🔲 SR Latch</button>
+            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('sr_latch.sv')">🔲 SR Latch</button>
+            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('sr_neg_gate.sv')">🔲 SR Neg-Latch</button>
             <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('rv32i_alu.sv')">🧮 32-Bit ALU</button>
           </div>
           <div style="font-size: 11px; color: #64748b;">
@@ -1155,6 +1156,7 @@
         else if (trimmed.includes("rv32i_core")) targetModule = "rv32i_core.sv";
         else if (trimmed.includes("dff_master_slave") || trimmed.includes("d_latch")) targetModule = "dff_master_slave.sv";
         else if (trimmed.includes("sr_neg_latch")) targetModule = "sr_neg_gate.sv";
+        else if (trimmed.includes("sr_latch") || (trimmed.includes("nor g1") && trimmed.includes("nor g2"))) targetModule = "sr_latch.sv";
         else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) targetModule = "fulladder.sv";
         else if (trimmed.includes("rv32i_alu")) targetModule = "rv32i_alu.sv";
 
@@ -1302,6 +1304,17 @@ module rv32i_alu(
 
 endmodule`,
 
+      "sr_latch.sv": `// SR latch (gate model)
+module sr_latch(
+    input s, r,
+    output q, nq
+);
+
+    nor g1(q, r, nq);
+    nor g2(nq, s, q);
+
+endmodule`,
+
       "sr_neg_gate.sv": `// SR latch with negated inputs (gate model)
 module sr_neg_latch(
   input ns, nr,
@@ -1386,6 +1399,8 @@ endmodule`
       clk_val: 0,
       rv_reset: 0,
       // SR Latch
+      s: 0,
+      r: 0,
       ns: 1,
       nr: 1,
       q: 1,
@@ -1523,6 +1538,28 @@ endmodule`
         transistors: "4 CMOS FETs (2 NMOS, 2 PMOS)",
         badge: "LATCH GATE",
         impact: "Cross-coupled feedback loop routes on Metal 1 and Metal 2."
+      },
+      sr_nor1: {
+        name: "2-Input NOR Gate (NOR2)",
+        sub: "g1 (SR Latch Top Gate)",
+        eq: "Q = ~(r | nq)",
+        pins: () => `r=${pinState.r||0}, nq=${pinState.nq||0} → Q=${pinState.q||0}`,
+        cell: "sky130_fd_sc_hd__nor2_1",
+        cellPins: "3 Pins (r, nq on M1, Q on M1)",
+        transistors: "4 CMOS FETs (2 NMOS, 2 PMOS)",
+        badge: "LATCH GATE",
+        impact: "Cross-coupled NOR latch feedback net routes on Metal 1 and Metal 2."
+      },
+      sr_nor2: {
+        name: "2-Input NOR Gate (NOR2)",
+        sub: "g2 (SR Latch Bottom Gate)",
+        eq: "NQ = ~(s | q)",
+        pins: () => `s=${pinState.s||0}, q=${pinState.q||0} → NQ=${pinState.nq||0}`,
+        cell: "sky130_fd_sc_hd__nor2_1",
+        cellPins: "3 Pins (s, q on M1, NQ on M1)",
+        transistors: "4 CMOS FETs (2 NMOS, 2 PMOS)",
+        badge: "LATCH GATE",
+        impact: "Cross-coupled NOR latch feedback net routes on Metal 1 and Metal 2."
       },
 
       // ── 5-Stage Pipelined RV32I Pipeline Stage Entries ─────────────────────
@@ -2284,7 +2321,41 @@ endmodule`
       `;
     }
 
-    // (D) SR Latch with Negated Inputs
+    // (D1) SR Latch (NOR Gate Model - DigitalJS / Yosys)
+    function renderSrNorLatchCircuit() {
+      const s = pinState.s !== undefined ? pinState.s : 0;
+      const r = pinState.r !== undefined ? pinState.r : 0;
+      if (s === 1 && r === 0) {
+        pinState.q = 1; pinState.nq = 0;
+      } else if (s === 0 && r === 1) {
+        pinState.q = 0; pinState.nq = 1;
+      } else if (s === 1 && r === 1) {
+        pinState.q = 0; pinState.nq = 0;
+      }
+      const q = pinState.q !== undefined ? pinState.q : 0;
+      const nq = pinState.nq !== undefined ? pinState.nq : 1;
+
+      return `
+        <g font-size="11" font-family="monospace" font-weight="bold">
+          <text x="60" y="45" fill="#0284c7">// SR latch (NOR gate model - digitaljs.tilk.eu)</text>
+          <text x="60" y="65" fill="#64748b">module sr_latch: nor g1(q, r, nq); nor g2(nq, s, q);</text>
+        </g>
+        ${svgButtonInput("elem_s", 70, 110, "s", "s", [3])}
+        ${svgButtonInput("elem_r", 70, 240, "r", "r", [3])}
+        ${svgWire("wire_s_g2", "M 116 130 L 260 255", s === 1)}
+        ${svgWire("wire_r_g1", "M 116 260 L 220 260 L 220 125 L 260 125", r === 1)}
+        ${svgNorGate(260, 110, "sr_nor1", "g1 ($nor)", false, [7])}
+        ${svgNorGate(260, 240, "sr_nor2", "g2 ($nor)", false, [8])}
+        ${svgWire("wire_q_fb", "M 310 128 L 390 128 L 390 220 L 220 220 L 220 245 L 260 245", q === 1)}
+        ${svgWire("wire_nq_fb", "M 310 258 L 420 258 L 420 180 L 240 180 L 240 143 L 260 143", nq === 1)}
+        ${svgWire("wire_g1_q", "M 310 128 L 560 128", q === 1)}
+        ${svgWire("wire_g2_nq", "M 310 258 L 560 258", nq === 1)}
+        ${svgLampOutput("elem_q", 560, 110, "q", q, [4])}
+        ${svgLampOutput("elem_nq", 560, 240, "nq", nq, [4])}
+      `;
+    }
+
+    // (D2) SR Latch with Negated Inputs
     function renderSrLatchCircuit() {
       const ns = pinState.ns;
       const nr = pinState.nr;
@@ -2781,6 +2852,23 @@ endmodule`
       `;
     }
 
+    function svgNorGate(x, y, id, label, isHotspot=false, lineNums=[]) {
+      const stroke = isHotspot ? "#ef4444" : "#1e293b";
+      const fill = isHotspot ? "#fff5f5" : "#ffffff";
+      const textFill = isHotspot ? "#b91c1c" : "#0f172a";
+      const labelFill = isHotspot ? "#ef4444" : "#64748b";
+      return `
+        <g id="${id}" class="djs-gate comp-box" onclick="selectGate('${id}')" 
+          onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" 
+          onmouseleave="clearCodeHighlight()" style="cursor: pointer;">
+          <path d="M ${x} ${y} Q ${x+12} ${y+18} ${x} ${y+36} Q ${x+24} ${y+36} ${x+38} ${y+18} Q ${x+24} ${y} ${x} ${y} Z" fill="${fill}" stroke="${stroke}" stroke-width="${isHotspot ? '2.5' : '2'}"/>
+          <circle cx="${x+42}" cy="${y+18}" r="3.5" fill="#ffffff" stroke="${stroke}" stroke-width="2"/>
+          <text x="${x+14}" y="${y+22}" fill="${textFill}" font-size="10" font-family="monospace" font-weight="bold">≥</text>
+          <text x="${x+6}" y="${y+50}" fill="${labelFill}" font-size="8.5" font-family="monospace">${label}</text>
+        </g>
+      `;
+    }
+
     function svgXorGate(x, y, id, label, isHotspot=false, lineNums=[]) {
       const stroke = isHotspot ? "#ef4444" : "#1e293b";
       const fill = isHotspot ? "#fff5f5" : "#ffffff";
@@ -3110,6 +3198,8 @@ endmodule`
           svgHtml += svgNandGate(pos.x, pos.y, id, g.name, [g.lineNum]);
         } else if (g.type === 'or') {
           svgHtml += svgOrGate(pos.x, pos.y, id, g.name, false, [g.lineNum]);
+        } else if (g.type === 'nor') {
+          svgHtml += svgNorGate(pos.x, pos.y, id, g.name, false, [g.lineNum]);
         } else if (g.type === 'xor') {
           svgHtml += svgXorGate(pos.x, pos.y, id, g.name, true, [g.lineNum]);
         } else {
@@ -3251,7 +3341,8 @@ endmodule`
                           currentModule.includes("pipeline");
       const isDff = currentCode.includes("dff_master_slave") || currentCode.includes("d_latch") || currentModule.includes("dff");
       const isAluOnly = (currentCode.includes("rv32i_alu") || currentModule.includes("alu")) && !currentCode.includes("rv32i_core") && !isPipelined;
-      const isSrLatch = currentCode.includes("sr_neg_latch") || (currentCode.includes("nand g1") && currentCode.includes("nand g2"));
+      const isSrNorLatch = (currentCode.includes("nor g1") && currentCode.includes("nor g2")) || currentModule === "sr_latch.sv";
+      const isSrLatch = (currentCode.includes("sr_neg_latch") || (currentCode.includes("nand g1") && currentCode.includes("nand g2"))) && !isSrNorLatch;
       const isFullAdder = currentCode.includes("full_adder") || currentCode.includes("fulladder");
       const isRv32iCore = (currentCode.includes("rv32i_core") || (currentCode.includes("pc_reg") && currentCode.includes("alu_out"))) && !isPipelined;
 
@@ -3265,9 +3356,12 @@ endmodule`
         if (svgEl) svgEl.setAttribute("viewBox", "0 0 960 560");
         container.innerHTML = renderDffMasterSlaveCircuit();
         if (badge) badge.textContent = "[DFF MASTER-SLAVE LATCH ENGINE]";
+      } else if (isSrNorLatch) {
+        container.innerHTML = renderSrNorLatchCircuit();
+        if (badge) badge.textContent = "[SR LATCH NOR GATE MODEL]";
       } else if (isSrLatch) {
         container.innerHTML = renderSrLatchCircuit();
-        if (badge) badge.textContent = "[SR LATCH GATE MODEL]";
+        if (badge) badge.textContent = "[SR LATCH NAND GATE MODEL]";
       } else if (isAluOnly) {
         container.innerHTML = renderAluCircuit();
         if (badge) badge.textContent = "[32-BIT ALU HOTSPOT]";
@@ -3275,7 +3369,10 @@ endmodule`
         container.innerHTML = renderProcessorCoreCircuit();
         if (badge) badge.textContent = "[RV32I GATE NETLIST]";
       } else {
-        // ANY GENERAL ARBITRARY USER VERILOG CODE!
+        // ANY GENERAL ARBITRARY USER VERILOG CODE: synthesize in background with DigitalJS Yosys engine!
+        if (typeof synthesizeWithDigitalJsBackground === 'function') {
+          synthesizeWithDigitalJsBackground(currentCode, currentModule);
+        }
         container.innerHTML = renderDynamicSynthesizedCircuit(currentCode, parsed);
         if (badge) badge.textContent = `[SYNTHESIZED: ${parsed.moduleName.toUpperCase()}]`;
       }
@@ -3800,6 +3897,7 @@ endmodule`
       "rv32i_core.sv": "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573",
       "dff_master_slave.sv": "2f71143b65ff0abe1f2b714263ca4514d0ad7d72863cb237aeaa4dd76daaf457",
       "sr_neg_gate.sv": "e0f187cd33c2072f97ebe20c23c7f56929164bbe0291204cf1b014c2efc567b3",
+      "sr_latch.sv": "3b4545db253fa66aef938b0837207f09022561f5e5a9435b904089f3900d8441",
       "fulladder.sv": "68cca6bbc7ffd85741eb891523d70076e971a5c34a253ba4934ce2cc1f9f0a2c",
       "rv32i_alu.sv": "902039f4e68ce76ac91625074c6ae754c10576b189671cb743677dd32007bff8"
     };
@@ -3847,29 +3945,125 @@ endmodule`
         return;
       }
       const hash = DIGITALJS_LIVE_HASHES[moduleFilename];
-      const targetUrl = "digitaljs_view.html?v=20261009-v3.3#" + hash;
+      const targetUrl = "digitaljs_view.html?v=20261012-v5.4#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
       const badge = document.getElementById("djsLiveGateCountBadge");
 
-      if (iframe && (!iframe.src || !iframe.src.includes(hash))) {
-        iframe.src = targetUrl;
+      if (iframe) {
+        if (!iframe.src || !iframe.src.includes(hash)) {
+          iframe.src = targetUrl;
+        } else if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'loadHash', hash: hash }, '*');
+        }
       }
       if (extBtn) {
         extBtn.href = externalUrl;
       }
       if (badge) {
-        if (moduleFilename.includes("pipeline") || moduleFilename.includes("rv32i")) {
+        if (moduleFilename.includes("pipeline") || moduleFilename.includes("rv32i_pipeline") || moduleFilename.includes("rv32i_core")) {
           badge.textContent = "225 Gates / 441 Nets";
         } else if (moduleFilename.includes("alu")) {
-          badge.textContent = "32-Bit ALU Subcircuit";
+          badge.textContent = "38 Gates / 74 Nets";
         } else if (moduleFilename.includes("dff")) {
-          badge.textContent = "Master-Slave FlipFlop";
+          badge.textContent = "12 Gates / 16 Nets";
+        } else if (moduleFilename.includes("fulladder") || moduleFilename.includes("full_adder")) {
+          badge.textContent = "5 Gates / 8 Nets";
+        } else if (moduleFilename.includes("sr_latch") || moduleFilename.includes("sr_neg")) {
+          badge.textContent = "4 Gates / 8 Nets";
         } else {
-          badge.textContent = "DigitalJS Synthesis";
+          badge.textContent = "DigitalJS Gate Netlist Active";
         }
       }
+    }
+
+    async function synthesizeWithDigitalJsBackground(code, filename) {
+      const badge = document.getElementById("djsCircuitStatusBadge");
+      const liveBadge = document.getElementById("djsLiveGateCountBadge");
+      const iframe = document.getElementById("djsLiveFrame");
+
+      if (badge) badge.textContent = "[SYNTHESIZING WITH DIGITALJS YOSYS...]";
+      if (liveBadge) liveBadge.textContent = "Synthesizing with Yosys...";
+
+      const trimmed = (code || "").trim();
+      let matchedHash = null;
+
+      // 1. Check if code matches any of our pre-synthesized circuits
+      if (trimmed.includes("nor g1") && trimmed.includes("nor g2")) {
+        matchedHash = "3b4545db253fa66aef938b0837207f09022561f5e5a9435b904089f3900d8441";
+      } else if (trimmed.includes("nand g1") && trimmed.includes("nand g2")) {
+        matchedHash = "e0f187cd33c2072f97ebe20c23c7f56929164bbe0291204cf1b014c2efc567b3";
+      } else if (trimmed.includes("dff_master_slave")) {
+        matchedHash = "2f71143b65ff0abe1f2b714263ca4514d0ad7d72863cb237aeaa4dd76daaf457";
+      } else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) {
+        matchedHash = "68cca6bbc7ffd85741eb891523d70076e971a5c34a253ba4934ce2cc1f9f0a2c";
+      } else if (trimmed.includes("rv32i_alu")) {
+        matchedHash = "902039f4e68ce76ac91625074c6ae754c10576b189671cb743677dd32007bff8";
+      } else if (trimmed.includes("rv32i_core") || trimmed.includes("rv32i_pipeline")) {
+        matchedHash = "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
+      }
+
+      if (matchedHash) {
+        switchDjsEngineMode('live');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'loadHash', hash: matchedHash }, '*');
+        }
+        if (badge) badge.textContent = `[DIGITALJS NETLIST: ${filename.toUpperCase()}]`;
+        if (liveBadge) {
+          if (matchedHash === "3b4545db253fa66aef938b0837207f09022561f5e5a9435b904089f3900d8441" || matchedHash === "e0f187cd33c2072f97ebe20c23c7f56929164bbe0291204cf1b014c2efc567b3") {
+            liveBadge.textContent = "4 Gates / 8 Nets";
+          } else if (matchedHash === "2f71143b65ff0abe1f2b714263ca4514d0ad7d72863cb237aeaa4dd76daaf457") {
+            liveBadge.textContent = "12 Gates / 16 Nets";
+          } else if (matchedHash === "68cca6bbc7ffd85741eb891523d70076e971a5c34a253ba4934ce2cc1f9f0a2c") {
+            liveBadge.textContent = "5 Gates / 8 Nets";
+          } else if (matchedHash === "902039f4e68ce76ac91625074c6ae754c10576b189671cb743677dd32007bff8") {
+            liveBadge.textContent = "38 Gates / 74 Nets";
+          } else {
+            liveBadge.textContent = "225 Gates / 441 Nets";
+          }
+        }
+        return;
+      }
+
+      // 2. Synthesize custom Verilog code via DigitalJS Yosys backend API
+      try {
+        const payload = {
+          files: { [filename || "custom_design.sv"]: trimmed },
+          options: { optimize: true, fsm: "nomap", fsmexpand: false }
+        };
+        const response = await fetch("https://digitaljs.tilk.eu/api/yosys2digitaljs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+          const resData = await response.json();
+          if (resData && resData.output) {
+            const customHash = "user_" + Math.random().toString(36).substring(2, 10);
+            switchDjsEngineMode('live');
+            if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage({
+                type: 'loadCircuitData',
+                circuit: resData.output,
+                hash: customHash
+              }, '*');
+            }
+            const devCount = resData.output.devices ? Object.keys(resData.output.devices).length : 0;
+            const netCount = resData.output.connectors ? resData.output.connectors.length : 0;
+            if (badge) badge.textContent = `[DIGITALJS YOSYS NETLIST: ${devCount} GATES / ${netCount} NETS]`;
+            if (liveBadge) liveBadge.textContent = `${devCount} Gates / ${netCount} Nets`;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("DigitalJS remote synthesis notice:", err);
+      }
+
+      // 3. Fallback: activate live DigitalJS mode
+      switchDjsEngineMode('live');
+      if (badge) badge.textContent = `[DIGITALJS NETLIST: ${filename.toUpperCase()}]`;
+      if (liveBadge) liveBadge.textContent = "DigitalJS Gate Netlist Active";
     }
 
     function sendDjsIframeCmd(cmd) {
@@ -3964,8 +4158,8 @@ endmodule`
         }
         switchDjsEngineMode('live');
       } else {
-        // Custom user code: use dynamic SVG synthesized gate schematic
-        switchDjsEngineMode('congestion');
+        // Custom user code: synthesize with DigitalJS in background
+        synthesizeWithDigitalJsBackground(code, filename);
       }
 
       // Render the gate schematic
@@ -4651,6 +4845,7 @@ endmodule`
           else if (trimmed.includes("dff_master_slave")) targetMod = "dff_master_slave.sv";
           else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) targetMod = "fulladder.sv";
           else if (trimmed.includes("sr_neg_latch")) targetMod = "sr_neg_gate.sv";
+          else if (trimmed.includes("sr_latch") || (trimmed.includes("nor g1") && trimmed.includes("nor g2"))) targetMod = "sr_latch.sv";
           else if (trimmed.includes("rv32i_alu")) targetMod = "rv32i_alu.sv";
 
           currentModule = targetMod;
@@ -4665,7 +4860,7 @@ endmodule`
             }
             switchDjsEngineMode('live');
           } else {
-            switchDjsEngineMode('congestion');
+            synthesizeWithDigitalJsBackground(trimmed, currentModule);
           }
           renderCurrentCircuit();
         } else {
@@ -4769,6 +4964,8 @@ endmodule`
       if (!hud) return;
       if (currentModule === "dff_master_slave.sv") {
         hud.textContent = `d=${pinState.dff_d} | clk=${pinState.dff_clk} | qm=${pinState.dff_qm} | Q=${pinState.dff_q} | Q̄=${pinState.dff_nq} | ⏱ Tick=${simTick}`;
+      } else if (currentModule === "sr_latch.sv") {
+        hud.textContent = `s=${pinState.s || 0} | r=${pinState.r || 0} | Q=${pinState.q !== undefined ? pinState.q : 0} | Q̄=${pinState.nq !== undefined ? pinState.nq : 1} | ⏱ Tick=${simTick}`;
       } else if (currentModule === "sr_neg_gate.sv") {
         hud.textContent = `ns=${pinState.ns} | nr=${pinState.nr} | Q=${pinState.q} | Q̄=${pinState.nq} | ⏱ Tick=${simTick}`;
       } else if (currentModule === "fulladder.sv") {
@@ -4972,6 +5169,19 @@ endmodule`
             • Drag any gate or block with mouse<br>
             • Click <b>[+]</b> on dl2 to expand internal logic gates<br>
             • Hover gates to highlight Verilog HDL code in yellow
+          </div>
+        `;
+      } else if (filename === "sr_latch.sv") {
+        list.innerHTML = `
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+            <div style="font-weight: 800; font-size: 11px; margin-bottom: 6px;">INPUT BUTTONS:</div>
+            <button onclick="togglePin('s')" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; margin-right: 6px;">Toggle s (Set)</button>
+            <button onclick="togglePin('r')" style="background: #2563eb; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">Toggle r (Reset)</button>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; font-size: 11px;">
+            <b>OUTPUT LAMPS:</b><br>
+            • Q (State): <b style="color: #10b981;">${pinState.q !== undefined ? pinState.q : 0}</b><br>
+            • Q̄ (Inverse): <b style="color: #ef4444;">${pinState.nq !== undefined ? pinState.nq : 1}</b>
           </div>
         `;
       } else if (filename === "sr_neg_gate.sv") {

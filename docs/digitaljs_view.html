@@ -1,10 +1,19 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/symbola"/><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/site.webmanifest"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><meta name="msapplication-TileColor" content="#da532c"><meta name="theme-color" content="#ffffff"><title>DigitalJS Online</title>
   <script>
-    // Intercept circuit API: load local pre-synthesized JSONs with fallback to upstream
+    // In-memory custom circuit store
+    window.customCircuits = window.customCircuits || {};
+
+    // Intercept circuit API: load in-memory custom JSONs, local pre-synthesized JSONs, with fallback to upstream
     const origFetch = window.fetch;
     window.fetch = function(url, opts) {
       if (typeof url === "string" && url.includes("/api/circuit/")) {
-        const hash = url.substring(url.indexOf("/api/circuit/") + 13).replace(/[^a-zA-Z0-9]/g, "");
+        const hash = url.substring(url.indexOf("/api/circuit/") + 13).replace(/[^a-zA-Z0-9_]/g, "");
+        if (window.customCircuits && window.customCircuits[hash]) {
+          return Promise.resolve(new Response(JSON.stringify(window.customCircuits[hash]), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }));
+        }
         return origFetch("circuits/" + hash + ".json", opts)
           .then(res => {
             if (!res.ok) {
@@ -48,6 +57,14 @@
               clearInterval(hashPauseInterval);
             }
           }, 150);
+        } else if (event.data.type === "loadCircuitData") {
+          const hash = event.data.hash || ("custom_" + Math.random().toString(36).substring(2, 10));
+          window.customCircuits = window.customCircuits || {};
+          window.customCircuits[hash] = event.data.circuit;
+          window.location.hash = "#" + hash;
+          if (typeof window.onpopstate === "function") {
+            window.onpopstate();
+          }
         } else if (event.data.type === "simCommand") {
           const btn = document.querySelector("button[name=" + event.data.cmd + "]");
           if (btn) btn.click();
