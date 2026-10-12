@@ -367,9 +367,9 @@
             <!-- Tick Counter Input Group -->
             <div class="input-group me-2 upper-toolbar-group" style="display: inline-flex; align-items: stretch; border: 1px solid #ced4da; border-radius: 4px; overflow: hidden;">
               <div class="input-group-prepend" style="background: #e9ecef; border-right: 1px solid #ced4da; padding: 5px 10px; display: flex; align-items: center; color: #495057;">
-                <span title="Current tick" style="font-size: 13px;">⏱</span>
+                <span title="Simulation Time (ms)" style="font-size: 13px;">⏱</span>
               </div>
-              <input type="text" id="djsTickVal" value="0" readonly style="background: #ffffff; border: none; padding: 5px 10px; font-family: monospace; font-size: 13px; width: 7.5em; color: #212529; outline: none;" />
+              <input type="text" id="djsTickVal" value="0 ms" readonly style="background: #ffffff; border: none; padding: 5px 10px; font-family: monospace; font-size: 13px; width: 7.5em; color: #212529; outline: none;" />
             </div>
 
             <!-- File Actions Button Group -->
@@ -1363,6 +1363,9 @@ endmodule`
       : "empty_design.sv";
     let isSimRunning = false;
     let simTimer = null;
+    let simIntervalTimer = null;
+    let simTimeMs = 0;
+    let simLastTimestamp = null;
     let simTick = 0;
     let simClock = 0;
     let simZoom = 1.0;
@@ -3307,6 +3310,11 @@ endmodule`
       if (sigEl) {
         sigEl.innerHTML = `<span style="color: #64748b;">STATUS:</span> Standby &bull; Verilog code loaded &bull; Click <b style="color: #0d6efd;">▶ Run</b> to synthesize gate netlist`;
       }
+      if (!isSimRunning) {
+        simTimeMs = 0;
+        simTick = 0;
+        if (typeof updateTickDisplay === 'function') updateTickDisplay();
+      }
     }
 
     function renderCurrentCircuit() {
@@ -4073,12 +4081,8 @@ endmodule`
       }
     }
 
-    // Sync tick and cross-probe selection from DigitalJS engine iframe
+    // Cross-probe element selection from DigitalJS engine iframe
     window.addEventListener("message", (event) => {
-      if (event.data && event.data.type === "tickUpdate") {
-        const el = document.getElementById("djsTickVal");
-        if (el) el.value = event.data.tick;
-      }
       if (event.data && event.data.type === "djsCellSelected") {
         handleCircuitSelection(event.data);
       }
@@ -4146,6 +4150,11 @@ endmodule`
 
       // Before user clicks Run, keep circuit in standby mode (NOT visible yet)
       if (!isCircuitSynthesized) {
+        if (!isSimRunning) {
+          simTimeMs = 0;
+          simTick = 0;
+          if (typeof updateTickDisplay === 'function') updateTickDisplay();
+        }
         switchDjsEngineMode('congestion');
         renderStandbyCircuitState(filename);
         return;
@@ -4880,12 +4889,19 @@ endmodule`
 
     function djsPauseSim() {
       isSimRunning = false;
-      clearInterval(simTimer);
-      simTimer = null;
+      if (simIntervalTimer) {
+        clearInterval(simIntervalTimer);
+        simIntervalTimer = null;
+      }
+      if (simTimer) {
+        clearInterval(simTimer);
+        simTimer = null;
+      }
       const btn = document.getElementById("djsRunBtn");
       const txt = document.getElementById("djsRunBtnText");
       if (btn) btn.style.background = "#0d6efd";
       if (txt) txt.textContent = "Run";
+      updateTickDisplay();
       sendDjsIframeCmd('pause');
     }
 
@@ -4895,27 +4911,43 @@ endmodule`
       const txt = document.getElementById("djsRunBtnText");
       if (btn) btn.style.background = "#16a34a";
       if (txt) txt.textContent = "Running...";
+
+      simLastTimestamp = performance.now();
+      if (simIntervalTimer) clearInterval(simIntervalTimer);
+      simIntervalTimer = setInterval(() => {
+        if (!isSimRunning) return;
+        const now = performance.now();
+        const delta = now - simLastTimestamp;
+        simLastTimestamp = now;
+        simTimeMs += delta;
+        updateTickDisplay();
+      }, 25);
+
       startSimLoop();
       sendDjsIframeCmd('resume');
     }
 
     function djsStepSim() {
+      simTimeMs += 50;
       advanceTick();
       sendDjsIframeCmd('single');
     }
 
     function djsFastFwdSim() {
-      for (let i = 0; i < 20; i++) advanceTick();
+      simTimeMs += 500;
+      for (let i = 0; i < 5; i++) advanceTick();
       sendDjsIframeCmd('fastfw');
     }
 
     function djsNextEventSim() {
+      simTimeMs += 25;
       advanceTick();
       sendDjsIframeCmd('next');
     }
 
     function djsResetSim() {
-      isCircuitSynthesized = true;
+      djsPauseSim();
+      simTimeMs = 0;
       simTick = 0;
       simClock = 0;
       pinState.dff_d = 1;
@@ -4940,39 +4972,42 @@ endmodule`
         }
       }
       updateTickDisplay();
-      updateHudClock();
       if (currentDjsEngineMode !== 'live') {
         renderCurrentCircuit();
       }
     }
 
     function updateTickDisplay() {
+      const ms = Math.max(0, Math.floor(simTimeMs || 0));
       const el = document.getElementById("djsTickVal");
       if (el) {
-        if (el.tagName === 'INPUT') el.value = simTick;
-        else el.textContent = simTick;
+        el.value = `${ms} ms`;
       }
+      updateHudClock();
+      updateSignalHud();
     }
 
     function updateHudClock() {
+      const ms = Math.max(0, Math.floor(simTimeMs || 0));
       const el = document.getElementById("djsHudClkBadge");
-      if (el) el.textContent = `CLK: ${simClock ? 'HIGH' : 'LOW'} | Cycle #${Math.floor(simTick / 2)}`;
+      if (el) el.textContent = `CLK: ${simClock ? 'HIGH' : 'LOW'} | Time: ${ms} ms`;
     }
 
     function updateSignalHud() {
       const hud = document.getElementById("djsSignalHud");
       if (!hud) return;
+      const ms = Math.max(0, Math.floor(simTimeMs || 0));
       if (currentModule === "dff_master_slave.sv") {
-        hud.textContent = `d=${pinState.dff_d} | clk=${pinState.dff_clk} | qm=${pinState.dff_qm} | Q=${pinState.dff_q} | Q̄=${pinState.dff_nq} | ⏱ Tick=${simTick}`;
+        hud.textContent = `d=${pinState.dff_d} | clk=${pinState.dff_clk} | qm=${pinState.dff_qm} | Q=${pinState.dff_q} | Q̄=${pinState.dff_nq} | ⏱ Time: ${ms} ms`;
       } else if (currentModule === "sr_latch.sv") {
-        hud.textContent = `s=${pinState.s || 0} | r=${pinState.r || 0} | Q=${pinState.q !== undefined ? pinState.q : 0} | Q̄=${pinState.nq !== undefined ? pinState.nq : 1} | ⏱ Tick=${simTick}`;
+        hud.textContent = `s=${pinState.s || 0} | r=${pinState.r || 0} | Q=${pinState.q !== undefined ? pinState.q : 0} | Q̄=${pinState.nq !== undefined ? pinState.nq : 1} | ⏱ Time: ${ms} ms`;
       } else if (currentModule === "sr_neg_gate.sv") {
-        hud.textContent = `ns=${pinState.ns} | nr=${pinState.nr} | Q=${pinState.q} | Q̄=${pinState.nq} | ⏱ Tick=${simTick}`;
+        hud.textContent = `ns=${pinState.ns} | nr=${pinState.nr} | Q=${pinState.q} | Q̄=${pinState.nq} | ⏱ Time: ${ms} ms`;
       } else if (currentModule === "fulladder.sv") {
         const sum = pinState.fa_a ^ pinState.fa_b ^ pinState.fa_cin;
-        hud.textContent = `A=${pinState.fa_a} | B=${pinState.fa_b} | Cin=${pinState.fa_cin} | Sum=${sum} | ⏱ Tick=${simTick}`;
+        hud.textContent = `A=${pinState.fa_a} | B=${pinState.fa_b} | Cin=${pinState.fa_cin} | Sum=${sum} | ⏱ Time: ${ms} ms`;
       } else {
-        hud.textContent = `clk=${simClock} | pc=0x${(pinState.pc_val||0).toString(16).padStart(8,'0')} | instr=ADD | alu_out=0x00000008 | Cout=0 | ⏱ Tick=${simTick}`;
+        hud.textContent = `clk=${simClock} | pc=0x${(pinState.pc_val||0).toString(16).padStart(8,'0')} | instr=ADD | alu_out=0x00000008 | Cout=0 | ⏱ Time: ${ms} ms`;
       }
     }
 
