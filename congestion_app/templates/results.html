@@ -3377,12 +3377,13 @@ endmodule`
         container.innerHTML = renderProcessorCoreCircuit();
         if (badge) badge.textContent = "[RV32I GATE NETLIST]";
       } else {
-        // ANY GENERAL ARBITRARY USER VERILOG CODE: synthesize in background with DigitalJS Yosys engine!
+        // ANY GENERAL ARBITRARY USER VERILOG CODE: synthesize via DigitalJS Yosys and show live iframe.
+        // Do NOT render mock SVG — it hides the live DigitalJS gate netlist canvas.
+        switchDjsEngineMode('live');
         if (typeof synthesizeWithDigitalJsBackground === 'function') {
           synthesizeWithDigitalJsBackground(currentCode, currentModule);
         }
-        container.innerHTML = renderDynamicSynthesizedCircuit(currentCode, parsed);
-        if (badge) badge.textContent = `[SYNTHESIZED: ${parsed.moduleName.toUpperCase()}]`;
+        if (badge) badge.textContent = `[SYNTHESIZING: ${parsed.moduleName.toUpperCase()} — DIGITALJS YOSYS]`;
       }
 
       // Re-apply active visual selection on canvas if user previously clicked a gate or wire
@@ -4050,13 +4051,33 @@ endmodule`
           if (resData && resData.output) {
             const customHash = "user_" + Math.random().toString(36).substring(2, 10);
             switchDjsEngineMode('live');
-            if (iframe && iframe.contentWindow) {
-              iframe.contentWindow.postMessage({
-                type: 'loadCircuitData',
-                circuit: resData.output,
-                hash: customHash
-              }, '*');
+
+            // Helper to send circuit data to iframe, with retry if iframe not ready
+            function sendCircuitToIframe(iframeEl, circuitData, hashKey) {
+              if (!iframeEl) return;
+              function doSend() {
+                if (iframeEl.contentWindow) {
+                  iframeEl.contentWindow.postMessage({
+                    type: 'loadCircuitData',
+                    circuit: circuitData,
+                    hash: hashKey
+                  }, '*');
+                }
+              }
+              // If iframe has no src yet, initialize it first
+              const needsLoad = !iframeEl.src || iframeEl.src === 'about:blank' || iframeEl.src === window.location.href;
+              if (needsLoad) {
+                iframeEl.onload = () => { iframeEl.onload = null; setTimeout(doSend, 200); };
+                iframeEl.src = 'digitaljs_view.html?v=20261012-v5.6';
+              } else {
+                // Iframe already loaded — send immediately, retry after 300ms as safety net
+                doSend();
+                setTimeout(doSend, 400);
+              }
             }
+
+            sendCircuitToIframe(iframe, resData.output, customHash);
+
             const devCount = resData.output.devices ? Object.keys(resData.output.devices).length : 0;
             const netCount = resData.output.connectors ? resData.output.connectors.length : 0;
             if (badge) badge.textContent = `[DIGITALJS YOSYS NETLIST: ${devCount} GATES / ${netCount} NETS]`;
@@ -4868,8 +4889,16 @@ endmodule`
               updateLiveDigitalJsFrame(currentModule);
             }
             switchDjsEngineMode('live');
+            // For preset circuits, still update HUD / signal panel via renderCurrentCircuit
+            // but do NOT draw mock SVG — switchDjsEngineMode('live') already shows iframe
           } else {
+            // Custom/arbitrary Verilog: hand off entirely to synthesizeWithDigitalJsBackground().
+            // That function will switch to live mode and postMessage the circuit data.
+            // Do NOT call renderCurrentCircuit() here — it would override the live iframe.
             synthesizeWithDigitalJsBackground(trimmed, currentModule);
+            // Still update HUD / signal panel without touching the circuit canvas
+            if (typeof updateSignalHud === 'function') updateSignalHud();
+            return; // early return — skip renderCurrentCircuit()
           }
           renderCurrentCircuit();
         } else {
