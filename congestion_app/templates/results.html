@@ -4905,7 +4905,7 @@ endmodule`
     }
 
     // ── Show error state in circuit canvas ──────────────────────────────────
-    function renderErrorCircuitState(errors) {
+    function renderErrorCircuitState(customMsg) {
       isCircuitSynthesized = false;
       switchDjsEngineMode('congestion');
       const container = document.getElementById("djsCircuitGroup");
@@ -4913,42 +4913,25 @@ endmodule`
       const badge      = document.getElementById("djsHudModeBadge");
       const sigEl      = document.getElementById("djsSignalSummary");
 
-      if (badge) badge.textContent = "[ERROR: CODE NOT ACCEPTED]";
+      const errorDetail = customMsg || "Only RV32I-related HDL code";
+
+      if (badge) badge.textContent = "[ERROR: CANNOT SYNTHESIZE]";
       if (sigEl) {
-        sigEl.innerHTML = `<span style="color:#dc2626;font-weight:600;">✖ Error:</span> ${errors[0] || "Invalid code"}`;
+        sigEl.innerHTML = `<span style="color:#dc2626;font-weight:600;">✖ Code Error — Cannot Synthesize:</span> ${errorDetail}`;
       }
       if (svgEl) svgEl.setAttribute("viewBox", "0 0 680 340");
       if (container) {
-        const errLines = errors.map((e, i) =>
-          `<tspan x="0" dy="${i === 0 ? 0 : 24}" font-size="13" fill="#dc2626">⚠ ${e}</tspan>`
-        ).join('');
         container.innerHTML = `
           <g transform="translate(340,170)">
-            <rect x="-300" y="-140" width="600" height="280" rx="12"
+            <rect x="-240" y="-65" width="480" height="130" rx="12"
               fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-            <text x="-270" y="-100" font-size="18" font-weight="700"
+            <text x="0" y="-12" text-anchor="middle" font-size="18" font-weight="700"
               fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">
               ✖ Code Error — Cannot Synthesize
             </text>
-            <text x="-270" y="-68" font-family="monospace" text-anchor="start">
-              ${errLines}
-            </text>
-            <rect x="-270" y="-30" width="540" height="1" fill="#fca5a5"/>
-            <text x="-270" y="14" font-size="12" fill="#6b7280"
-              font-family="system-ui, -apple-system, sans-serif">
-              Supported modules:
-            </text>
-            <text x="-270" y="34" font-size="12" fill="#374151"
-              font-family="monospace">
-              rv32i_pipeline_top  •  rv32i_core  •  rv32i_alu
-            </text>
-            <text x="-270" y="54" font-size="12" fill="#374151"
-              font-family="monospace">
-              dff_master_slave  •  sr_latch  •  sr_neg_latch  •  full_adder
-            </text>
-            <text x="-270" y="82" font-size="11" fill="#9ca3af"
-              font-family="system-ui, -apple-system, sans-serif">
-              Load a preset from the toolbar or fix the errors above, then click ▶ Run.
+            <text x="0" y="24" text-anchor="middle" font-size="15" font-weight="600"
+              fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">
+              ${errorDetail}
             </text>
           </g>`;
       }
@@ -4964,18 +4947,14 @@ endmodule`
       // ── Step 1: Basic Verilog syntax validation ────────────────────────────
       const syntaxErrors = validateVerilogCode(trimmed);
       if (syntaxErrors.length > 0) {
-        renderErrorCircuitState(syntaxErrors);
+        renderErrorCircuitState("Only RV32I-related HDL code");
         return;
       }
 
       // ── Step 2: Check if this is a supported RV32I module ─────────────────
       const detectedFile = detectRv32iModule(trimmed);
       if (!detectedFile) {
-        renderErrorCircuitState([
-          "Only RV32I-related HDL code is supported.",
-          "Module name not recognised as a supported RV32I design.",
-          "Load a preset from the toolbar or use a supported module name."
-        ]);
+        renderErrorCircuitState("Only RV32I-related HDL code");
         return;
       }
 
