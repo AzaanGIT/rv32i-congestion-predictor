@@ -1127,21 +1127,8 @@ endmodule`
           </div>
         </div>
 
-        <!-- Design Presets Bar on Page 2 -->
-        <div style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 7px 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span style="font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px;">HDL Presets:</span>
-            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('rv32i_core.sv')">⚡ RV32I Core</button>
-            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('dff_master_slave.sv')">🔄 D Flip-Flop</button>
-            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('fulladder.sv')">➕ Full Adder</button>
-            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('sr_latch.sv')">🔲 SR Latch</button>
-            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('sr_neg_gate.sv')">🔲 SR Neg-Latch</button>
-            <button type="button" class="schematic-ctrl-btn" onclick="djsSelectModule('rv32i_alu.sv')">🧮 32-Bit ALU</button>
-          </div>
-          <div style="font-size: 11px; color: #64748b;">
-            💡 <i>Edit Verilog on left &amp; click <b>Run</b> to synthesize gate netlist in real-time</i>
-          </div>
-        </div>
+
+
 
         <!-- 2. WORKBENCH: SIDE-BY-SIDE LAYOUT (||) - CODE ON LEFT, GATE LEVEL CANVAS ON RIGHT -->
         <div id="djsWorkbenchLayout" class="editor-circuit-wrapper" style="display: grid; grid-template-columns: minmax(380px, 460px) 10px 1fr; height: 640px; min-height: 560px; max-height: calc(100vh - 120px); overflow: hidden; background: #ffffff;">
