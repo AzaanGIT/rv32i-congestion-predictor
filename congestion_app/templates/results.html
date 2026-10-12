@@ -4900,22 +4900,17 @@ endmodule`
           if (tabLabel) tabLabel.textContent = currentModule;
 
           if (DIGITALJS_LIVE_HASHES[currentModule]) {
+            // Preset circuit: load via hash into live iframe
             if (typeof updateLiveDigitalJsFrame === 'function') {
               updateLiveDigitalJsFrame(currentModule);
             }
             switchDjsEngineMode('live');
-            // For preset circuits, still update HUD / signal panel via renderCurrentCircuit
-            // but do NOT draw mock SVG — switchDjsEngineMode('live') already shows iframe
+            renderCurrentCircuit();
           } else {
-            // Custom/arbitrary Verilog: hand off entirely to synthesizeWithDigitalJsBackground().
-            // That function will switch to live mode and postMessage the circuit data.
-            // Do NOT call renderCurrentCircuit() here — it would override the live iframe.
+            // Custom/arbitrary Verilog: synthesize via Yosys then show in live iframe
             synthesizeWithDigitalJsBackground(trimmed, currentModule);
-            // Still update HUD / signal panel without touching the circuit canvas
             if (typeof updateSignalHud === 'function') updateSignalHud();
-            return; // early return — skip renderCurrentCircuit()
           }
-          renderCurrentCircuit();
         } else {
           currentModule = "empty_design.sv";
           renderEmptyCircuitState();
@@ -4924,6 +4919,7 @@ endmodule`
         }
       }
 
+      // Toggle simulation: start timer on first Run, pause/resume on subsequent clicks
       if (!isSimRunning) {
         djsResumeSim();
       } else {
