@@ -193,8 +193,8 @@ def predict():
     suggested_resources = {}
     for k, res in resources.items():
         d_val = demands.get(k, 0)
-        if d_val / max(1.0, res) > 0.80:
-            suggested_resources[k] = int(d_val / 0.70)
+        if d_val / max(1.0, res) > 0.65:
+            suggested_resources[k] = max(int(res * 1.40), int(d_val / 0.50))
         else:
             suggested_resources[k] = int(res)
 

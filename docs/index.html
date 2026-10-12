@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261012-v5.9.2';
+      const BUILD_VER = '20261012-v6.0';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1705,10 +1705,13 @@ endmodule`
       const curDemand = allDemands[layer] || 0;
       const curPct = rawData[layer] || 0;
       
-      let recRes = allSuggestedResources[layer];
-      if (!recRes || recRes <= curRes) {
-        recRes = curDemand > 0 ? Math.ceil(curDemand / 0.70) : Math.max(1000, Math.ceil(curRes * 1.25));
-      }
+      // Calculate target capacity:
+      // Guarantee at least +40% increase over current tracks, AND ensure saturation drops to <= 50%
+      let recRes = Math.max(
+        Math.ceil(curRes * 1.40),
+        curDemand > 0 ? Math.ceil(curDemand / 0.50) : Math.ceil(curRes * 1.40)
+      );
+      recRes = Math.max(1000, recRes);
       const estNewPct = recRes > 0 ? Math.min(100.0, Math.round((curDemand / recRes) * 1000) / 10) : 0;
 
       document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer + ' Only';
@@ -1779,8 +1782,10 @@ endmodule`
         }
         for (let i = 1; i <= 10; i++) {
           if (formData.has('metal_' + i)) {
-            const inp = document.querySelector(`input[name="metal_${i}"]`);
-            if (inp) inp.value = formData.get('metal_' + i);
+            const val = parseFloat(formData.get('metal_' + i)) || 0;
+            const inps = document.querySelectorAll(`input[name="metal_${i}"]`);
+            inps.forEach(inp => { inp.value = val; });
+            allResources['M' + i] = val;
           }
         }
         closeFixModal();
@@ -1841,7 +1846,13 @@ endmodule`
 
       for (let i = 1; i <= 10; i++) {
         const k = "M" + i;
-        const d = Math.round(baseDemands[k] * stress * 10) / 10;
+        let d;
+        if (isFix && targetFixedLayer && allDemands && allDemands[k] !== undefined && allDemands[k] > 0) {
+          // Single-layer fix: placement and floorplan are identical, so demands remain exactly the same
+          d = allDemands[k];
+        } else {
+          d = Math.round(baseDemands[k] * stress * 10) / 10;
+        }
         demands[k] = d;
         const cap = resources[k] || 0;
         let pct = 0;
@@ -1888,8 +1899,8 @@ endmodule`
         const k = "M" + i;
         const d = demands[k] || 0;
         const res = resources[k] || 0;
-        if (res > 0 && (d / res > 0.80)) {
-          allSuggestedResources[k] = Math.ceil(d / 0.70);
+        if (res > 0 && (d / res > 0.65)) {
+          allSuggestedResources[k] = Math.max(Math.ceil(res * 1.40), Math.ceil(d / 0.50));
         } else {
           allSuggestedResources[k] = res;
         }
