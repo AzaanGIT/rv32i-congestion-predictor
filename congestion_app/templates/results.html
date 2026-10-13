@@ -1134,10 +1134,11 @@
         if (cap > 0) {
           pct = Math.round((d / cap) * 1000) / 10;
         }
-        layerUsage[k] = Math.min(100.0, pct);
-        sumUsage += layerUsage[k];
-        if (pct > peakVal) {
-          peakVal = pct;
+        const cappedPct = Math.min(100.0, pct);
+        layerUsage[k] = cappedPct;
+        sumUsage += cappedPct;
+        if (cappedPct > peakVal) {
+          peakVal = cappedPct;
           peakLayer = k;
         }
       }
