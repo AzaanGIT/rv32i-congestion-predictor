@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261012-v6.0';
+      const BUILD_VER = '20261013-v6.1';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -161,6 +161,87 @@
     .modal-box { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); border-radius: 12px; width: 600px; max-width: 90%; padding: 24px; color: #1a202c; }
   </style>
   <script>
+    function isRv32iRelatedCode(code) {
+      if (!code || typeof code !== 'string') return false;
+      const trimmed = code.trim();
+      if (trimmed.length === 0) return false;
+      const lower = trimmed.toLowerCase();
+
+      // 1. Direct architectural names in module definition, comments or code
+      const rvKeywords = ["rv32i", "rv32", "riscv", "risc_v", "risc-v", "rv32e", "rv32m"];
+      for (const kw of rvKeywords) {
+        if (lower.includes(kw)) return true;
+      }
+
+      // 2. RV32I pipeline stage registers (IF/ID, ID/EX, EX/MEM, MEM/WB)
+      const hasPipeline = (
+        (lower.includes("ifid_") || lower.includes("if_id")) &&
+        (lower.includes("idex_") || lower.includes("id_ex"))
+      ) || (
+        (lower.includes("exmem_") || lower.includes("ex_mem")) &&
+        (lower.includes("memwb_") || lower.includes("mem_wb"))
+      );
+      if (hasPipeline) return true;
+
+      // 3. Core RV32I debug & pipeline signals
+      if (lower.includes("debug_pc") && lower.includes("debug_alu_result")) return true;
+      if (lower.includes("instruction_memory") && lower.includes("regfile")) return true;
+      if (lower.includes("load_use_stall") && (lower.includes("branch_taken") || lower.includes("branch_target") || lower.includes("branch_id"))) return true;
+      if (lower.includes("pc_next") && (lower.includes("pc_plus4") || lower.includes("instr_if"))) return true;
+
+      // 4. RV32I Instruction Decode structure (Opcode + Funct3 + Funct7)
+      const hasRvDecode = (
+        (lower.includes("opcode") || lower.includes("opcode_id") || lower.includes("op_code")) &&
+        (lower.includes("funct3") || lower.includes("funct3_id")) &&
+        (lower.includes("funct7") || lower.includes("funct7_id") || lower.includes("regwrite") || lower.includes("alusrc") || lower.includes("imm_id"))
+      );
+      if (hasRvDecode) return true;
+
+      // 5. RV32I 32-register register file
+      if (lower.includes("regfile") && lower.includes("rs1") && lower.includes("rs2") && lower.includes("rd")) return true;
+
+      // 6. RV32I ALU structure
+      if (lower.includes("alu") && lower.includes("funct3") && (lower.includes("forward_a") || lower.includes("forward_b") || lower.includes("alu_result") || lower.includes("alu_out"))) return true;
+
+      return false;
+    }
+
+    function validateVerilogCode(code) {
+      const errors = [];
+      if (!code || code.trim().length === 0) {
+        errors.push("No code entered. Please write or load RV32I Verilog HDL code.");
+        return errors;
+      }
+      if (!/\bmodule\b/.test(code)) {
+        errors.push("Missing 'module' keyword — not valid Verilog HDL.");
+      }
+      if (!/\bendmodule\b/.test(code)) {
+        errors.push("Missing 'endmodule' keyword — module is not closed.");
+      }
+      return errors;
+    }
+
+    function showHdlValidationError(msg) {
+      const banner = document.getElementById("hdlValidationErrorBanner");
+      const msgEl = document.getElementById("hdlValidationErrorMessage");
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (msgEl) msgEl.textContent = msg;
+      if (banner) {
+        banner.style.display = "block";
+        banner.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      if (textarea) {
+        textarea.style.border = "2px solid #ef4444";
+      }
+    }
+
+    function clearHdlValidationError() {
+      const banner = document.getElementById("hdlValidationErrorBanner");
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (banner) banner.style.display = "none";
+      if (textarea) textarea.style.border = "none";
+    }
+
     function showInputForm() {
       const resultsEl = document.getElementById('resultsView');
       const controlsEl = document.getElementById('controlsView');
@@ -173,6 +254,26 @@
     }
 
     function triggerAnalysisFromForm() {
+      const textarea = document.getElementById("hdlCodeTextarea");
+      const userCode = textarea ? textarea.value.trim() : "";
+
+      if (userCode.length > 0) {
+        // Validate syntax
+        const syntaxErrs = validateVerilogCode(userCode);
+        if (syntaxErrs.length > 0) {
+          showHdlValidationError("Verilog Syntax Error: " + syntaxErrs[0]);
+          return;
+        }
+
+        // Validate RV32I relation
+        if (!isRv32iRelatedCode(userCode)) {
+          showHdlValidationError("Only RV32I-related HDL code is supported (e.g. 5-Stage RV32I Pipeline, RV32I Core, or RV32I ALU). Arbitrary non-RV32I designs cannot be synthesized into a gate-level netlist.");
+          return;
+        }
+      }
+
+      clearHdlValidationError();
+
       const controlsEl = document.getElementById('controlsView');
       const resultsEl = document.getElementById('resultsView');
       if (controlsEl) controlsEl.style.display = 'none';
@@ -483,6 +584,17 @@
 
       <!-- Hidden input for file name -->
       <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="">
+
+      <!-- Validation Error Banner for non-RV32I HDL code -->
+      <div id="hdlValidationErrorBanner" style="display: none; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 14px 18px; margin-top: 14px; color: #991b1b; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);">
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+          <span style="font-size: 18px; line-height: 1;">❌</span>
+          <div>
+            <div style="font-weight: 800; font-size: 13px; margin-bottom: 2px;">Unsupported HDL Code — Cannot Run or Synthesize</div>
+            <div id="hdlValidationErrorMessage" style="font-size: 12px; font-weight: 500; color: #b91c1c; line-height: 1.4;">Only RV32I-related HDL code is supported (e.g. 5-Stage RV32I Pipeline, RV32I Core, or RV32I ALU). Arbitrary non-RV32I designs cannot be synthesized into a gate-level netlist.</div>
+          </div>
+        </div>
+      </div>
     </div>
 
 
@@ -842,6 +954,7 @@ endmodule`
       const tabLabel = document.getElementById("tabFilenameLabel");
       const hiddenInput = document.getElementById("selectedHdlFilenameInput");
       if (!textarea) return;
+      if (typeof clearHdlValidationError === 'function') clearHdlValidationError();
 
       const codeVal = textarea.value || "";
       const lines = codeVal.length === 0 ? 1 : codeVal.split(/\r\n|\r|\n/).length;
@@ -1970,6 +2083,15 @@ endmodule`
       const userCode = document.getElementById('hdlCodeTextarea')?.value;
       if (userCode && userCode.trim().length > 0) {
         const trimmed = userCode.trim();
+        if (!isRv32iRelatedCode(trimmed)) {
+          // Reject non-RV32I HDL code: DO NOT synthesize or generate netlist
+          window.userSubmittedCode = "";
+          if (typeof renderErrorCircuitState === 'function') {
+            renderErrorCircuitState("Only RV32I-related HDL code is supported");
+          }
+          return;
+        }
+
         let targetModule = 'user_design.sv';
         if (typeof parseVerilogCode === 'function') {
           const parsed = parseVerilogCode(trimmed);
@@ -1977,10 +2099,6 @@ endmodule`
         }
         if (trimmed.includes("rv32i_pipeline_top")) targetModule = "rv32i_pipeline_top.sv";
         else if (trimmed.includes("rv32i_core")) targetModule = "rv32i_core.sv";
-        else if (trimmed.includes("dff_master_slave") || trimmed.includes("d_latch")) targetModule = "dff_master_slave.sv";
-        else if (trimmed.includes("sr_neg_latch")) targetModule = "sr_neg_gate.sv";
-        else if (trimmed.includes("sr_latch") || (trimmed.includes("nor g1") && trimmed.includes("nor g2"))) targetModule = "sr_latch.sv";
-        else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) targetModule = "fulladder.sv";
         else if (trimmed.includes("rv32i_alu")) targetModule = "rv32i_alu.sv";
 
         window.userSubmittedCode = trimmed;
@@ -4200,8 +4318,13 @@ endmodule`
         container.innerHTML = renderProcessorCoreCircuit();
         if (badge) badge.textContent = "[RV32I GATE NETLIST]";
       } else {
-        // ANY GENERAL ARBITRARY USER VERILOG CODE: synthesize via DigitalJS Yosys and show live iframe.
-        // Do NOT render mock SVG — it hides the live DigitalJS gate netlist canvas.
+        if (!isRv32iRelatedCode(currentCode)) {
+          djsPauseSim();
+          isCircuitSynthesized = false;
+          renderErrorCircuitState("Only RV32I-related HDL code is supported");
+          return;
+        }
+        // ONLY valid RV32I user-defined processor code gets synthesized
         switchDjsEngineMode('live');
         if (typeof synthesizeWithDigitalJsBackground === 'function') {
           synthesizeWithDigitalJsBackground(currentCode, currentModule);
@@ -4811,6 +4934,13 @@ endmodule`
     }
 
     async function synthesizeWithDigitalJsBackground(code, filename) {
+      if (!isRv32iRelatedCode(code)) {
+        djsPauseSim();
+        isCircuitSynthesized = false;
+        renderErrorCircuitState("Only RV32I-related HDL code is supported");
+        return;
+      }
+
       const badge = document.getElementById("djsCircuitStatusBadge");
       const liveBadge = document.getElementById("djsLiveGateCountBadge");
       const iframe = document.getElementById("djsLiveFrame");
@@ -4821,18 +4951,10 @@ endmodule`
       const trimmed = (code || "").trim();
       let matchedHash = null;
 
-      // 1. Check if code matches any of our pre-synthesized circuits
-      if (trimmed.includes("nor g1") && trimmed.includes("nor g2")) {
-        matchedHash = "3b4545db253fa66aef938b0837207f09022561f5e5a9435b904089f3900d8441";
-      } else if (trimmed.includes("nand g1") && trimmed.includes("nand g2")) {
-        matchedHash = "e0f187cd33c2072f97ebe20c23c7f56929164bbe0291204cf1b014c2efc567b3";
-      } else if (trimmed.includes("dff_master_slave")) {
-        matchedHash = "2f71143b65ff0abe1f2b714263ca4514d0ad7d72863cb237aeaa4dd76daaf457";
-      } else if (trimmed.includes("full_adder") || trimmed.includes("fulladder")) {
-        matchedHash = "68cca6bbc7ffd85741eb891523d70076e971a5c34a253ba4934ce2cc1f9f0a2c";
-      } else if (trimmed.includes("rv32i_alu")) {
+      // 1. Check if code matches any of our pre-synthesized RV32I circuits
+      if (trimmed.includes("rv32i_alu")) {
         matchedHash = "902039f4e68ce76ac91625074c6ae754c10576b189671cb743677dd32007bff8";
-      } else if (trimmed.includes("rv32i_core") || trimmed.includes("rv32i_pipeline")) {
+      } else if (trimmed.includes("rv32i_core") || trimmed.includes("rv32i_pipeline") || trimmed.includes("rv32i_pipeline_top")) {
         matchedHash = "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
       }
 
@@ -5020,6 +5142,12 @@ endmodule`
         switchDjsEngineMode('live');
       } else {
         // Custom user code: synthesize with DigitalJS in background
+        if (!isRv32iRelatedCode(code)) {
+          djsPauseSim();
+          isCircuitSynthesized = false;
+          renderErrorCircuitState("Only RV32I-related HDL code is supported");
+          return;
+        }
         synthesizeWithDigitalJsBackground(code, filename);
       }
 
@@ -5695,12 +5823,7 @@ endmodule`
       "rv32i_pipeline_top":    "rv32i_pipeline_top.sv",
       "rv32i_pipeline_clean":  "rv32i_pipeline_clean.sv",
       "rv32i_core":            "rv32i_core.sv",
-      "rv32i_alu":             "rv32i_alu.sv",
-      "dff_master_slave":      "dff_master_slave.sv",
-      "sr_latch":              "sr_latch.sv",
-      "sr_neg_latch":          "sr_neg_gate.sv",
-      "full_adder":            "fulladder.sv",
-      "fulladder":             "fulladder.sv"
+      "rv32i_alu":             "rv32i_alu.sv"
     };
 
     // ── Basic Verilog syntax checker ─────────────────────────────────────────
@@ -5723,6 +5846,10 @@ endmodule`
 
     // ── Detect which RV32I preset module the code belongs to ────────────────
     function detectRv32iModule(code) {
+      if (!isRv32iRelatedCode(code)) {
+        return null;
+      }
+
       const lower = (code || "").toLowerCase();
 
       // 1. Top-level RV32I Pipelined Processor
@@ -5745,21 +5872,7 @@ endmodule`
         return "rv32i_alu.sv";
       }
 
-      // 4. Sequential / Latches / Standard Cells
-      if (lower.includes("dff_master_slave") || lower.includes("d_latch") || lower.includes("master_slave")) {
-        return "dff_master_slave.sv";
-      }
-      if (lower.includes("sr_neg_latch") || lower.includes("sr_neg_gate")) {
-        return "sr_neg_gate.sv";
-      }
-      if (lower.includes("sr_latch") || (lower.includes("nor g1") && lower.includes("nor g2"))) {
-        return "sr_latch.sv";
-      }
-      if (lower.includes("full_adder") || lower.includes("fulladder")) {
-        return "fulladder.sv";
-      }
-
-      // 5. Fallback check by parsed module name or standard RV32I identifiers
+      // 4. Check by parsed module name or standard RV32I identifiers
       for (const [keyword, filename] of Object.entries(SUPPORTED_MODULE_MAP)) {
         if (code.includes(keyword)) return filename;
       }
@@ -5768,12 +5881,12 @@ endmodule`
       if (parsed && parsed.moduleName) {
         const mod = parsed.moduleName.toLowerCase();
         if (SUPPORTED_MODULE_MAP[mod]) return SUPPORTED_MODULE_MAP[mod];
-        if (mod.includes("rv32i") || mod.includes("pipeline") || mod.includes("riscv") || mod.includes("processor") || mod === "top") {
+        if (mod.includes("rv32i") || mod.includes("pipeline") || mod.includes("riscv") || mod.includes("processor")) {
           return "rv32i_pipeline_top.sv";
         }
       }
 
-      return null;
+      return "rv32i_pipeline_top.sv";
     }
 
     // ── Show error state in circuit canvas ──────────────────────────────────
@@ -5819,13 +5932,24 @@ endmodule`
       // ── Step 1: Basic Verilog syntax validation ────────────────────────────
       const syntaxErrors = validateVerilogCode(trimmed);
       if (syntaxErrors.length > 0) {
+        djsPauseSim();
+        isCircuitSynthesized = false;
         renderErrorCircuitState("Only RV32I-related HDL code");
         return;
       }
 
       // ── Step 2: Check if this is a supported RV32I module ─────────────────
+      if (!isRv32iRelatedCode(trimmed)) {
+        djsPauseSim();
+        isCircuitSynthesized = false;
+        renderErrorCircuitState("Only RV32I-related HDL code");
+        return;
+      }
+
       const detectedFile = detectRv32iModule(trimmed);
       if (!detectedFile) {
+        djsPauseSim();
+        isCircuitSynthesized = false;
         renderErrorCircuitState("Only RV32I-related HDL code");
         return;
       }
@@ -6245,14 +6369,20 @@ endmodule`
     window.addEventListener("DOMContentLoaded", () => {
       drawAllLayerHeatmaps();
       if (userSubmittedCode && userSubmittedCode.trim().length > 0) {
-        const parsed = parseVerilogCode(userSubmittedCode);
-        const moduleFileName = (parsed.moduleName ? parsed.moduleName : "user_design") + ".sv";
-        HDL_PRESETS[moduleFileName] = userSubmittedCode;
-        currentModule = moduleFileName;
+        if (!isRv32iRelatedCode(userSubmittedCode)) {
+          currentModule = "empty_design.sv";
+          renderErrorCircuitState("Only RV32I-related HDL code is supported");
+        } else {
+          const parsed = parseVerilogCode(userSubmittedCode);
+          const moduleFileName = (parsed.moduleName ? parsed.moduleName : "user_design") + ".sv";
+          HDL_PRESETS[moduleFileName] = userSubmittedCode;
+          currentModule = moduleFileName;
+          djsSelectModule(currentModule);
+        }
       } else {
         currentModule = "empty_design.sv";
+        djsSelectModule(currentModule);
       }
-      djsSelectModule(currentModule);
       setDjsLayout('side');
       // Keep simulation initially paused until user clicks Run
       djsPauseSim();

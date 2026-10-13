@@ -81,6 +81,43 @@ def index():
     )
 
 
+def is_rv32i_code(code: str) -> bool:
+    """Checks whether the inputted HDL code is related to the RV32I processor architecture."""
+    if not code or not code.strip():
+        return True
+    lower = code.lower()
+    rv_keywords = ["rv32i", "rv32", "riscv", "risc_v", "risc-v", "rv32e", "rv32m"]
+    if any(kw in lower for kw in rv_keywords):
+        return True
+    has_pipeline = (
+        ("ifid_" in lower or "if_id" in lower) and ("idex_" in lower or "id_ex" in lower)
+    ) or (
+        ("exmem_" in lower or "ex_mem" in lower) and ("memwb_" in lower or "mem_wb" in lower)
+    )
+    if has_pipeline:
+        return True
+    if "debug_pc" in lower and "debug_alu_result" in lower:
+        return True
+    if "instruction_memory" in lower and "regfile" in lower:
+        return True
+    if "load_use_stall" in lower and ("branch_taken" in lower or "branch_target" in lower or "branch_id" in lower):
+        return True
+    if "pc_next" in lower and ("pc_plus4" in lower or "instr_if" in lower):
+        return True
+    has_decode = (
+        ("opcode" in lower or "opcode_id" in lower or "op_code" in lower)
+        and ("funct3" in lower or "funct3_id" in lower)
+        and ("funct7" in lower or "funct7_id" in lower or "regwrite" in lower or "alusrc" in lower or "imm_id" in lower)
+    )
+    if has_decode:
+        return True
+    if "regfile" in lower and "rs1" in lower and "rs2" in lower and "rd" in lower:
+        return True
+    if "alu" in lower and "funct3" in lower and ("forward_a" in lower or "forward_b" in lower or "alu_result" in lower or "alu_out" in lower):
+        return True
+    return False
+
+
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
     if request.method == "GET":
@@ -209,6 +246,11 @@ def predict():
 
     selected_hdl_filename = request.form.get("selected_hdl_filename", "")
     selected_hdl_code = request.form.get("selected_hdl_code", "")
+
+    # Reject non-RV32I HDL code: do not load or synthesize non-RV32I circuits
+    if selected_hdl_code and not is_rv32i_code(selected_hdl_code):
+        selected_hdl_code = ""
+        selected_hdl_filename = "empty_design.sv"
 
     return render_template(
         "results.html",

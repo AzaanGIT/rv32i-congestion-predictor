@@ -533,6 +533,17 @@
 
       <!-- Hidden input for file name -->
       <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="">
+
+      <!-- Validation Error Banner for non-RV32I HDL code -->
+      <div id="hdlValidationErrorBanner" style="display: none; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 14px 18px; margin-top: 14px; color: #991b1b; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);">
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+          <span style="font-size: 18px; line-height: 1;">❌</span>
+          <div>
+            <div style="font-weight: 800; font-size: 13px; margin-bottom: 2px;">Unsupported HDL Code — Cannot Run or Synthesize</div>
+            <div id="hdlValidationErrorMessage" style="font-size: 12px; font-weight: 500; color: #b91c1c; line-height: 1.4;">Only RV32I-related HDL code is supported (e.g. 5-Stage RV32I Pipeline, RV32I Core, or RV32I ALU). Arbitrary non-RV32I designs cannot be synthesized into a gate-level netlist.</div>
+          </div>
+        </div>
+      </div>
     </div>
 
 
@@ -561,6 +572,87 @@
   </form>
 
   <script>
+    function isRv32iRelatedCode(code) {
+      if (!code || typeof code !== 'string') return false;
+      const trimmed = code.trim();
+      if (trimmed.length === 0) return false;
+      const lower = trimmed.toLowerCase();
+
+      // 1. Direct architectural names in module definition, comments or code
+      const rvKeywords = ["rv32i", "rv32", "riscv", "risc_v", "risc-v", "rv32e", "rv32m"];
+      for (const kw of rvKeywords) {
+        if (lower.includes(kw)) return true;
+      }
+
+      // 2. RV32I pipeline stage registers (IF/ID, ID/EX, EX/MEM, MEM/WB)
+      const hasPipeline = (
+        (lower.includes("ifid_") || lower.includes("if_id")) &&
+        (lower.includes("idex_") || lower.includes("id_ex"))
+      ) || (
+        (lower.includes("exmem_") || lower.includes("ex_mem")) &&
+        (lower.includes("memwb_") || lower.includes("mem_wb"))
+      );
+      if (hasPipeline) return true;
+
+      // 3. Core RV32I debug & pipeline signals
+      if (lower.includes("debug_pc") && lower.includes("debug_alu_result")) return true;
+      if (lower.includes("instruction_memory") && lower.includes("regfile")) return true;
+      if (lower.includes("load_use_stall") && (lower.includes("branch_taken") || lower.includes("branch_target") || lower.includes("branch_id"))) return true;
+      if (lower.includes("pc_next") && (lower.includes("pc_plus4") || lower.includes("instr_if"))) return true;
+
+      // 4. RV32I Instruction Decode structure (Opcode + Funct3 + Funct7)
+      const hasRvDecode = (
+        (lower.includes("opcode") || lower.includes("opcode_id") || lower.includes("op_code")) &&
+        (lower.includes("funct3") || lower.includes("funct3_id")) &&
+        (lower.includes("funct7") || lower.includes("funct7_id") || lower.includes("regwrite") || lower.includes("alusrc") || lower.includes("imm_id"))
+      );
+      if (hasRvDecode) return true;
+
+      // 5. RV32I 32-register register file
+      if (lower.includes("regfile") && lower.includes("rs1") && lower.includes("rs2") && lower.includes("rd")) return true;
+
+      // 6. RV32I ALU structure
+      if (lower.includes("alu") && lower.includes("funct3") && (lower.includes("forward_a") || lower.includes("forward_b") || lower.includes("alu_result") || lower.includes("alu_out"))) return true;
+
+      return false;
+    }
+
+    function validateVerilogCode(code) {
+      const errors = [];
+      if (!code || code.trim().length === 0) {
+        errors.push("No code entered. Please write or load RV32I Verilog HDL code.");
+        return errors;
+      }
+      if (!/\bmodule\b/.test(code)) {
+        errors.push("Missing 'module' keyword — not valid Verilog HDL.");
+      }
+      if (!/\bendmodule\b/.test(code)) {
+        errors.push("Missing 'endmodule' keyword — module is not closed.");
+      }
+      return errors;
+    }
+
+    function showHdlValidationError(msg) {
+      const banner = document.getElementById("hdlValidationErrorBanner");
+      const msgEl = document.getElementById("hdlValidationErrorMessage");
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (msgEl) msgEl.textContent = msg;
+      if (banner) {
+        banner.style.display = "block";
+        banner.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      if (textarea) {
+        textarea.style.border = "2px solid #ef4444";
+      }
+    }
+
+    function clearHdlValidationError() {
+      const banner = document.getElementById("hdlValidationErrorBanner");
+      const textarea = document.getElementById("hdlCodeTextarea");
+      if (banner) banner.style.display = "none";
+      if (textarea) textarea.style.border = "none";
+    }
+
     function handleProcessorSelection(val) {
       const content = document.getElementById('processorContent');
       const promptBanner = document.getElementById('selectPromptBanner');
@@ -892,6 +984,7 @@ endmodule`
       const tabLabel = document.getElementById("tabFilenameLabel");
       const hiddenInput = document.getElementById("selectedHdlFilenameInput");
       if (!textarea) return;
+      if (typeof clearHdlValidationError === 'function') clearHdlValidationError();
 
       const codeVal = textarea.value || "";
       const lines = codeVal.length === 0 ? 1 : codeVal.split(/\r\n|\r|\n/).length;
@@ -1009,6 +1102,27 @@ endmodule`
         }, { passive: false });
       }
       updateLineNumbers();
+
+      const form = document.getElementById('floorplanForm');
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          const textarea = document.getElementById("hdlCodeTextarea");
+          const userCode = textarea ? textarea.value.trim() : "";
+          if (userCode.length > 0) {
+            const syntaxErrs = validateVerilogCode(userCode);
+            if (syntaxErrs.length > 0) {
+              e.preventDefault();
+              showHdlValidationError("Verilog Syntax Error: " + syntaxErrs[0]);
+              return false;
+            }
+            if (!isRv32iRelatedCode(userCode)) {
+              e.preventDefault();
+              showHdlValidationError("Only RV32I-related HDL code is supported (e.g. 5-Stage RV32I Pipeline, RV32I Core, or RV32I ALU). Arbitrary non-RV32I designs cannot be synthesized into a gate-level netlist.");
+              return false;
+            }
+          }
+        });
+      }
     });
 
   </script>
