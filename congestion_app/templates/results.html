@@ -715,6 +715,90 @@
         </div>
       </div>
 
+      <!-- WHY CONGESTION IS HAPPENING - ROOT CAUSE ANALYSIS IN WORDS -->
+      <div class="card" id="whyCongestionCard" style="border: 1px solid #e2e8f0; background: #ffffff; margin-top: 24px; padding: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PHYSICAL ROOT CAUSE ANALYSIS</span>
+            <h3 style="margin: 4px 0 0 0; font-size: 17px; font-weight: 800; color: #1a202c;">Why Is Congestion Happening? (Detailed Explanation in Words)</h3>
+          </div>
+          <span id="whyCongestionBadge" style="background: {% if is_congested %}#fee2e2{% else %}#f0fdf4{% endif %}; border: 1px solid {% if is_congested %}#fca5a5{% else %}#bbf7d0{% endif %}; color: {% if is_congested %}#991b1b{% else %}#166534{% endif %}; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
+            {% if is_congested %}⚠️ STATUS: CONGESTION OCCURRING{% else %}✓ CURRENT STATUS: NO CONGESTION{% endif %}
+          </span>
+        </div>
+
+        <!-- Primary Live Dynamic Explanation Box -->
+        <div id="whyCongestionSummaryBox" style="background: {% if is_congested %}#fef2f2{% else %}#f8fafc{% endif %}; border-left: 4px solid {% if is_congested %}#dc2626{% else %}#16a34a{% endif %}; padding: 14px 16px; border-radius: 6px; margin-bottom: 18px;">
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 4px;" id="whyCongestionSummaryTitle">
+            {% if is_congested %}
+            <span style="color:#b91c1c;">⚠️ Why Congestion Is Occurring in This Run:</span>
+            {% else %}
+            <span style="color:#15803d;">✓ Why Congestion Is NOT Occurring in This Run:</span>
+            {% endif %}
+          </div>
+          <p id="whyCongestionSummaryText" style="margin: 0; font-size: 12.5px; color: #334155; line-height: 1.55;">
+            {% if is_congested %}
+            Congestion is occurring because routing track demand on <b>{{ peak_layer }} has reached {{ peak_val_pct }}%</b> (exceeding the 85.0% DRC limit). Standard cell utilization of <b>{{ utilization }}%</b> and density of <b>{{ density }}</b> have concentrated transistor pins too densely, leaving insufficient open tracks for detailed routing detours.
+            {% else %}
+            Routing congestion is <b>NOT happening</b>. Peak wire track saturation is on <b>{{ peak_layer }} at {{ peak_val_pct }}%</b>, which is safely below the critical 85.0% DRC threshold. The core utilization (<b>{{ utilization }}%</b>) and placement density (<b>{{ density }}</b>) leave ample whitespace between cell rows for all intra-core nets, clock routing, and detour channels without causing DRC violations.
+            {% endif %}
+          </p>
+        </div>
+
+        <!-- The 4 Silicon Principles Causing Congestion -->
+        <div style="font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+          The 4 Main Silicon Factors Causing Routing Congestion:
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+          
+          <!-- Factor 1: Utilization & Pin Density -->
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #fafafa;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 16px;">📍</span>
+              <span style="font-weight: 800; font-size: 13px; color: #1e293b;">1. High Core Utilization &amp; Pin Clustering</span>
+            </div>
+            <p style="font-size: 12px; color: #475569; margin: 0; line-height: 1.5;">
+              When cell utilization exceeds <b>70–80%</b>, logic gates are packed back-to-back. Every gate pin requires an access track. High pin concentration causes <b>local pin density blockage</b>, forcing wires to compete for identical escape channels.
+            </p>
+          </div>
+
+          <!-- Factor 2: Metal 2 & Metal 3 Bottleneck -->
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #fafafa;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 16px;">⚡</span>
+              <span style="font-weight: 800; font-size: 13px; color: #1e293b;">2. Metal 2 / Metal 3 Layer Bottleneck</span>
+            </div>
+            <p style="font-size: 12px; color: #475569; margin: 0; line-height: 1.5;">
+              Metal 1 is reserved inside standard cells for internal transistor wires and power rails. Therefore, <b>100% of inter-cell connections must immediately escape up to M2 and M3</b>. This creates an immediate traffic bottleneck on M2 (horizontal) and M3 (vertical).
+            </p>
+          </div>
+
+          <!-- Factor 3: Narrow Core Margin & Perimeter Choke -->
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #fafafa;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 16px;">🚧</span>
+              <span style="font-weight: 800; font-size: 13px; color: #1e293b;">3. Inadequate Core Margin (Outer Choke)</span>
+            </div>
+            <p style="font-size: 12px; color: #475569; margin: 0; line-height: 1.5;">
+              When core margin is small (&lt; 2.5 mm), the boundary between logic cells and chip I/O pads has no routing bypass ring. Global wires traveling between distant modules cannot detour around the periphery and are forced directly through the congested core center.
+            </p>
+          </div>
+
+          <!-- Factor 4: Aspect Ratio & Wirelength Stretch -->
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; background: #fafafa;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 16px;">📐</span>
+              <span style="font-weight: 800; font-size: 13px; color: #1e293b;">4. Rectangular Aspect Ratio (Wire Stretch)</span>
+            </div>
+            <p style="font-size: 12px; color: #475569; margin: 0; line-height: 1.5;">
+              An elongated die (aspect ratio &gt; 1.3 or &lt; 0.7) stretches bus lines traveling along the long axis, drastically increasing <b>HPWL (Half-Perimeter Wire Length)</b>. Longer wires occupy more horizontal or vertical tracks across the entire die length.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
 
       
     </div>
@@ -1330,6 +1414,52 @@
           recP.innerHTML = `<b style="color:#dc2626;">Congestion is occurring!</b> Peak routing congestion is <b style="color:#dc2626;">${peakVal}% on ${peakLayer}</b> (exceeds 85.0% DRC limit). Click to apply calculated design rules and eliminate routing overflow.`;
         } else {
           recP.innerHTML = `<b style="color:#15803d;">Congestion is not occurring.</b> Peak routing congestion is <b style="color:#15803d;">${peakVal}% on ${peakLayer}</b> (safely below 85.0% threshold). Click to experiment with tighter silicon optimization.`;
+        }
+      }
+
+      // Update Root Cause Section in Words
+      const whyBadge = document.getElementById('whyCongestionBadge');
+      const whyBox = document.getElementById('whyCongestionSummaryBox');
+      const whyTitle = document.getElementById('whyCongestionSummaryTitle');
+      const whyText = document.getElementById('whyCongestionSummaryText');
+      if (whyBox) {
+        if (isCongested) {
+          whyBox.style.borderLeftColor = '#dc2626';
+          whyBox.style.background = '#fef2f2';
+          if (whyBadge) {
+            whyBadge.innerText = '⚠️ STATUS: CONGESTION OCCURRING';
+            whyBadge.style.background = '#fee2e2';
+            whyBadge.style.borderColor = '#fca5a5';
+            whyBadge.style.color = '#991b1b';
+          }
+          if (whyTitle) {
+            whyTitle.innerHTML = `<span style="color:#b91c1c;">⚠️ Why Congestion Is Occurring in This Run:</span>`;
+          }
+          if (whyText) {
+            let reasons = [];
+            if (util > 75.0) reasons.push(`high standard cell utilization (<b>${util}%</b>) leaving inadequate routing whitespace between cell rows`);
+            if (peakVal >= 85.0) reasons.push(`excessive routing demand on <b>${peakLayer} (${peakVal}% saturation)</b> which exceeds the 85% DRC track capacity`);
+            if (density > 0.65) reasons.push(`elevated cell placement density (<b>${density}</b>) producing intense pin clustering`);
+            if (margin < 2.5) reasons.push(`narrow core margin (<b>${margin} mm</b>) choking peripheral detour channels`);
+            if (aspect > 1.4 || aspect < 0.7) reasons.push(`stretched aspect ratio (<b>${aspect}</b>) causing prolonged net lengths`);
+            if (reasons.length === 0) reasons.push(`local wire demand outstripping track resources on <b>${peakLayer}</b>`);
+            whyText.innerHTML = `Congestion is occurring primarily due to: ${reasons.join(', and ')}. When wires cannot find open tracks within their assigned channel, detailed routing fails and creates Design Rule Check (DRC) shorts and overlaps.`;
+          }
+        } else {
+          whyBox.style.borderLeftColor = '#16a34a';
+          whyBox.style.background = '#f0fdf4';
+          if (whyBadge) {
+            whyBadge.innerText = '✓ CURRENT STATUS: NO CONGESTION';
+            whyBadge.style.background = '#f0fdf4';
+            whyBadge.style.borderColor = '#bbf7d0';
+            whyBadge.style.color = '#166534';
+          }
+          if (whyTitle) {
+            whyTitle.innerHTML = `<span style="color:#15803d;">✓ Why Congestion Is NOT Occurring in This Run:</span>`;
+          }
+          if (whyText) {
+            whyText.innerHTML = `Routing congestion is <b>NOT happening</b>. Peak wire track saturation is on <b>${peakLayer} at ${peakVal}%</b>, which is safely below the 85.0% threshold. The core utilization (<b>${util}%</b>) and density (<b>${density}</b>) leave sufficient whitespace between cell rows for all intra-core nets, clock routing, and detour channels without causing DRC violations.`;
+          }
         }
       }
 
