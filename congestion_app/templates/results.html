@@ -412,7 +412,6 @@
           </div>
           <div style="margin-top: 10px;">
             <h1 id="kpiSuccessProb" style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">{{ success_prob }}%</h1>
-            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Feasibility Success Probability</span>
           </div>
         </div>
 
@@ -426,7 +425,6 @@
           </div>
           <div style="margin-top: 10px;">
             <h1 id="kpiPeakPct" style="margin: 0; font-size: 32px; font-weight: 800; color: {% if is_congested %}#dc2626{% else %}#15803d{% endif %};">{{ peak_val_pct }}%</h1>
-            <span id="kpiPeakSubtitle" style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Peak Layer Congestion ({{ peak_layer }} Track Saturation)</span>
           </div>
         </div>
 
@@ -1217,11 +1215,6 @@
         kpiPeakB.innerText = isCongested ? `CONGESTION DETECTED (${peakLayer})` : `NO CONGESTION (${peakLayer})`;
         kpiPeakB.style.background = isCongested ? '#fef2f2' : '#f0fdf4';
         kpiPeakB.style.borderColor = isCongested ? '#fca5a5' : '#bbf7d0';
-        kpiPeakB.style.color = isCongested ? '#b91c1c' : '#15803d';
-      }
-      const kpiPeakSub = document.getElementById('kpiPeakSubtitle');
-      if (kpiPeakSub) {
-        kpiPeakSub.innerText = `Peak Layer Congestion (${peakLayer} Track Saturation)`;
       }
 
       // Update Dedicated Top Congestion Status Banner
