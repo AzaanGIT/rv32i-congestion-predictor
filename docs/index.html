@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.3';
+      const BUILD_VER = '20261026-v8.4';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -366,93 +366,98 @@
             <span style="font-size: 10px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 7px; border-radius: 4px;">SkyWater 130nm PDK</span>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; flex: 1; min-height: 0; align-items: stretch;">
-            <!-- UTIL -->
-            <div class="box" style="padding: 10px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                UTIL <span class="badge" style="font-size: 8px; padding: 2px 5px;">%</span>
-              </label>
-              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <input type="number" id="inp_util" name="utilization" value="57.0" step="any" oninput="updateLiveStats()" style="font-size: 22px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+<div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
+            <!-- TOP SUB-ROW: 3 CONTROLS (UTIL, ASPECT RATIO, MARGIN) -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; min-height: 0; align-items: stretch;">
+              <!-- UTIL -->
+              <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
+                  UTIL <span class="badge" style="font-size: 8px; padding: 2px 5px;">%</span>
+                </label>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                  <input type="number" id="inp_util" name="utilization" value="57.0" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+                </div>
+                <div>
+                  <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
+                    <span>20%</span>
+                    <span>95%</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)" style="margin: 0; height: 5px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
-                <div style="display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8; font-weight: 700; margin-top: 3px;">
-                  <span>20%</span>
-                  <span>95%</span>
+
+              <!-- ASPECT RATIO -->
+              <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
+                  ASPECT <span class="badge" style="font-size: 8px; padding: 2px 5px;">RATIO</span>
+                </label>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                  <input type="number" id="inp_aspect" name="aspect_ratio" value="1.5" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+                </div>
+                <div>
+                  <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
+                    <span>0.5</span>
+                    <span>3.0</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MARGIN -->
+              <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
+                  MARGIN <span class="badge" style="font-size: 8px; padding: 2px 5px;">MM</span>
+                </label>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                  <input type="number" id="inp_margin" name="core_margin" value="3.0" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+                </div>
+                <div>
+                  <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
+                    <span>0.5</span>
+                    <span>10.0</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- ASPECT RATIO -->
-            <div class="box" style="padding: 10px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                ASPECT <span class="badge" style="font-size: 8px; padding: 2px 5px;">RATIO</span>
-              </label>
-              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <input type="number" id="inp_aspect" name="aspect_ratio" value="1.5" step="any" oninput="updateLiveStats()" style="font-size: 22px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
-              </div>
-              <div>
-                <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)" style="margin: 0; height: 5px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
-                <div style="display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8; font-weight: 700; margin-top: 3px;">
-                  <span>0.5</span>
-                  <span>3.0</span>
+            <!-- BOTTOM SUB-ROW: 2 CONTROLS (DENSITY, LAYER ADJ) -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; flex: 1; min-height: 0; align-items: stretch;">
+              <!-- DENSITY -->
+              <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
+                  DENSITY <span class="badge" style="font-size: 8px; padding: 2px 5px;">0-1</span>
+                </label>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                  <input type="number" id="inp_density" name="density" value="0.56" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+                </div>
+                <div>
+                  <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
+                    <span>0.10</span>
+                    <span>0.95</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- MARGIN -->
-            <div class="box" style="padding: 10px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                MARGIN <span class="badge" style="font-size: 8px; padding: 2px 5px;">MM</span>
-              </label>
-              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <input type="number" id="inp_margin" name="core_margin" value="3.0" step="any" oninput="updateLiveStats()" style="font-size: 22px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
-              </div>
-              <div>
-                <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)" style="margin: 0; height: 5px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
-                <div style="display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8; font-weight: 700; margin-top: 3px;">
-                  <span>0.5</span>
-                  <span>10.0</span>
+              <!-- LAYER ADJ -->
+              <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
+                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
+                  LAYER ADJ <span class="badge" style="font-size: 8px; padding: 2px 5px;">0-1</span>
+                </label>
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+                  <input type="number" id="inp_layer_adj" name="layer_adjustment" value="0.6" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+                </div>
+                <div>
+                  <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
+                    <span>0.10</span>
+                    <span>1.00</span>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <!-- DENSITY -->
-            <div class="box" style="padding: 10px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                DENSITY <span class="badge" style="font-size: 8px; padding: 2px 5px;">0-1</span>
-              </label>
-              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <input type="number" id="inp_density" name="density" value="0.56" step="any" oninput="updateLiveStats()" style="font-size: 22px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
-              </div>
-              <div>
-                <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)" style="margin: 0; height: 5px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
-                <div style="display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8; font-weight: 700; margin-top: 3px;">
-                  <span>0.10</span>
-                  <span>0.95</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- LAYER ADJ -->
-            <div class="box" style="padding: 10px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                LAYER ADJ <span class="badge" style="font-size: 8px; padding: 2px 5px;">0-1</span>
-              </label>
-              <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
-                <input type="number" id="inp_layer_adj" name="layer_adjustment" value="0.6" step="any" oninput="updateLiveStats()" style="font-size: 22px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
-              </div>
-              <div>
-                <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)" style="margin: 0; height: 5px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
-                <div style="display: flex; justify-content: space-between; font-size: 8px; color: #94a3b8; font-weight: 700; margin-top: 3px;">
-                  <span>0.10</span>
-                  <span>1.00</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          </div></div>
 
         <!-- SECTION 2: SILICON METAL STACK CAPACITY (M1 → M10) -->
         <div class="card" style="height: 100%; margin-bottom: 0; padding: 12px 16px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
