@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v7.8';
+      const BUILD_VER = '20261026-v7.9';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -293,6 +293,9 @@
       }
       simTimeMs = 0;
       simTick = 0;
+      if (typeof updateLiveStats === 'function') {
+        updateLiveStats();
+      }
       if (typeof updateTickDisplay === 'function') {
         updateTickDisplay();
       }
@@ -587,24 +590,8 @@
     </div>
 
 
-      <!-- LIVE ESTIMATION BANNER -->
-      <div class="summary-banner">
-        <div class="metric-group">
-          <div class="metric-item">
-            <span class="metric-label">Estimated Core Area</span>
-            <span class="metric-val" id="disp_area">1.48 mm²</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Total Routing Budget</span>
-            <span class="metric-val" id="disp_tracks">136,783 tracks</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Estimated Risk Class</span>
-            <span class="metric-val" id="disp_risk" style="color: #15803d;">DRC Clean</span>
-          </div>
-        </div>
-
-        <button type="button" id="btnRunSynthesize" class="btn-submit" onclick="triggerAnalysisFromForm(); return false;" style="width: auto; padding: 14px 28px; margin-top: 0;">FIND CONGESTION</button>
+      <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+        <button type="button" id="btnRunSynthesize" class="btn-submit" onclick="triggerAnalysisFromForm(); return false;" style="width: auto; padding: 14px 32px; margin-top: 0;">FIND CONGESTION</button>
       </div>
 
     </div>
@@ -1219,6 +1206,24 @@ endmodule`
             <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">DRC Track Rule</div>
             <div style="font-size: 13px; font-weight: 800; color: #1e293b;">&le; 100.0% Capacity</div>
             <div id="bannerDrcVerdict" style="font-size: 11px; font-weight: 700; color: #15803d;">PASS (CLEAN)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTIMATED CORE AREA, ROUTING BUDGET & RISK CLASS -->
+      <div class="summary-banner" style="margin-top: 0; margin-bottom: 20px;">
+        <div class="metric-group" style="display: flex; gap: 40px; flex-wrap: wrap;">
+          <div class="metric-item">
+            <span class="metric-label">Estimated Core Area</span>
+            <span class="metric-val" id="disp_area">1.48 mm²</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Total Routing Budget</span>
+            <span class="metric-val" id="disp_tracks">136,783 tracks</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Estimated Risk Class</span>
+            <span class="metric-val" id="disp_risk" style="color: #15803d;">DRC Clean / Safe</span>
           </div>
         </div>
       </div>

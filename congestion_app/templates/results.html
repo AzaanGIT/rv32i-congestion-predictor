@@ -82,6 +82,12 @@
     .input-box .badge { background: #edf2f7; color: #4a5568; padding: 1px 6px; border-radius: 3px; font-size: 9px; font-weight: 700; }
     .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
 
+    .summary-banner { background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(109, 40, 217, 0.03) 100%); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+    .metric-group { display: flex; gap: 32px; }
+    .metric-item { display: flex; flex-direction: column; }
+    .metric-label { font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase; }
+    .metric-val { font-size: 16px; font-weight: 800; color: #1a202c; margin-top: 2px; }
+
         /* DigitalJS Online Interface Styling (tilk/digitaljs_online) */
     #panelSchematic { display: block; margin-bottom: 24px; border: 1px solid #c7d2fe; box-shadow: 0 10px 30px rgba(124, 58, 237, 0.12); position: relative; border-radius: 12px; overflow: hidden; }
     
@@ -387,6 +393,26 @@
             <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">DRC Rule</div>
             <div style="font-size: 13px; font-weight: 800; color: #1e293b;">&lt; 85.0% Limit</div>
             <div id="bannerDrcVerdict" style="font-size: 11px; font-weight: 700; color: {% if is_congested %}#dc2626{% else %}#15803d{% endif %};">{% if is_congested %}FAIL (OVERFLOW){% else %}PASS (CLEAN){% endif %}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTIMATED CORE AREA, ROUTING BUDGET & RISK CLASS -->
+      <div class="summary-banner" style="margin-top: 0; margin-bottom: 20px;">
+        <div class="metric-group" style="display: flex; gap: 40px; flex-wrap: wrap;">
+          <div class="metric-item">
+            <span class="metric-label">Estimated Core Area</span>
+            <span class="metric-val" id="disp_area">{{ "%.2f"|format((utilization * 0.02) + (core_margin * 0.1) * aspect_ratio) }} mm²</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Total Routing Budget</span>
+            <span class="metric-val" id="disp_tracks">{{ "{:,}".format(resources.values()|sum|int) }} tracks</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Estimated Risk Class</span>
+            <span class="metric-val" id="disp_risk" style="color: {% if utilization > 70 %}#dc2626{% elif utilization > 60 %}#d97706{% else %}#15803d{% endif %};">
+              {% if utilization > 70 %}High Congestion Warning{% elif utilization > 60 %}Borderline Pressure{% else %}DRC Clean / Safe{% endif %}
+            </span>
           </div>
         </div>
       </div>
