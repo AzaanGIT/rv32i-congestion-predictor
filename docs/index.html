@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v7.5';
+      const BUILD_VER = '20261026-v7.6';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -465,7 +465,7 @@
       </div>
 
       
-    <!-- SECTION 3: VERILOG HDL CODE & DIGITALJS SYNTHESIS -->
+    <!-- SECTION 3: VERILOG HDL CODE & SYNTHESIS -->
     <div class="card" style="border: 1.5px solid rgba(124, 58, 237, 0.35); margin-bottom: 24px;">
       <div class="card-header" style="margin-bottom: 14px;">
         <div>
@@ -473,10 +473,9 @@
         </div>
       </div>
 
-      <!-- DigitalJS-Themed Tab Bar -->
+      <!-- Tab Bar -->
       <div style="background: #f8fafc; border-radius: 10px 10px 0 0; padding: 8px 14px 0 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
         <div style="display: flex; gap: 4px; align-items: center;">
-          <div style="background: #7c3aed; color: #ffffff; font-weight: 900; font-size: 11px; padding: 4px 9px; border-radius: 5px; margin-right: 8px; letter-spacing: 0.5px;">DigitalJS</div>
           <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #64748b; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">Setup</button>
           <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #64748b; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">I/O</button>
           <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #ffffff; color: #7c3aed; border: 1px solid #e2e8f0; border-bottom: 2px solid #7c3aed; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 6px;">
@@ -536,7 +535,7 @@
 
       <!-- Tab Content 2: Setup View -->
       <div id="hdlTabSetupView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 10px 10px; border: 1px solid #e2e8f0; border-top: none; padding: 22px;">
-        <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 12px;">DigitalJS / Yosys Synthesis Options</div>
+        <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 12px;">Synthesis Options</div>
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 12px; color: #334155;">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" checked disabled>
@@ -1326,7 +1325,7 @@ endmodule`
 
               <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 4px 12px; font-size: 10px; color: #6c757d; display: flex; justify-content: space-between; align-items: center;">
                 <span>SystemVerilog HDL | Synthesizable (Click <b>Run</b> to synthesize and simulate)</span>
-                <span style="color: #16a34a; font-weight: 700;">● DigitalJS Engine Active</span>
+                <span style="color: #16a34a; font-weight: 700;">● Circuit Engine Active</span>
               </div>
             </div>
 
@@ -3359,7 +3358,7 @@ endmodule`
       return `
         <!-- Title & Clock Banner -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="30" y="25" fill="#0284c7">⚡ RV32I PROCESSOR CORE GATE NETLIST | 5 PIPELINE STAGES WITH DIGITALJS INTERACTIVITY</text>
+          <text x="30" y="25" fill="#0284c7">⚡ RV32I PROCESSOR CORE GATE NETLIST | 5 PIPELINE STAGES WITH INTERACTIVE SIMULATION</text>
         </g>
 
         <!-- Dynamic Rubber-Banding Inter-Stage Wires -->
@@ -3482,7 +3481,7 @@ endmodule`
 
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#0284c7">// SR latch (NOR gate model - digitaljs.tilk.eu)</text>
+          <text x="60" y="45" fill="#0284c7">// SR latch (NOR gate model)</text>
           <text x="60" y="65" fill="#64748b">module sr_latch: nor g1(q, r, nq); nor g2(nq, s, q);</text>
         </g>
         ${svgButtonInput("elem_s", 70, 110, "s", "s", [3])}
@@ -3516,7 +3515,7 @@ endmodule`
 
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#0284c7">// SR latch with negated inputs (gate model - digitaljs.tilk.eu)</text>
+          <text x="60" y="45" fill="#0284c7">// SR latch with negated inputs (gate model)</text>
           <text x="60" y="65" fill="#64748b">module sr_neg_latch: nand g1(q, ns, nq); nand g2(nq, nr, q);</text>
         </g>
         ${svgButtonInput("elem_ns", 70, 110, "ns", "ns", [3])}
@@ -3864,7 +3863,7 @@ endmodule`
       return `
         <!-- Top Status Bar & DigitalJS Synthesis Info -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="30" y="24" fill="#0284c7">⚡ 5-STAGE PIPELINED RV32I PROCESSOR NETLIST (digitaljs.tilk.eu Synthesis Engine)</text>
+          <text x="30" y="24" fill="#0284c7">⚡ 5-STAGE PIPELINED RV32I PROCESSOR NETLIST (Gate-Level Synthesis Engine)</text>
           <text x="30" y="42" fill="#64748b">Module: rv32i_pipeline_top | Stages: IF → ID → EX [HOTSPOT] → MEM → WB | Clocked: posedge clk | Click [+] to drill down</text>
         </g>
 
@@ -4530,7 +4529,7 @@ endmodule`
         if (typeof synthesizeWithDigitalJsBackground === 'function') {
           synthesizeWithDigitalJsBackground(currentCode, currentModule);
         }
-        if (badge) badge.textContent = `[SYNTHESIZING: ${parsed.moduleName.toUpperCase()} — DIGITALJS YOSYS]`;
+        if (badge) badge.textContent = `[SYNTHESIZING: ${parsed.moduleName.toUpperCase()} — GATE NETLIST]`;
       }
 
       // Re-apply active visual selection on canvas if user previously clicked a gate or wire
@@ -5140,7 +5139,7 @@ endmodule`
         } else if (moduleFilename.includes("sr_latch") || moduleFilename.includes("sr_neg")) {
           badge.textContent = "4 Gates / 8 Nets";
         } else {
-          badge.textContent = "DigitalJS Gate Netlist Active";
+          badge.textContent = "Gate Netlist Active";
         }
       }
     }
@@ -5182,7 +5181,7 @@ endmodule`
       }
 
       const modName = (filename || "RV32I_CORE.SV").toUpperCase();
-      if (badge) badge.textContent = `[DIGITALJS NETLIST: ${modName}]`;
+      if (badge) badge.textContent = `[GATE NETLIST: ${modName}]`;
       if (liveBadge) {
         if (matchedHash === "3b4545db253fa66aef938b0837207f09022561f5e5a9435b904089f3900d8441" || matchedHash === "e0f187cd33c2072f97ebe20c23c7f56929164bbe0291204cf1b014c2efc567b3") {
           liveBadge.textContent = "4 Gates / 8 Nets";
@@ -6499,7 +6498,7 @@ endmodule`
 
     function djsShareLink() {
       navigator.clipboard.writeText(window.location.href).then(() => {
-        alert("DigitalJS simulation session URL copied to clipboard!");
+        alert("Simulation session URL copied to clipboard!");
       });
     }
 

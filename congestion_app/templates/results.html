@@ -492,7 +492,7 @@
 
               <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 4px 12px; font-size: 10px; color: #6c757d; display: flex; justify-content: space-between; align-items: center;">
                 <span>SystemVerilog HDL | Synthesizable (Click <b>Run</b> to synthesize and simulate)</span>
-                <span style="color: #16a34a; font-weight: 700;">● DigitalJS Engine Active</span>
+                <span style="color: #16a34a; font-weight: 700;">● Circuit Engine Active</span>
               </div>
             </div>
 
@@ -2488,7 +2488,7 @@ endmodule`
       return `
         <!-- Title & Clock Banner -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="30" y="25" fill="#0284c7">⚡ RV32I PROCESSOR CORE GATE NETLIST | 5 PIPELINE STAGES WITH DIGITALJS INTERACTIVITY</text>
+          <text x="30" y="25" fill="#0284c7">⚡ RV32I PROCESSOR CORE GATE NETLIST | 5 PIPELINE STAGES WITH INTERACTIVE SIMULATION</text>
         </g>
 
         <!-- Dynamic Rubber-Banding Inter-Stage Wires -->
@@ -2611,7 +2611,7 @@ endmodule`
 
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#0284c7">// SR latch (NOR gate model - digitaljs.tilk.eu)</text>
+          <text x="60" y="45" fill="#0284c7">// SR latch (NOR gate model)</text>
           <text x="60" y="65" fill="#64748b">module sr_latch: nor g1(q, r, nq); nor g2(nq, s, q);</text>
         </g>
         ${svgButtonInput("elem_s", 70, 110, "s", "s", [3])}
@@ -2645,7 +2645,7 @@ endmodule`
 
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="60" y="45" fill="#0284c7">// SR latch with negated inputs (gate model - digitaljs.tilk.eu)</text>
+          <text x="60" y="45" fill="#0284c7">// SR latch with negated inputs (gate model)</text>
           <text x="60" y="65" fill="#64748b">module sr_neg_latch: nand g1(q, ns, nq); nand g2(nq, nr, q);</text>
         </g>
         ${svgButtonInput("elem_ns", 70, 110, "ns", "ns", [3])}
@@ -2993,7 +2993,7 @@ endmodule`
       return `
         <!-- Top Status Bar & DigitalJS Synthesis Info -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="30" y="24" fill="#0284c7">⚡ 5-STAGE PIPELINED RV32I PROCESSOR NETLIST (digitaljs.tilk.eu Synthesis Engine)</text>
+          <text x="30" y="24" fill="#0284c7">⚡ 5-STAGE PIPELINED RV32I PROCESSOR NETLIST (Gate-Level Synthesis Engine)</text>
           <text x="30" y="42" fill="#64748b">Module: rv32i_pipeline_top | Stages: IF → ID → EX [HOTSPOT] → MEM → WB | Clocked: posedge clk | Click [+] to drill down</text>
         </g>
 
@@ -3659,7 +3659,7 @@ endmodule`
         if (typeof synthesizeWithDigitalJsBackground === 'function') {
           synthesizeWithDigitalJsBackground(currentCode, currentModule);
         }
-        if (badge) badge.textContent = `[SYNTHESIZING: ${parsed.moduleName.toUpperCase()} — DIGITALJS YOSYS]`;
+        if (badge) badge.textContent = `[SYNTHESIZING: ${parsed.moduleName.toUpperCase()} — GATE NETLIST]`;
       }
 
       // Re-apply active visual selection on canvas if user previously clicked a gate or wire
@@ -4258,7 +4258,7 @@ endmodule`
         } else if (moduleFilename.includes("sr_latch") || moduleFilename.includes("sr_neg")) {
           badge.textContent = "4 Gates / 8 Nets";
         } else {
-          badge.textContent = "DigitalJS Gate Netlist Active";
+          badge.textContent = "Gate Netlist Active";
         }
       }
     }
@@ -4275,7 +4275,7 @@ endmodule`
       const liveBadge = document.getElementById("djsLiveGateCountBadge");
       const iframe = document.getElementById("djsLiveFrame");
 
-      if (badge) badge.textContent = "[SYNTHESIZING WITH DIGITALJS YOSYS...]";
+      if (badge) badge.textContent = "[SYNTHESIZING GATE NETLIST...]";
       if (liveBadge) liveBadge.textContent = "Synthesizing with Yosys...";
 
       const trimmed = (code || "").trim();
@@ -4293,7 +4293,7 @@ endmodule`
         if (iframe && iframe.contentWindow) {
           iframe.contentWindow.postMessage({ type: 'loadHash', hash: matchedHash }, '*');
         }
-        if (badge) badge.textContent = `[DIGITALJS NETLIST: ${filename.toUpperCase()}]`;
+        if (badge) badge.textContent = `[GATE NETLIST: ${filename.toUpperCase()}]`;
         if (liveBadge) {
           if (matchedHash === "3b4545db253fa66aef938b0837207f09022561f5e5a9435b904089f3900d8441" || matchedHash === "e0f187cd33c2072f97ebe20c23c7f56929164bbe0291204cf1b014c2efc567b3") {
             liveBadge.textContent = "4 Gates / 8 Nets";
@@ -4348,7 +4348,7 @@ endmodule`
 
             const devCount = resData.output.devices ? Object.keys(resData.output.devices).length : 0;
             const netCount = resData.output.connectors ? resData.output.connectors.length : 0;
-            if (badge) badge.textContent = `[DIGITALJS YOSYS NETLIST: ${devCount} GATES / ${netCount} NETS]`;
+            if (badge) badge.textContent = `[GATE NETLIST: ${devCount} GATES / ${netCount} NETS]`;
             if (liveBadge) liveBadge.textContent = `${devCount} Gates / ${netCount} Nets`;
 
             switchDjsEngineMode('live');
@@ -4368,14 +4368,14 @@ endmodule`
           if (badge) badge.textContent = `[YOSYS API ERROR ${response.status}]`;
         }
       } catch (err) {
-        console.warn("DigitalJS remote synthesis failed:", err);
+        console.warn("Remote synthesis failed:", err);
         if (badge) badge.textContent = `[SYNTHESIS ERROR — check console]`;
       }
 
       // Fallback: stay in live mode with whatever was last loaded
       switchDjsEngineMode('live');
-      if (badge) badge.textContent = `[DIGITALJS NETLIST: ${(filename || "design").toUpperCase()}]`;
-      if (liveBadge) liveBadge.textContent = "DigitalJS Gate Netlist Active";
+      if (badge) badge.textContent = `[GATE NETLIST: ${(filename || "design").toUpperCase()}]`;
+      if (liveBadge) liveBadge.textContent = "Gate Netlist Active";
     }
 
     function sendDjsIframeCmd(cmd) {
@@ -5595,7 +5595,7 @@ endmodule`
 
     function djsShareLink() {
       navigator.clipboard.writeText(window.location.href).then(() => {
-        alert("DigitalJS simulation session URL copied to clipboard!");
+        alert("Simulation session URL copied to clipboard!");
       });
     }
 
