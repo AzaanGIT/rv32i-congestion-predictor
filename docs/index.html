@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.6';
+      const BUILD_VER = '20261026-v8.7';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -320,7 +320,7 @@
   <div id="controlsView" style="display: flex; flex-direction: column; height: calc(100vh - 24px); max-height: calc(100vh - 24px); max-width: 1600px; margin: 0 auto; overflow: hidden; box-sizing: border-box;">
 
   <!-- COMPACT TOP BAR: BRAND + ARCHITECTURE + PRESETS -->
-  <div class="header" style="flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: 0 4px 16px rgba(103, 80, 164, 0.06); border-radius: 12px; padding: 10px 18px; margin-bottom: 12px; border-bottom: none;">
+  <div class="header" style="flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: 0 4px 16px rgba(103, 80, 164, 0.06); border-radius: 12px; padding: 10px 18px; margin-bottom: 12px; border-bottom: none; position: relative;">
     <!-- Brand -->
     <div style="display: flex; align-items: center; gap: 12px;">
       <div class="brand-title" style="font-size: 16.5px; font-weight: 900; margin: 0; color: #1a202c;">
@@ -331,18 +331,21 @@
       </span>
     </div>
 
-    <!-- Center: Processor Selector -->
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Core:</span>
-      <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="background: #ffffff; border: 1.5px solid #7c3aed; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer;">
-        <option value="" selected>-- Select Processor Core --</option>
-        <option value="RV32I">RV32I (RISC-V 32-bit Integer ISA Core)</option>
-      </select>
-      <span id="isaLabel" style="display: none;">32-Bit RISC-V (RV32I)</span>
+    <!-- Center: Processor Selector Slot (Docking destination for animation) -->
+    <div id="headerCoreSlot" style="width: 290px; height: 38px; display: flex; align-items: center; justify-content: center; position: relative;">
+      <!-- Moving Core Selector Unit (Starts centered on screen, smoothly glides up into header on selection) -->
+      <div id="coreSelectorUnit" class="in-center" style="display: flex; align-items: center; gap: 8px; background: #ffffff; border: 2px solid #7c3aed; border-radius: 10px; padding: 8px 14px; box-shadow: 0 16px 40px rgba(124, 58, 237, 0.22), 0 4px 12px rgba(0, 0, 0, 0.06); transform: translate(0px, calc(44vh - 25px)) scale(1.15); transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease, padding 0.45s ease, border-radius 0.45s ease; z-index: 999; will-change: transform;">
+        <span style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Core:</span>
+        <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="background: transparent; border: none; font-size: 12px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer;">
+          <option value="" selected>-- Select Processor Core --</option>
+          <option value="RV32I">RV32I (RISC-V 32-bit Integer ISA Core)</option>
+        </select>
+        <span id="isaLabel" style="display: none;">32-Bit RISC-V (RV32I)</span>
+      </div>
     </div>
 
     <!-- Right: Presets -->
-    <div class="preset-bar" style="margin: 0; display: flex; align-items: center; gap: 6px;">
+    <div id="presetBarGroup" class="preset-bar" style="margin: 0; display: flex; align-items: center; gap: 6px; opacity: 0.4; pointer-events: none; transition: opacity 0.3s ease;">
       <span style="font-size: 11px; font-weight: 800; color: #718096; margin-right: 4px;">PRESETS:</span>
       <button type="button" class="btn-preset" onclick="applyPreset('default')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">⚡ Standard</button>
       <button type="button" class="btn-preset" onclick="applyPreset('high_density')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">🔥 High Density</button>
@@ -350,23 +353,17 @@
     </div>
   </div>
 
-  <form id="floorplanForm" action="javascript:void(0);" method="GET" onsubmit="triggerAnalysisFromForm(); return false;" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
-
-    <!-- BANNER SHOWN BEFORE PROCESSOR IS SELECTED -->
-    <div id="selectPromptBanner" class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 0; background: rgba(255, 255, 255, 0.95); border: 2px dashed rgba(124, 58, 237, 0.3); border-radius: 12px; padding: 40px 20px; text-align: center; box-sizing: border-box;">
-      <div style="width: 58px; height: 58px; border-radius: 50%; background: #f5f3ff; border: 1.5px solid #ddd6fe; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.12);">
-        ⚡
-      </div>
-      <div style="font-size: 18px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">
-        Select Processor Core to Begin
-      </div>
-      <div style="font-size: 13px; color: #64748b; max-width: 500px; line-height: 1.6; margin-bottom: 20px;">
-        Please select <b>RV32I (RISC-V 32-bit Integer ISA Core)</b> from the top selector to configure floorplan parameters, silicon metal stack capacity, and Verilog HDL description.
-      </div>
-      <button type="button" onclick="const s = document.getElementById('processorSelect'); if (s) { s.value = 'RV32I'; handleProcessorSelection('RV32I'); }" style="background: #7c3aed; color: #ffffff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35); transition: 0.2s;">
-        ⚡ Load RV32I Processor Core
-      </button>
+  <!-- CENTER WELCOME MESSAGE (DIRECTLY ABOVE CENTERED SELECTOR) -->
+  <div id="centerWelcome" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 38vh; left: 50%; transform: translate(-50%, -100%); z-index: 90; text-align: center; pointer-events: none; transition: opacity 0.3s ease;">
+    <div style="font-size: 32px; margin-bottom: 6px;">⚡</div>
+    <div style="font-size: 17px; font-weight: 800; color: #1e1b4b; margin-bottom: 4px;">
+      Select Target Processor Core
     </div>
+    <div style="font-size: 12.5px; color: #64748b; max-width: 440px; line-height: 1.5;">
+      Choose <b>RV32I</b> below to unlock floorplan geometry and synthesizable RTL description.
+    </div>
+  </div>
+  <form id="floorplanForm" action="javascript:void(0);" method="GET" onsubmit="triggerAnalysisFromForm(); return false;" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
 
     <!-- 2-COLUMN DASHBOARD GRID: HIDDEN UNTIL PROCESSOR IS SELECTED -->
     <div id="processorContent" style="display: none; flex: 1; min-height: 0; flex-direction: column; gap: 12px;">
@@ -682,15 +679,73 @@
   </form>
 
   <script>
+    function updateCoreSelectorPosition() {
+      const unit = document.getElementById('coreSelectorUnit');
+      const slot = document.getElementById('headerCoreSlot');
+      const select = document.getElementById('processorSelect');
+      const welcome = document.getElementById('centerWelcome');
+      const isUnselected = !select || select.value === '';
+
+      if (!unit || !slot) return;
+
+      if (isUnselected) {
+        const slotRect = slot.getBoundingClientRect();
+        const screenCenterX = window.innerWidth / 2;
+        const screenCenterY = window.innerHeight * 0.48;
+        
+        const slotCenterX = slotRect.left + slotRect.width / 2;
+        const slotCenterY = slotRect.top + slotRect.height / 2;
+        
+        const deltaX = screenCenterX - slotCenterX;
+        const deltaY = screenCenterY - slotCenterY;
+
+        unit.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.15)`;
+        unit.style.padding = '8px 14px';
+        unit.style.boxShadow = '0 16px 40px rgba(124, 58, 237, 0.22), 0 4px 12px rgba(0, 0, 0, 0.06)';
+        unit.style.border = '2px solid #7c3aed';
+        unit.style.borderRadius = '10px';
+        unit.classList.add('in-center');
+
+        if (welcome) {
+          welcome.style.opacity = '1';
+          welcome.style.pointerEvents = 'auto';
+        }
+      } else {
+        unit.style.transform = 'translate(0px, 0px) scale(1)';
+        unit.style.padding = '5px 12px';
+        unit.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.1)';
+        unit.style.border = '1.5px solid #7c3aed';
+        unit.style.borderRadius = '6px';
+        unit.classList.remove('in-center');
+
+        if (welcome) {
+          welcome.style.opacity = '0';
+          welcome.style.pointerEvents = 'none';
+        }
+      }
+    }
+
     function handleProcessorSelection(val) {
       const content = document.getElementById('processorContent');
-      const promptBanner = document.getElementById('selectPromptBanner');
       const activeBadge = document.getElementById('activeTargetBadge');
       const isaLabel = document.getElementById('isaLabel');
+      const presetBar = document.getElementById('presetBarGroup');
+
+      updateCoreSelectorPosition();
 
       if (val === 'RV32I') {
-        if (content) content.style.display = 'flex';
-        if (promptBanner) promptBanner.style.display = 'none';
+        if (content) {
+          content.style.display = 'flex';
+          content.style.opacity = '0';
+          content.style.transition = 'opacity 0.35s ease';
+          setTimeout(() => {
+            content.style.opacity = '1';
+          }, 100);
+        }
+        if (presetBar) {
+          presetBar.style.opacity = '1';
+          presetBar.style.pointerEvents = 'auto';
+        }
         if (activeBadge) {
           activeBadge.innerText = 'TARGET LOADED: RV32I';
           activeBadge.style.background = '#f0fdf4';
@@ -704,7 +759,10 @@
         updateLiveStats();
       } else {
         if (content) content.style.display = 'none';
-        if (promptBanner) promptBanner.style.display = 'flex';
+        if (presetBar) {
+          presetBar.style.opacity = '0.4';
+          presetBar.style.pointerEvents = 'none';
+        }
         if (activeBadge) {
           activeBadge.innerText = 'AWAITING SELECTION';
           activeBadge.style.background = '#fef3c7';
@@ -718,6 +776,17 @@
       }
     }
 
+    // Recalculate selector position on resize and DOM ready
+    window.addEventListener('resize', () => {
+      const select = document.getElementById('processorSelect');
+      if (!select || select.value === '') {
+        updateCoreSelectorPosition();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCoreSelectorPosition();
+    });
     function syncInput(targetId, val) {
       document.getElementById(targetId).value = val;
       updateLiveStats();
