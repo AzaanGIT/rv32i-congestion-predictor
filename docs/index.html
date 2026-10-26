@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v7.0';
+      const BUILD_VER = '20261026-v7.1';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -314,9 +314,7 @@
     <div>
       <div class="brand-title">
         RV32I CONGESTION PREDICTOR
-        <span class="chip-badge">RISC-V 32-Bit Core</span>
       </div>
-      <div class="subtitle">Silicon floorplanning routing pressure & thermal risk analysis</div>
     </div>
   </div>
 
@@ -329,25 +327,19 @@
       <div class="card-header" style="margin-bottom: 12px;">
         <div>
           <div class="card-title">TARGET PROCESSOR CORE / ARCHITECTURE</div>
-          <div class="card-heading">Select the processor through which you want to proceed</div>
         </div>
         <span id="activeTargetBadge" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
           AWAITING SELECTION
         </span>
       </div>
       
-      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;">
+      <div style="display: grid; grid-template-columns: 1fr; gap: 16px; align-items: center;">
         <div>
           <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="width: 100%; background: #ffffff; border: 2px solid #7c3aed; border-radius: 10px; padding: 13px 18px; font-size: 14px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);">
             <option value="" selected>-- SELECT PROCESSOR CORE --</option>
             <option value="RV32I">RV32I (RISC-V 32-bit Integer ISA Core)</option>
           </select>
-        </div>
-        <div>
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; text-align: right;">
-            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">SUPPORTED ARCHITECTURES</div>
-            <div id="isaLabel" style="font-size: 13px; font-weight: 800; color: #718096;">RV32I Available</div>
-          </div>
+          <span id="isaLabel" style="display: none;"></span>
         </div>
       </div>
     </div>
@@ -368,7 +360,6 @@
       <div class="card-header">
         <div>
           <div class="card-title">1. Floorplan Geometry & Density Parameters</div>
-          <div class="card-heading">Set core cell utilization and margin</div>
         </div>
       </div>
 
@@ -410,68 +401,57 @@
       <div class="card-header">
         <div>
           <div class="card-title">2. Silicon Metal Stack Capacity ($M_1$ → $M_{10}$)</div>
-          <div class="card-heading">Available routing track capacity per metal layer</div>
         </div>
       </div>
 
       <div class="grid-5">
         <div class="box">
           <label>METAL 1 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">FEOL Std Cell Local</div>
           <input type="number" name="metal_1" value="0" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 2 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Signal Low</div>
           <input type="number" name="metal_2" value="27540" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 3 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Signal Low</div>
           <input type="number" name="metal_3" value="37221" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 4 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Interconnect</div>
           <input type="number" name="metal_4" value="18450" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 5 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Interconnect</div>
           <input type="number" name="metal_5" value="18096" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 6 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Intermediate Bus</div>
           <input type="number" name="metal_6" value="18450" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 7 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Global Bus</div>
           <input type="number" name="metal_7" value="5699" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 8 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Global Bus</div>
           <input type="number" name="metal_8" value="5796" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 9 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">Power Grid Mesh</div>
           <input type="number" name="metal_9" value="2758" step="any" oninput="updateLiveStats()">
         </div>
 
         <div class="box">
           <label>METAL 10 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">VDD / VSS Straps</div>
           <input type="number" name="metal_10" value="2772" step="any" oninput="updateLiveStats()">
         </div>
       </div>
@@ -541,11 +521,7 @@
           <textarea id="hdlCodeTextarea" name="selected_hdl_code" placeholder="// Type or paste your Verilog / SystemVerilog code here...&#10;// Example:&#10;// module my_processor(input clk, reset, input [31:0] instr, output [31:0] pc, alu_out);&#10;//   ... write your gates, modules or RTL here ...&#10;// endmodule" spellcheck="false" oninput="updateLineNumbers()" onscroll="syncHdlLineNumbers()"
             style="flex: 1; height: 100%; background: #ffffff; color: #1e293b; border: none; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 20px; resize: none; min-height: 290px; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; overflow-y: auto; tab-size: 2; box-sizing: border-box;"></textarea>
         </div>
-        <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; border-radius: 0 0 10px 10px;">
-          <span style="display: flex; align-items: center; gap: 8px;">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
-            <span style="color: #334155;">Target: <b>User Verilog HDL Code ──► Synthesized Gate-Level Netlist</b></span>
-          </span>
+        <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 8px 16px; display: flex; justify-content: flex-end; align-items: center; font-size: 11px; color: #64748b; border-radius: 0 0 10px 10px;">
           <span id="hdlCharCount" style="color: #64748b; font-family: monospace;">0 characters (0 lines)</span>
         </div>
       </div>
@@ -570,9 +546,6 @@
             <input type="checkbox" checked disabled>
             <span><b>Gate subset mapping</b> (AND, NAND, OR, NOR, XOR, MUX)</span>
           </label>
-        </div>
-        <div style="margin-top: 14px; font-size: 11px; color: #5b21b6; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 10px 14px; border-radius: 6px;">
-          ℹ️ When you click <b>Find Congestion</b>, the HDL code is mapped to logic gates and analyzed by the XGBoost backend model to predict silicon routing tracks.
         </div>
       </div>
 
@@ -1107,8 +1080,7 @@ endmodule`
     
     <!-- LEFT SIDEBAR: INPUT PARAMETERS -->
     <div class="sidebar">
-      <div class="sidebar-title">Predict routing pressure</div>
-      <div class="sidebar-subtitle">These are the values from the last run. Go back to change them.</div>
+      <div class="sidebar-title">INPUT PARAMETERS</div>
       
       <div class="input-box" style="border-color: #7c3aed; background: #fdfcff;">
         <label style="color: #7c3aed;">PROCESSOR CORE <span class="badge" style="background: #7c3aed; color: #ffffff;">ISA</span></label>
@@ -1361,8 +1333,7 @@ endmodule`
 
             <!-- Tab Pane 2: Setup View -->
             <div id="djsLeftSetupPane" style="display: none; padding: 16px; flex: 1; overflow-y: auto; background: #ffffff;">
-              <div style="font-size: 13px; font-weight: 700; color: #212529; margin-bottom: 8px;">Circuit synthesis options</div>
-              <p style="font-size: 11.5px; color: #6c757d; line-height: 1.45; margin-bottom: 12px;">Yosys Open-Source Hardware Synthesis &amp; ABC Logic Gate Mapping.</p>
+              <div style="font-size: 13px; font-weight: 700; color: #212529; margin-bottom: 12px;">Circuit synthesis options</div>
               
               <div style="display: flex; flex-direction: column; gap: 8px; font-size: 11.5px; color: #334155;">
                 <label style="display: flex; align-items: center; gap: 6px;"><input type="checkbox" checked disabled> <b>Optimize in Yosys</b> (<code>opt -full</code>)</label>
@@ -1374,14 +1345,12 @@ endmodule`
               <div style="margin-top: 16px; border-top: 1px solid #dee2e6; padding-top: 12px;">
                 <div style="font-size: 11.5px; font-weight: 700; color: #7c3aed; margin-bottom: 4px;">Silicon PDK Target</div>
                 <div style="font-size: 11px; color: #475569;">SkyWater 130nm (<code>sky130_fd_sc_hd</code>)</div>
-                <div style="font-size: 10.5px; color: #94a3b8; margin-top: 4px;">Gate logic directly impacts M1 pin density and M2/M3 wire tracks.</div>
               </div>
             </div>
 
             <!-- Tab Pane 3: I/O View -->
             <div id="djsLeftIoPane" style="display: none; padding: 16px; flex: 1; overflow-y: auto; background: #ffffff;">
-              <div style="font-size: 13px; font-weight: 700; color: #212529; margin-bottom: 8px;">I/O Panel (Live Bit Controls)</div>
-              <p style="font-size: 11.5px; color: #6c757d; line-height: 1.45; margin-bottom: 12px;">Click buttons below to toggle inputs or observe output indicators:</p>
+              <div style="font-size: 13px; font-weight: 700; color: #212529; margin-bottom: 12px;">I/O Panel (Live Bit Controls)</div>
               
               <div id="djsIoControlsList" style="display: flex; flex-direction: column; gap: 10px;">
                 <!-- Dynamically populated per module -->
@@ -1539,10 +1508,9 @@ endmodule`
 
       <!-- 2D CELLULAR HEATMAP VIEWER -->
       <div class="card" id="layerDensityCard">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
           <div>
-            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</span>
-            <h3 style="margin: 4px 0 0 0; font-size: 16px; font-weight: 800; color: #1a202c;">Top view & combined side view</h3>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</h3>
           </div>
           <div style="display:flex; align-items:center; gap: 8px;">
             <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
@@ -1559,8 +1527,7 @@ endmodule`
               <span id="pct-M1" style="color: #15803d; font-weight: 800;">0.0%</span>
             </div>
             <canvas id="cvs-M1" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M1')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M1')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M2">
@@ -1569,8 +1536,7 @@ endmodule`
               <span id="pct-M2" style="color: #15803d; font-weight: 800;">50.8%</span>
             </div>
             <canvas id="cvs-M2" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M2')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M2')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M3">
@@ -1579,8 +1545,7 @@ endmodule`
               <span id="pct-M3" style="color: #15803d; font-weight: 800;">46.0%</span>
             </div>
             <canvas id="cvs-M3" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M3')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M3')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M4">
@@ -1589,8 +1554,7 @@ endmodule`
               <span id="pct-M4" style="color: #15803d; font-weight: 800;">36.1%</span>
             </div>
             <canvas id="cvs-M4" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M4')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M4')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M5">
@@ -1599,8 +1563,7 @@ endmodule`
               <span id="pct-M5" style="color: #15803d; font-weight: 800;">25.2%</span>
             </div>
             <canvas id="cvs-M5" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M5')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M5')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M6">
@@ -1609,8 +1572,7 @@ endmodule`
               <span id="pct-M6" style="color: #15803d; font-weight: 800;">25.0%</span>
             </div>
             <canvas id="cvs-M6" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M6')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M6')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M7">
@@ -1619,8 +1581,7 @@ endmodule`
               <span id="pct-M7" style="color: #15803d; font-weight: 800;">14.7%</span>
             </div>
             <canvas id="cvs-M7" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M7')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M7')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M8">
@@ -1629,8 +1590,7 @@ endmodule`
               <span id="pct-M8" style="color: #15803d; font-weight: 800;">14.8%</span>
             </div>
             <canvas id="cvs-M8" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M8')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M8')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M9">
@@ -1639,8 +1599,7 @@ endmodule`
               <span id="pct-M9" style="color: #15803d; font-weight: 800;">17.7%</span>
             </div>
             <canvas id="cvs-M9" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M9')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M9')">Fix this layer</button>
           </div>
           
           <div class="heatmap-card" id="card-M10">
@@ -1649,8 +1608,7 @@ endmodule`
               <span id="pct-M10" style="color: #15803d; font-weight: 800;">15.5%</span>
             </div>
             <canvas id="cvs-M10" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('M10')">Fix this layer</button>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M10')">Fix this layer</button>
           </div>
           
         </div>
@@ -1660,9 +1618,8 @@ endmodule`
       <div class="card" style="border-left: 5px solid #16a34a;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Input Changes</span>
-            <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
-            <p id="recDesc" style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is 50.8% on M2. Click to apply calculated design rules and bring wire density below 100%.</p>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c;">RECOMMENDED INPUT CHANGES</h3>
+            <p id="recDesc" style="display: none;"></p>
           </div>
           <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
         </div>
