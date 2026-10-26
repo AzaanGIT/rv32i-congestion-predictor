@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v7.3';
+      const BUILD_VER = '20261026-v7.4';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1277,15 +1277,6 @@ endmodule`
               </button>
             </div>
 
-            <!-- Engine Mode Switcher (Live DigitalJS vs Congestion SVG) -->
-            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Engine Mode" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #0284c7;">
-              <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="Live Interactive DigitalJS Gate Netlist" style="background: #ffffff; color: #0284c7; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #0284c7; display: inline-flex; align-items: center; gap: 4px;">
-                <span>⚡ Live DigitalJS</span>
-              </button>
-              <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="BEOL Hotspot &amp; Congestion Overlay" style="background: #0284c7; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                <span>🔥 Hotspots &amp; Congestion</span>
-              </button>
-            </div>
 
           </div>
         </div>
@@ -5114,7 +5105,7 @@ endmodule`
         return;
       }
       const hash = DIGITALJS_LIVE_HASHES[moduleFilename];
-      const targetUrl = "digitaljs_view.html?v=20261026-v7.3#" + hash;
+      const targetUrl = "digitaljs_view.html?v=20261026-v7.4#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
