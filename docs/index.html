@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.12';
+      const BUILD_VER = '20261026-v8.13';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1336,7 +1336,7 @@ endmodule`
               Congestion Is NOT Happening
             </h2>
             <p id="congestionStatusDesc" style="margin: 2px 0 0 0; font-size: 12.5px; color: #166534; line-height: 1.3;">
-              All 10 metal layers are safely within track limits (Peak: <b id="congestionStatusPeakLayer">M2 at 50.8%</b>).
+              Routing wire demand is safely within available track capacity.
             </p>
           </div>
         </div>
@@ -2244,7 +2244,7 @@ endmodule`
             cTitle.style.color = '#7f1d1d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `Routing overflow detected! Peak: <b style="color: #b91c1c;">${peakLayer} at ${peakVal}%</b> (exceeds 100.0% capacity).`;
+            cDesc.innerHTML = 'Routing overflow detected! Wire demand exceeds 100.0% track capacity.';
             cDesc.style.color = '#991b1b';
           }
         } else {
@@ -2263,7 +2263,7 @@ endmodule`
             cTitle.style.color = '#14532d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `All 10 metal layers are safely within track limits (Peak: <b style="color: #15803d;">${peakLayer} at ${peakVal}%</b>).`;
+            cDesc.innerHTML = 'Routing wire demand is safely within available track capacity.';
             cDesc.style.color = '#166534';
           }
         }

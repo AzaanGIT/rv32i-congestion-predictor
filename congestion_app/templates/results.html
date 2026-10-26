@@ -366,9 +366,9 @@
             </h2>
             <p id="congestionStatusDesc" style="margin: 2px 0 0 0; font-size: 12.5px; color: {% if is_congested %}#991b1b{% else %}#166534{% endif %}; line-height: 1.3;">
               {% if is_congested %}
-              Routing overflow detected! Peak: <b id="congestionStatusPeakLayer" style="color: #b91c1c;">{{ peak_layer }} at {{ peak_val_pct }}%</b> (exceeds 100.0% capacity).
+              Routing overflow detected! Wire demand exceeds 100.0% track capacity.
               {% else %}
-              All 10 metal layers are safely within track limits (Peak: <b id="congestionStatusPeakLayer" style="color: #15803d;">{{ peak_layer }} at {{ peak_val_pct }}%</b>).
+              Routing wire demand is safely within available track capacity.
               {% endif %}
             </p>
           </div>
@@ -1248,7 +1248,7 @@
             cTitle.style.color = '#7f1d1d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `Routing overflow detected! Peak: <b style="color: #b91c1c;">${peakLayer} at ${peakVal}%</b> (exceeds 100.0% capacity).`;
+            cDesc.innerHTML = 'Routing overflow detected! Wire demand exceeds 100.0% track capacity.';
             cDesc.style.color = '#991b1b';
           }
         } else {
@@ -1267,7 +1267,7 @@
             cTitle.style.color = '#14532d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `All 10 metal layers are safely within track limits (Peak: <b style="color: #15803d;">${peakLayer} at ${peakVal}%</b>).`;
+            cDesc.innerHTML = 'Routing wire demand is safely within available track capacity.';
             cDesc.style.color = '#166534';
           }
         }
