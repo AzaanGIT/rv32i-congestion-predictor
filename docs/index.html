@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.10';
+      const BUILD_VER = '20261026-v8.11';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1382,8 +1382,99 @@ endmodule`
         </div>
       </div>
 
-      <!-- DIGITALJS REAL INTERACTIVE CIRCUIT SIMULATOR -->
-            <!-- 2D CELLULAR HEATMAP VIEWER -->
+      <!-- Overview Cards: 4 KPI Cards -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+        
+        <!-- KPI 1: Routing Feasibility -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Routing Feasibility</span>
+            <span id="kpiSuccessBadge" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+              ROUTABLE
+            </span>
+          </div>
+          <div style="margin-top: 10px;">
+            <h1 id="kpiSuccessProb" style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">100.0%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Feasibility Success Probability</span>
+          </div>
+        </div>
+
+        <!-- KPI 2: Routing Congestion % -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">ROUTING CONGESTION %</span>
+            <span id="kpiPeakBadge" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+              NO CONGESTION (M2)
+            </span>
+          </div>
+          <div style="margin-top: 10px;">
+            <h1 id="kpiPeakPct" style="margin: 0; font-size: 32px; font-weight: 800; color: #15803d;">50.8%</h1>
+            <span id="kpiPeakSubtitle" style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Peak Layer Congestion (M2 Track Saturation)</span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Thermal Risk Index -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #6b21a8; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Thermal Risk Index</span>
+            <span id="kpiThermalBadge" class="heat-pill" style="background:#15803d; color:#ffffff; font-weight: 800; font-size: 10px; padding: 2px 8px; border-radius: 6px;">
+              NORMAL / SAFE
+            </span>
+          </div>
+          <div style="margin-top: 10px;">
+            <h1 id="kpiThermalVal" style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">41.9</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Est. Peak Temp: <b id="kpiPeakTemp" style="color:#ea580c;">56.4 °C</b></span>
+          </div>
+        </div>
+
+        <!-- KPI 4: Core Cell Utilization Spec -->
+        <div class="card" style="margin-bottom: 0; padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #7c3aed; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Core Cell Utilization</span>
+            <span style="background: #f5f3ff; border: 1px solid #ddd6fe; color: #7c3aed; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
+              TARGET SPEC
+            </span>
+          </div>
+          <div style="margin-top: 10px;">
+            <h1 id="kpiCoreUtil" style="margin: 0; font-size: 32px; font-weight: 800; color: #7c3aed;">57.0%</h1>
+            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Placement Density: <b id="kpiCoreDensity">0.56</b></span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- AI ENGINE & PHYSICAL FEATURE SUMMARY CARD -->
+      <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%); border: 1px solid rgba(124, 58, 237, 0.2); margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c; letter-spacing: 0.5px;">PHYSICAL SILICON DESIGN METRICS</h3>
+          </div>
+
+          <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
+            ⚡ Inference: &lt;25ms
+          </span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px;">
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">PIN DENSITY INDEX</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">59.05 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">HPWL WIRELENGTH</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">393.91 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">MACRO BLOCKAGE</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">25.1 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span></div>
+          </div>
+          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">VIA PILLAR DENSITY</div>
+            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">0.42 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2D CELLULAR HEATMAP VIEWER -->
       <div class="card" id="layerDensityCard">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
           <div>
@@ -1666,101 +1757,6 @@ endmodule`
         </div>
 
       </div>
-
-
-
-      <!-- Overview Cards: 4 KPI Cards -->
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
-        
-        <!-- KPI 1: Routing Feasibility -->
-        <div class="card" style="margin-bottom: 0; padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Routing Feasibility</span>
-            <span id="kpiSuccessBadge" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
-              ROUTABLE
-            </span>
-          </div>
-          <div style="margin-top: 10px;">
-            <h1 id="kpiSuccessProb" style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">100.0%</h1>
-            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Feasibility Success Probability</span>
-          </div>
-        </div>
-
-        <!-- KPI 2: Routing Congestion % -->
-        <div class="card" style="margin-bottom: 0; padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #718096; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">ROUTING CONGESTION %</span>
-            <span id="kpiPeakBadge" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
-              NO CONGESTION (M2)
-            </span>
-          </div>
-          <div style="margin-top: 10px;">
-            <h1 id="kpiPeakPct" style="margin: 0; font-size: 32px; font-weight: 800; color: #15803d;">50.8%</h1>
-            <span id="kpiPeakSubtitle" style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Peak Layer Congestion (M2 Track Saturation)</span>
-          </div>
-        </div>
-
-        <!-- KPI 3: Thermal Risk Index -->
-        <div class="card" style="margin-bottom: 0; padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #6b21a8; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Thermal Risk Index</span>
-            <span id="kpiThermalBadge" class="heat-pill" style="background:#15803d; color:#ffffff; font-weight: 800; font-size: 10px; padding: 2px 8px; border-radius: 6px;">
-              NORMAL / SAFE
-            </span>
-          </div>
-          <div style="margin-top: 10px;">
-            <h1 id="kpiThermalVal" style="margin: 0; font-size: 32px; font-weight: 800; color: #1a202c;">41.9</h1>
-            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Est. Peak Temp: <b id="kpiPeakTemp" style="color:#ea580c;">56.4 °C</b></span>
-          </div>
-        </div>
-
-        <!-- KPI 4: Core Cell Utilization Spec -->
-        <div class="card" style="margin-bottom: 0; padding: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #7c3aed; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Core Cell Utilization</span>
-            <span style="background: #f5f3ff; border: 1px solid #ddd6fe; color: #7c3aed; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 10px;">
-              TARGET SPEC
-            </span>
-          </div>
-          <div style="margin-top: 10px;">
-            <h1 id="kpiCoreUtil" style="margin: 0; font-size: 32px; font-weight: 800; color: #7c3aed;">57.0%</h1>
-            <span style="color: #4a5568; font-size: 11px; font-weight: 700; margin-top: 4px; display: inline-block;">Placement Density: <b id="kpiCoreDensity">0.56</b></span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- AI ENGINE & PHYSICAL FEATURE SUMMARY CARD -->
-      <div class="card" style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%); border: 1px solid rgba(124, 58, 237, 0.2); margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div>
-            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c; letter-spacing: 0.5px;">PHYSICAL SILICON DESIGN METRICS</h3>
-          </div>
-
-          <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
-            ⚡ Inference: &lt;25ms
-          </span>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px;">
-          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">PIN DENSITY INDEX</div>
-            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">59.05 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span></div>
-          </div>
-          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">HPWL WIRELENGTH</div>
-            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">393.91 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span></div>
-          </div>
-          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">MACRO BLOCKAGE</div>
-            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">25.1 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span></div>
-          </div>
-          <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">VIA PILLAR DENSITY</div>
-            <div style="font-size: 18px; font-weight: 800; color: #7c3aed; margin-top: 2px;">0.42 <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span></div>
-          </div>
-        </div>
-      </div>
-
 
       <!-- RECOMMENDATION SECTION -->
       <div class="card" style="border-left: 5px solid #16a34a;">
