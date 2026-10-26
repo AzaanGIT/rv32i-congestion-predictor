@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.4';
+      const BUILD_VER = '20261026-v8.5';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -87,7 +87,7 @@
     .layer-tag { font-size: 9px; color: #7c3aed; font-weight: 700; margin-top: 2px; }
     .badge { background: #edf2f7; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; }
     input[type="number"] { width: 100%; background: transparent; border: none; color: #1a202c; font-size: 18px; font-weight: 800; margin-top: 8px; outline: none; font-family: inherit; }
-    input[type="range"] { width: 100%; margin-top: 8px; accent-color: #7c3aed; cursor: pointer; }
+    input[type="range"] { width: 100%; height: 8px; margin-top: 8px; accent-color: #7c3aed; cursor: pointer; border-radius: 4px; }
 
     .summary-banner { background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(109, 40, 217, 0.03) 100%); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
     .metric-group { display: flex; gap: 32px; }
@@ -378,7 +378,7 @@
                   <input type="number" id="inp_util" name="utilization" value="57.0" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
                 </div>
                 <div>
-                  <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)" style="margin: 0; height: 8px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
                   <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
                     <span>20%</span>
                     <span>95%</span>
@@ -395,7 +395,7 @@
                   <input type="number" id="inp_aspect" name="aspect_ratio" value="1.5" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
                 </div>
                 <div>
-                  <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)" style="margin: 0; height: 8px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
                   <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
                     <span>0.5</span>
                     <span>3.0</span>
@@ -412,7 +412,7 @@
                   <input type="number" id="inp_margin" name="core_margin" value="3.0" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
                 </div>
                 <div>
-                  <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)" style="margin: 0; height: 8px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
                   <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
                     <span>0.5</span>
                     <span>10.0</span>
@@ -432,7 +432,7 @@
                   <input type="number" id="inp_density" name="density" value="0.56" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
                 </div>
                 <div>
-                  <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)" style="margin: 0; height: 8px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
                   <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
                     <span>0.10</span>
                     <span>0.95</span>
@@ -449,7 +449,7 @@
                   <input type="number" id="inp_layer_adj" name="layer_adjustment" value="0.6" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
                 </div>
                 <div>
-                  <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)" style="margin: 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+                  <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)" style="margin: 0; height: 8px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
                   <div style="display: flex; justify-content: space-between; font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 2px;">
                     <span>0.10</span>
                     <span>1.00</span>
