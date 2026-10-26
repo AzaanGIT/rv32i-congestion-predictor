@@ -246,19 +246,9 @@
           window._userWantsRunning = false;
           var btn = document.querySelector('button[name="pause"]');
           if (btn) btn.click();
-          var tickInput = document.getElementById("tick");
-          if (tickInput && !window._userWantsRunning) {
-            window._lastReportedTick = tickInput.value;
-          }
         } else if (cmd === 'single') {
           var btn = document.querySelector('button[name="single"]');
           if (btn) btn.click();
-          setTimeout(function() {
-            var tickInput = document.getElementById("tick");
-            if (tickInput && window.parent && window.parent !== window) {
-              window.parent.postMessage({ type: 'djsTick', tick: parseInt(tickInput.value, 10) || 0, formatted: tickInput.value + ' ms', force: true }, '*');
-            }
-          }, 60);
         } else if (cmd === 'fastfw') {
           var btn = document.querySelector('button[name="fastfw"]');
           if (btn) btn.click();
@@ -270,24 +260,8 @@
     });
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 6: Forward live simulation tick to parent toolbar in real time
+    // STEP 6: Simulation timing is managed authoritatively by parent toolbar
     // ─────────────────────────────────────────────────────────────────────────
-    window._lastReportedTick = "";
-    setInterval(function() {
-      if (!window._userWantsRunning) {
-        return; // Never send ticks before user clicks Run
-      }
-      var tickInput = document.getElementById("tick");
-      if (tickInput) {
-        var val = tickInput.value;
-        if (val && val !== window._lastReportedTick) {
-          window._lastReportedTick = val;
-          if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'djsTick', tick: parseInt(val, 10) || 0, formatted: val + ' ms' }, '*');
-          }
-        }
-      }
-    }, 40);
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 7: DOM ready — activate circuit tab + safe JointJS click handler

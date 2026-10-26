@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.14';
+      const BUILD_VER = '20261026-v8.15';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -5295,24 +5295,6 @@ endmodule`
         }
       } else if (event.data.type === "djsCellSelected") {
         handleCircuitSelection(event.data);
-      } else if (event.data.type === "djsTick") {
-        if (!isSimRunning && !event.data.force) {
-          const tickInput = document.getElementById("djsTickVal");
-          if (tickInput && tickInput.value !== "0 ms") {
-            tickInput.value = "0 ms";
-          }
-          simTimeMs = 0;
-          return;
-        }
-        const tickInput = document.getElementById("djsTickVal");
-        if (tickInput) {
-          tickInput.value = event.data.formatted || `${event.data.tick} ms`;
-        }
-        if (typeof event.data.tick === "number") {
-          simTimeMs = event.data.tick;
-        }
-        updateHudClock();
-        updateSignalHud();
       }
     });
 
@@ -6309,6 +6291,7 @@ endmodule`
     }
 
     function djsResumeSim() {
+      if (isSimRunning) return;
       isSimRunning = true;
       const btn = document.getElementById("djsRunBtn");
       const txt = document.getElementById("djsRunBtnText");
@@ -6333,18 +6316,21 @@ endmodule`
     function djsStepSim() {
       simTimeMs += 50;
       advanceTick();
+      updateTickDisplay();
       sendDjsIframeCmd('single');
     }
 
     function djsFastFwdSim() {
       simTimeMs += 500;
       for (let i = 0; i < 5; i++) advanceTick();
+      updateTickDisplay();
       sendDjsIframeCmd('fastfw');
     }
 
     function djsNextEventSim() {
       simTimeMs += 25;
       advanceTick();
+      updateTickDisplay();
       sendDjsIframeCmd('next');
     }
 

@@ -5273,6 +5273,7 @@ endmodule`
     }
 
     function djsResumeSim() {
+      if (isSimRunning) return;
       isSimRunning = true;
       const btn = document.getElementById("djsRunBtn");
       const txt = document.getElementById("djsRunBtnText");
@@ -5297,18 +5298,21 @@ endmodule`
     function djsStepSim() {
       simTimeMs += 50;
       advanceTick();
+      updateTickDisplay();
       sendDjsIframeCmd('single');
     }
 
     function djsFastFwdSim() {
       simTimeMs += 500;
       for (let i = 0; i < 5; i++) advanceTick();
+      updateTickDisplay();
       sendDjsIframeCmd('fastfw');
     }
 
     function djsNextEventSim() {
       simTimeMs += 25;
       advanceTick();
+      updateTickDisplay();
       sendDjsIframeCmd('next');
     }
 
