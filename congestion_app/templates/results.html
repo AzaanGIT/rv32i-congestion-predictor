@@ -418,7 +418,36 @@
       </div>
 
       <!-- DIGITALJS REAL INTERACTIVE CIRCUIT SIMULATOR -->
-      <div id="panelSchematic" style="margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); background: #ffffff;">
+            <!-- 2D CELLULAR HEATMAP VIEWER -->
+      <div class="card" id="layerDensityCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+          <div>
+            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</span>
+            <h3 style="margin: 4px 0 0 0; font-size: 16px; font-weight: 800; color: #1a202c;">Top view & combined side view</h3>
+          </div>
+          <div style="display:flex; align-items:center; gap: 8px;">
+            <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
+            <div style="width: 100px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0284c7 0%, #16a34a 30%, #d97706 60%, #dc2626 100%);"></div>
+            <span style="color:#718096; font-size:11px; font-weight: 700;">HIGH</span>
+          </div>
+        </div>
+
+        <div class="grid-heatmaps">
+          {% for layer in ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10"] %}
+          <div class="heatmap-card" id="card-{{ layer }}">
+            <div class="heatmap-header">
+              <span>{{ layer }} • ROUTING</span>
+              <span id="pct-{{ layer }}" style="color: {% if layer_usage_pct[layer] >= 85 %}#dc2626{% else %}#15803d{% endif %}; font-weight: 800;">{{ layer_usage_pct[layer] }}%</span>
+            </div>
+            <canvas id="cvs-{{ layer }}" class="canvas-sim" width="220" height="135"></canvas>
+            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('{{ layer }}')">Fix this layer</button>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+<div id="panelSchematic" style="margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); background: #ffffff;">
 
         <!-- 1. DIGITALJS SIGNATURE TOOLBAR (Exact replica of digitaljs.tilk.eu / Screenshot 2) -->
         <div id="toolbar" style="width: 100%; box-sizing: border-box; border-bottom: 5px solid #eee; padding: 4px 10px; background: #ffffff;">
@@ -690,35 +719,6 @@
         </div>
       </div>
 
-
-      <!-- 2D CELLULAR HEATMAP VIEWER -->
-      <div class="card" id="layerDensityCard">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
-          <div>
-            <span style="color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</span>
-            <h3 style="margin: 4px 0 0 0; font-size: 16px; font-weight: 800; color: #1a202c;">Top view & combined side view</h3>
-          </div>
-          <div style="display:flex; align-items:center; gap: 8px;">
-            <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
-            <div style="width: 100px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0284c7 0%, #16a34a 30%, #d97706 60%, #dc2626 100%);"></div>
-            <span style="color:#718096; font-size:11px; font-weight: 700;">HIGH</span>
-          </div>
-        </div>
-
-        <div class="grid-heatmaps">
-          {% for layer in ["M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10"] %}
-          <div class="heatmap-card" id="card-{{ layer }}">
-            <div class="heatmap-header">
-              <span>{{ layer }} • ROUTING</span>
-              <span id="pct-{{ layer }}" style="color: {% if layer_usage_pct[layer] >= 85 %}#dc2626{% else %}#15803d{% endif %}; font-weight: 800;">{{ layer_usage_pct[layer] }}%</span>
-            </div>
-            <canvas id="cvs-{{ layer }}" class="canvas-sim" width="220" height="135"></canvas>
-            <div style="color: #718096; font-size: 10px; margin-top: 8px; margin-bottom: 8px; font-weight: 600;">derived pressure distribution</div>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px;" onclick="openSingleLayerFix('{{ layer }}')">Fix this layer</button>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
 
       <!-- RECOMMENDATION SECTION -->
       <div class="card" style="border-left: 5px solid #16a34a;">

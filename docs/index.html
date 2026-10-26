@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.9';
+      const BUILD_VER = '20261026-v8.10';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1383,7 +1383,115 @@ endmodule`
       </div>
 
       <!-- DIGITALJS REAL INTERACTIVE CIRCUIT SIMULATOR -->
-      <div id="panelSchematic" style="margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); background: #ffffff;">
+            <!-- 2D CELLULAR HEATMAP VIEWER -->
+      <div class="card" id="layerDensityCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</h3>
+          </div>
+          <div style="display:flex; align-items:center; gap: 8px;">
+            <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
+            <div style="width: 100px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0284c7 0%, #16a34a 30%, #d97706 60%, #dc2626 100%);"></div>
+            <span style="color:#718096; font-size:11px; font-weight: 700;">HIGH</span>
+          </div>
+        </div>
+
+        <div class="grid-heatmaps">
+          
+          <div class="heatmap-card" id="card-M1">
+            <div class="heatmap-header">
+              <span>M1 • ROUTING</span>
+              <span id="pct-M1" style="color: #15803d; font-weight: 800;">0.0%</span>
+            </div>
+            <canvas id="cvs-M1" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M1')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M2">
+            <div class="heatmap-header">
+              <span>M2 • ROUTING</span>
+              <span id="pct-M2" style="color: #15803d; font-weight: 800;">50.8%</span>
+            </div>
+            <canvas id="cvs-M2" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M2')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M3">
+            <div class="heatmap-header">
+              <span>M3 • ROUTING</span>
+              <span id="pct-M3" style="color: #15803d; font-weight: 800;">46.0%</span>
+            </div>
+            <canvas id="cvs-M3" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M3')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M4">
+            <div class="heatmap-header">
+              <span>M4 • ROUTING</span>
+              <span id="pct-M4" style="color: #15803d; font-weight: 800;">36.1%</span>
+            </div>
+            <canvas id="cvs-M4" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M4')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M5">
+            <div class="heatmap-header">
+              <span>M5 • ROUTING</span>
+              <span id="pct-M5" style="color: #15803d; font-weight: 800;">25.2%</span>
+            </div>
+            <canvas id="cvs-M5" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M5')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M6">
+            <div class="heatmap-header">
+              <span>M6 • ROUTING</span>
+              <span id="pct-M6" style="color: #15803d; font-weight: 800;">25.0%</span>
+            </div>
+            <canvas id="cvs-M6" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M6')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M7">
+            <div class="heatmap-header">
+              <span>M7 • ROUTING</span>
+              <span id="pct-M7" style="color: #15803d; font-weight: 800;">14.7%</span>
+            </div>
+            <canvas id="cvs-M7" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M7')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M8">
+            <div class="heatmap-header">
+              <span>M8 • ROUTING</span>
+              <span id="pct-M8" style="color: #15803d; font-weight: 800;">14.8%</span>
+            </div>
+            <canvas id="cvs-M8" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M8')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M9">
+            <div class="heatmap-header">
+              <span>M9 • ROUTING</span>
+              <span id="pct-M9" style="color: #15803d; font-weight: 800;">17.7%</span>
+            </div>
+            <canvas id="cvs-M9" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M9')">Fix this layer</button>
+          </div>
+          
+          <div class="heatmap-card" id="card-M10">
+            <div class="heatmap-header">
+              <span>M10 • ROUTING</span>
+              <span id="pct-M10" style="color: #15803d; font-weight: 800;">15.5%</span>
+            </div>
+            <canvas id="cvs-M10" class="canvas-sim" width="220" height="135"></canvas>
+            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M10')">Fix this layer</button>
+          </div>
+          
+        </div>
+      </div>
+
+<div id="panelSchematic" style="margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); background: #ffffff;">
 
         <!-- 1. DIGITALJS SIGNATURE TOOLBAR (Exact replica of digitaljs.tilk.eu / Screenshot 2) -->
         <div id="toolbar" style="width: 100%; box-sizing: border-box; border-bottom: 5px solid #eee; padding: 4px 10px; background: #ffffff;">
@@ -1653,114 +1761,6 @@ endmodule`
         </div>
       </div>
 
-
-      <!-- 2D CELLULAR HEATMAP VIEWER -->
-      <div class="card" id="layerDensityCard">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
-          <div>
-            <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #1a202c; letter-spacing: 0.5px;">PER-LAYER ROUTING DENSITY VIEWER</h3>
-          </div>
-          <div style="display:flex; align-items:center; gap: 8px;">
-            <span style="color:#718096; font-size:11px; font-weight: 700;">LOW</span>
-            <div style="width: 100px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #0284c7 0%, #16a34a 30%, #d97706 60%, #dc2626 100%);"></div>
-            <span style="color:#718096; font-size:11px; font-weight: 700;">HIGH</span>
-          </div>
-        </div>
-
-        <div class="grid-heatmaps">
-          
-          <div class="heatmap-card" id="card-M1">
-            <div class="heatmap-header">
-              <span>M1 • ROUTING</span>
-              <span id="pct-M1" style="color: #15803d; font-weight: 800;">0.0%</span>
-            </div>
-            <canvas id="cvs-M1" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M1')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M2">
-            <div class="heatmap-header">
-              <span>M2 • ROUTING</span>
-              <span id="pct-M2" style="color: #15803d; font-weight: 800;">50.8%</span>
-            </div>
-            <canvas id="cvs-M2" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M2')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M3">
-            <div class="heatmap-header">
-              <span>M3 • ROUTING</span>
-              <span id="pct-M3" style="color: #15803d; font-weight: 800;">46.0%</span>
-            </div>
-            <canvas id="cvs-M3" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M3')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M4">
-            <div class="heatmap-header">
-              <span>M4 • ROUTING</span>
-              <span id="pct-M4" style="color: #15803d; font-weight: 800;">36.1%</span>
-            </div>
-            <canvas id="cvs-M4" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M4')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M5">
-            <div class="heatmap-header">
-              <span>M5 • ROUTING</span>
-              <span id="pct-M5" style="color: #15803d; font-weight: 800;">25.2%</span>
-            </div>
-            <canvas id="cvs-M5" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M5')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M6">
-            <div class="heatmap-header">
-              <span>M6 • ROUTING</span>
-              <span id="pct-M6" style="color: #15803d; font-weight: 800;">25.0%</span>
-            </div>
-            <canvas id="cvs-M6" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M6')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M7">
-            <div class="heatmap-header">
-              <span>M7 • ROUTING</span>
-              <span id="pct-M7" style="color: #15803d; font-weight: 800;">14.7%</span>
-            </div>
-            <canvas id="cvs-M7" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M7')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M8">
-            <div class="heatmap-header">
-              <span>M8 • ROUTING</span>
-              <span id="pct-M8" style="color: #15803d; font-weight: 800;">14.8%</span>
-            </div>
-            <canvas id="cvs-M8" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M8')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M9">
-            <div class="heatmap-header">
-              <span>M9 • ROUTING</span>
-              <span id="pct-M9" style="color: #15803d; font-weight: 800;">17.7%</span>
-            </div>
-            <canvas id="cvs-M9" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M9')">Fix this layer</button>
-          </div>
-          
-          <div class="heatmap-card" id="card-M10">
-            <div class="heatmap-header">
-              <span>M10 • ROUTING</span>
-              <span id="pct-M10" style="color: #15803d; font-weight: 800;">15.5%</span>
-            </div>
-            <canvas id="cvs-M10" class="canvas-sim" width="220" height="135"></canvas>
-            <button class="btn-fix" style="width: 100%; font-size: 11px; padding: 5px; margin-top: 8px;" onclick="openSingleLayerFix('M10')">Fix this layer</button>
-          </div>
-          
-        </div>
-      </div>
 
       <!-- RECOMMENDATION SECTION -->
       <div class="card" style="border-left: 5px solid #16a34a;">
