@@ -354,47 +354,29 @@
     <!-- RIGHT MAIN CONTENT -->
     <div class="main-content">
       
-      <!-- CONGESTION OCCURRENCE STATUS & CONGESTION PERCENTAGE BANNER -->
-      <div id="congestionStatusBanner" style="margin-bottom: 20px; border-radius: 10px; padding: 18px 24px; border: 1.5px solid {% if is_congested %}#fca5a5{% else %}#86efac{% endif %}; background: {% if is_congested %}linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%){% else %}linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%){% endif %}; box-shadow: 0 4px 16px {% if is_congested %}rgba(239, 68, 68, 0.12){% else %}rgba(16, 185, 129, 0.08){% endif %}; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <div id="congestionStatusIconBox" style="width: 48px; height: 48px; border-radius: 50%; background: {% if is_congested %}#ef4444{% else %}#22c55e{% endif %}; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; box-shadow: 0 2px 8px {% if is_congested %}rgba(239, 68, 68, 0.35){% else %}rgba(34, 197, 94, 0.35){% endif %}; flex-shrink: 0;">
+      <!-- CONGESTION OCCURRENCE STATUS BANNER -->
+      <div id="congestionStatusBanner" style="margin-bottom: 20px; border-radius: 8px; padding: 12px 20px; border: 1.5px solid {% if is_congested %}#fca5a5{% else %}#86efac{% endif %}; background: {% if is_congested %}#fef2f2{% else %}#f0fdf4{% endif %}; display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div id="congestionStatusIconBox" style="width: 36px; height: 36px; border-radius: 50%; background: {% if is_congested %}#ef4444{% else %}#22c55e{% endif %}; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; flex-shrink: 0;">
             {% if is_congested %}⚠️{% else %}✓{% endif %}
           </div>
           <div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span id="congestionStatusPill" style="background: {% if is_congested %}#b91c1c{% else %}#15803d{% endif %}; color: #ffffff; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;">
-                {% if is_congested %}CONGESTION OCCURRING{% else %}NO CONGESTION DETECTED{% endif %}
-              </span>
-              <span id="congestionStatusSubBadge" style="background: {% if is_congested %}rgba(185, 28, 28, 0.12){% else %}rgba(21, 128, 61, 0.12){% endif %}; color: {% if is_congested %}#b91c1c{% else %}#15803d{% endif %}; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
-                {% if is_congested %}DRC BOTTLENECK DETECTED{% else %}100% ROUTABLE &amp; DRC CLEAN{% endif %}
-              </span>
-            </div>
-            <h2 id="congestionStatusTitle" style="margin: 6px 0 2px 0; font-size: 18px; font-weight: 800; color: {% if is_congested %}#7f1d1d{% else %}#14532d{% endif %};">
+            <h2 id="congestionStatusTitle" style="margin: 0; font-size: 16px; font-weight: 800; color: {% if is_congested %}#7f1d1d{% else %}#14532d{% endif %};">
               {% if is_congested %}Congestion Is Happening! (Routing Overflow){% else %}Congestion Is NOT Happening{% endif %}
             </h2>
-            <p id="congestionStatusDesc" style="margin: 0; font-size: 12.5px; color: {% if is_congested %}#991b1b{% else %}#166534{% endif %}; line-height: 1.4;">
+            <p id="congestionStatusDesc" style="margin: 2px 0 0 0; font-size: 12.5px; color: {% if is_congested %}#991b1b{% else %}#166534{% endif %}; line-height: 1.3;">
               {% if is_congested %}
-              Routing overflow detected! Peak layer track saturation is <b style="color: #b91c1c;">{{ peak_layer }} at {{ peak_val_pct }}%</b>, exceeding the 85.0% DRC routability threshold.
+              Routing overflow detected! Peak: <b id="congestionStatusPeakLayer" style="color: #b91c1c;">{{ peak_layer }} at {{ peak_val_pct }}%</b> (exceeds 100.0% capacity).
               {% else %}
-              All 10 metal layers are safely within track limits. Peak layer track saturation is <b style="color: #15803d;">{{ peak_layer }} at {{ peak_val_pct }}%</b> (below 85.0% threshold).
+              All 10 metal layers are safely within track limits (Peak: <b id="congestionStatusPeakLayer" style="color: #15803d;">{{ peak_layer }} at {{ peak_val_pct }}%</b>).
               {% endif %}
             </p>
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 20px; background: rgba(255, 255, 255, 0.7); border: 1px solid {% if is_congested %}rgba(220, 38, 38, 0.2){% else %}rgba(21, 128, 61, 0.2){% endif %}; padding: 10px 18px; border-radius: 8px; flex-shrink: 0;">
-          <div style="text-align: right;">
-            <div style="font-size: 10.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Peak Routing Congestion</div>
-            <div id="bannerPeakCongestionPct" style="font-size: 28px; font-weight: 900; color: {% if is_congested %}#dc2626{% else %}#15803d{% endif %}; line-height: 1.1;">{{ peak_val_pct }}%</div>
-            <div id="bannerAvgCongestionPct" style="font-size: 11px; font-weight: 600; color: #64748b;">Avg Across Layers: {{ avg_usage_pct }}%</div>
-          </div>
-          <div style="border-left: 1px solid #cbd5e1; height: 38px;"></div>
-          <div>
-            <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">DRC Rule</div>
-            <div style="font-size: 13px; font-weight: 800; color: #1e293b;">&lt; 85.0% Limit</div>
-            <div id="bannerDrcVerdict" style="font-size: 11px; font-weight: 700; color: {% if is_congested %}#dc2626{% else %}#15803d{% endif %};">{% if is_congested %}FAIL (OVERFLOW){% else %}PASS (CLEAN){% endif %}</div>
-          </div>
-        </div>
+        <span id="congestionStatusPill" style="background: {% if is_congested %}#dc2626{% else %}#15803d{% endif %}; color: #ffffff; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0;">
+          {% if is_congested %}CONGESTION DETECTED{% else %}NO CONGESTION{% endif %}
+        </span>
       </div>
 
       <!-- ESTIMATED CORE AREA, ROUTING BUDGET & RISK CLASS -->
@@ -1242,91 +1224,51 @@
         kpiPeakSub.innerText = `Peak Layer Congestion (${peakLayer} Track Saturation)`;
       }
 
-      // Update Dedicated Top Congestion Status & Percentage Banner
+      // Update Dedicated Top Congestion Status Banner
       const cBanner = document.getElementById('congestionStatusBanner');
       const cIconBox = document.getElementById('congestionStatusIconBox');
       const cPill = document.getElementById('congestionStatusPill');
-      const cSubBadge = document.getElementById('congestionStatusSubBadge');
       const cTitle = document.getElementById('congestionStatusTitle');
       const cDesc = document.getElementById('congestionStatusDesc');
-      const cPeakPct = document.getElementById('bannerPeakCongestionPct');
-      const cAvgPct = document.getElementById('bannerAvgCongestionPct');
-      const cDrcVerdict = document.getElementById('bannerDrcVerdict');
 
       if (cBanner) {
         if (isCongested) {
-          cBanner.style.background = 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)';
+          cBanner.style.background = '#fef2f2';
           cBanner.style.borderColor = '#fca5a5';
-          cBanner.style.boxShadow = '0 4px 16px rgba(239, 68, 68, 0.12)';
           if (cIconBox) {
             cIconBox.innerText = '⚠️';
             cIconBox.style.background = '#ef4444';
-            cIconBox.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.35)';
           }
           if (cPill) {
-            cPill.innerText = 'CONGESTION OCCURRING';
-            cPill.style.background = '#b91c1c';
-          }
-          if (cSubBadge) {
-            cSubBadge.innerText = 'DRC BOTTLENECK DETECTED';
-            cSubBadge.style.background = 'rgba(185, 28, 28, 0.12)';
-            cSubBadge.style.color = '#b91c1c';
+            cPill.innerText = 'CONGESTION DETECTED';
+            cPill.style.background = '#dc2626';
           }
           if (cTitle) {
             cTitle.innerText = 'Congestion Is Happening! (Routing Overflow)';
             cTitle.style.color = '#7f1d1d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `Routing overflow detected! Peak layer track saturation is <b style="color: #b91c1c;">${peakLayer} at ${peakVal}%</b>, exceeding the 85.0% DRC routability threshold.`;
+            cDesc.innerHTML = `Routing overflow detected! Peak: <b style="color: #b91c1c;">${peakLayer} at ${peakVal}%</b> (exceeds 100.0% capacity).`;
             cDesc.style.color = '#991b1b';
           }
-          if (cPeakPct) {
-            cPeakPct.innerText = peakVal + '%';
-            cPeakPct.style.color = '#dc2626';
-          }
-          if (cAvgPct) {
-            cAvgPct.innerText = `Avg Across Layers: ${avgUsage}%`;
-          }
-          if (cDrcVerdict) {
-            cDrcVerdict.innerText = 'FAIL (OVERFLOW)';
-            cDrcVerdict.style.color = '#dc2626';
-          }
         } else {
-          cBanner.style.background = 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)';
+          cBanner.style.background = '#f0fdf4';
           cBanner.style.borderColor = '#86efac';
-          cBanner.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.08)';
           if (cIconBox) {
             cIconBox.innerText = '✓';
             cIconBox.style.background = '#22c55e';
-            cIconBox.style.boxShadow = '0 2px 8px rgba(34, 197, 94, 0.35)';
           }
           if (cPill) {
-            cPill.innerText = 'NO CONGESTION DETECTED';
+            cPill.innerText = 'NO CONGESTION';
             cPill.style.background = '#15803d';
-          }
-          if (cSubBadge) {
-            cSubBadge.innerText = '100% ROUTABLE & DRC CLEAN';
-            cSubBadge.style.background = 'rgba(21, 128, 61, 0.12)';
-            cSubBadge.style.color = '#15803d';
           }
           if (cTitle) {
             cTitle.innerText = 'Congestion Is NOT Happening';
             cTitle.style.color = '#14532d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `All 10 metal layers are safely within track limits. Peak layer track saturation is <b style="color: #15803d;">${peakLayer} at ${peakVal}%</b> (below 85.0% threshold).`;
+            cDesc.innerHTML = `All 10 metal layers are safely within track limits (Peak: <b style="color: #15803d;">${peakLayer} at ${peakVal}%</b>).`;
             cDesc.style.color = '#166534';
-          }
-          if (cPeakPct) {
-            cPeakPct.innerText = peakVal + '%';
-            cPeakPct.style.color = '#15803d';
-          }
-          if (cAvgPct) {
-            cAvgPct.innerText = `Avg Across Layers: ${avgUsage}%`;
-          }
-          if (cDrcVerdict) {
-            cDrcVerdict.innerText = 'PASS (CLEAN)';
-            cDrcVerdict.style.color = '#15803d';
           }
         }
       }
