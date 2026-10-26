@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.5';
+      const BUILD_VER = '20261026-v8.6';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -326,8 +326,8 @@
       <div class="brand-title" style="font-size: 16.5px; font-weight: 900; margin: 0; color: #1a202c;">
         ⚡ RV32I CONGESTION PREDICTOR
       </div>
-      <span id="activeTargetBadge" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px;">
-        TARGET: RV32I
+      <span id="activeTargetBadge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px;">
+        AWAITING SELECTION
       </span>
     </div>
 
@@ -335,7 +335,8 @@
     <div style="display: flex; align-items: center; gap: 8px;">
       <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Core:</span>
       <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="background: #ffffff; border: 1.5px solid #7c3aed; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer;">
-        <option value="RV32I" selected>RV32I (RISC-V 32-bit Integer ISA Core)</option>
+        <option value="" selected>-- Select Processor Core --</option>
+        <option value="RV32I">RV32I (RISC-V 32-bit Integer ISA Core)</option>
       </select>
       <span id="isaLabel" style="display: none;">32-Bit RISC-V (RV32I)</span>
     </div>
@@ -351,8 +352,24 @@
 
   <form id="floorplanForm" action="javascript:void(0);" method="GET" onsubmit="triggerAnalysisFromForm(); return false;" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
 
-    <!-- 2-COLUMN DASHBOARD GRID: FILLS 100% OF AVAILABLE VIEWPORT HEIGHT -->
-    <div id="processorContent" style="display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 12px;">
+    <!-- BANNER SHOWN BEFORE PROCESSOR IS SELECTED -->
+    <div id="selectPromptBanner" class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; min-height: 0; background: rgba(255, 255, 255, 0.95); border: 2px dashed rgba(124, 58, 237, 0.3); border-radius: 12px; padding: 40px 20px; text-align: center; box-sizing: border-box;">
+      <div style="width: 58px; height: 58px; border-radius: 50%; background: #f5f3ff; border: 1.5px solid #ddd6fe; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.12);">
+        ⚡
+      </div>
+      <div style="font-size: 18px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">
+        Select Processor Core to Begin
+      </div>
+      <div style="font-size: 13px; color: #64748b; max-width: 500px; line-height: 1.6; margin-bottom: 20px;">
+        Please select <b>RV32I (RISC-V 32-bit Integer ISA Core)</b> from the top selector to configure floorplan parameters, silicon metal stack capacity, and Verilog HDL description.
+      </div>
+      <button type="button" onclick="const s = document.getElementById('processorSelect'); if (s) { s.value = 'RV32I'; handleProcessorSelection('RV32I'); }" style="background: #7c3aed; color: #ffffff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35); transition: 0.2s;">
+        ⚡ Load RV32I Processor Core
+      </button>
+    </div>
+
+    <!-- 2-COLUMN DASHBOARD GRID: HIDDEN UNTIL PROCESSOR IS SELECTED -->
+    <div id="processorContent" style="display: none; flex: 1; min-height: 0; flex-direction: column; gap: 12px;">
 
       <!-- TOP ROW: (1 2) EXPANDED TILL MIDDLE OF SCREEN -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 0.92; min-height: 0; width: 100%; box-sizing: border-box;">
@@ -687,12 +704,12 @@
         updateLiveStats();
       } else {
         if (content) content.style.display = 'none';
-        if (promptBanner) promptBanner.style.display = 'block';
+        if (promptBanner) promptBanner.style.display = 'flex';
         if (activeBadge) {
           activeBadge.innerText = 'AWAITING SELECTION';
-          activeBadge.style.background = '#fef2f2';
-          activeBadge.style.color = '#b91c1c';
-          activeBadge.style.border = '1px solid #fca5a5';
+          activeBadge.style.background = '#fef3c7';
+          activeBadge.style.color = '#b45309';
+          activeBadge.style.border = '1px solid #fde68a';
         }
         if (isaLabel) {
           isaLabel.innerText = 'RV32I Available';
@@ -707,6 +724,11 @@
     }
 
     function applyPreset(type) {
+      const s = document.getElementById('processorSelect');
+      if (s && s.value !== 'RV32I') {
+        s.value = 'RV32I';
+        handleProcessorSelection('RV32I');
+      }
       if (type === 'default') {
         document.getElementById('inp_util').value = 57.0;
         document.getElementById('inp_aspect').value = 1.5;
@@ -744,7 +766,7 @@
       
       // Calculate estimated area
       const baseArea = (util * 0.02) + (margin * 0.1) * aspect;
-      document.getElementById('disp_area').innerText = baseArea.toFixed(2) + ' mm²';
+      const da = document.getElementById('disp_area'); if (da) da.innerText = baseArea.toFixed(2) + ' mm²';
 
       // Estimate total tracks sum
       let sumTracks = 0;
