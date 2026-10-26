@@ -199,8 +199,19 @@
       var btn = document.querySelector('button[name="pause"]');
       if (btn && !btn.disabled) {
         btn.click();
+        var tickInput = document.getElementById("tick");
+        if (tickInput && !window._userWantsRunning) {
+          tickInput.value = "0";
+        }
       }
     }
+
+    // Actively keep simulation paused on initial load until user commands Run
+    setInterval(function() {
+      if (!window._userWantsRunning) {
+        ensureSimulationPaused();
+      }
+    }, 50);
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 5: Handle postMessage from parent
@@ -214,7 +225,7 @@
         } else if (typeof window.onpopstate === 'function') {
           try { window.onpopstate(); } catch(e) {}
         }
-        setTimeout(ensureSimulationPaused, 80);
+        setTimeout(ensureSimulationPaused, 50);
       } else if (event.data.type === 'loadCircuitData') {
         var hash = event.data.hash || ('cst_' + Date.now().toString(36));
         var circuit = event.data.circuit;
@@ -235,9 +246,19 @@
           window._userWantsRunning = false;
           var btn = document.querySelector('button[name="pause"]');
           if (btn) btn.click();
+          var tickInput = document.getElementById("tick");
+          if (tickInput && !window._userWantsRunning) {
+            window._lastReportedTick = tickInput.value;
+          }
         } else if (cmd === 'single') {
           var btn = document.querySelector('button[name="single"]');
           if (btn) btn.click();
+          setTimeout(function() {
+            var tickInput = document.getElementById("tick");
+            if (tickInput && window.parent && window.parent !== window) {
+              window.parent.postMessage({ type: 'djsTick', tick: parseInt(tickInput.value, 10) || 0, formatted: tickInput.value + ' ms', force: true }, '*');
+            }
+          }, 60);
         } else if (cmd === 'fastfw') {
           var btn = document.querySelector('button[name="fastfw"]');
           if (btn) btn.click();
@@ -253,6 +274,9 @@
     // ─────────────────────────────────────────────────────────────────────────
     window._lastReportedTick = "";
     setInterval(function() {
+      if (!window._userWantsRunning) {
+        return; // Never send ticks before user clicks Run
+      }
       var tickInput = document.getElementById("tick");
       if (tickInput) {
         var val = tickInput.value;

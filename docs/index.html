@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v7.1';
+      const BUILD_VER = '20261026-v7.2';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -288,6 +288,14 @@
       if (controlsEl) controlsEl.style.display = 'none';
       if (resultsEl) resultsEl.style.display = 'block';
       window.scrollTo(0, 0);
+      if (typeof djsPauseSim === 'function') {
+        djsPauseSim();
+      }
+      simTimeMs = 0;
+      simTick = 0;
+      if (typeof updateTickDisplay === 'function') {
+        updateTickDisplay();
+      }
       if (typeof applyFloorplanAnalysis === 'function') {
         try {
           applyFloorplanAnalysis(false, null);
@@ -1367,7 +1375,7 @@ endmodule`
 
             <!-- LIVE DIGITALJS EMBEDDED ENGINE (CIRCUIT DESIGN ONLY - CLEAN FULL VIEW) -->
             <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 0; position: relative; background: #ffffff; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261009-v3.2#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
+              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261026-v7.2#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
             </div>
 
             <!-- Canvas Zoom Floating Controls (For Congestion View) -->
@@ -5102,7 +5110,7 @@ endmodule`
         return;
       }
       const hash = DIGITALJS_LIVE_HASHES[moduleFilename];
-      const targetUrl = "digitaljs_view.html?v=20261026-v7.0#" + hash;
+      const targetUrl = "digitaljs_view.html?v=20261026-v7.2#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
@@ -5201,6 +5209,14 @@ endmodule`
       if (event.data.type === "djsCellSelected") {
         handleCircuitSelection(event.data);
       } else if (event.data.type === "djsTick") {
+        if (!isSimRunning && !event.data.force) {
+          const tickInput = document.getElementById("djsTickVal");
+          if (tickInput && tickInput.value !== "0 ms") {
+            tickInput.value = "0 ms";
+          }
+          simTimeMs = 0;
+          return;
+        }
         const tickInput = document.getElementById("djsTickVal");
         if (tickInput) {
           tickInput.value = event.data.formatted || `${event.data.tick} ms`;
