@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v7.2';
+      const BUILD_VER = '20261026-v7.3';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -1279,10 +1279,10 @@ endmodule`
 
             <!-- Engine Mode Switcher (Live DigitalJS vs Congestion SVG) -->
             <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Engine Mode" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #0284c7;">
-              <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="Live Interactive DigitalJS Gate Netlist" style="background: #0284c7; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #0284c7; display: inline-flex; align-items: center; gap: 4px;">
+              <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="Live Interactive DigitalJS Gate Netlist" style="background: #ffffff; color: #0284c7; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #0284c7; display: inline-flex; align-items: center; gap: 4px;">
                 <span>⚡ Live DigitalJS</span>
               </button>
-              <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="BEOL Hotspot &amp; Congestion Overlay" style="background: #ffffff; color: #0284c7; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="BEOL Hotspot &amp; Congestion Overlay" style="background: #0284c7; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                 <span>🔥 Hotspots &amp; Congestion</span>
               </button>
             </div>
@@ -1374,8 +1374,8 @@ endmodule`
           <div id="djsCircuitContainer" class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 0; max-height: 100%; width: 100%;">
 
             <!-- LIVE DIGITALJS EMBEDDED ENGINE (CIRCUIT DESIGN ONLY - CLEAN FULL VIEW) -->
-            <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 0; position: relative; background: #ffffff; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261026-v7.2#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
+            <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 0; position: relative; background: #ffffff; display: none; flex-direction: column; flex: 1; overflow: hidden;">
+              <iframe id="djsLiveFrame" src="" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
             </div>
 
             <!-- Canvas Zoom Floating Controls (For Congestion View) -->
@@ -1385,7 +1385,7 @@ endmodule`
             </div>
 
             <!-- SVG Circuit Viewport (For BEOL Congestion & Hotspots) -->
-            <div id="djsCanvasViewport" style="flex: 1; width: 100%; height: 100%; overflow: auto; display: none; align-items: center; justify-content: center; background: #ffffff;">
+            <div id="djsCanvasViewport" style="flex: 1; width: 100%; height: 100%; overflow: auto; display: flex; align-items: center; justify-content: center; background: #ffffff;">
               <svg id="djsCircuitSvg" viewBox="0 0 960 560" onmousemove="djsSvgMouseMove(event)" onmouseup="djsSvgMouseUp(event)" onmouseleave="djsSvgMouseUp(event)" style="width: 100%; height: 100%; min-width: 650px; min-height: 520px; display: block; background: #ffffff; cursor: default;" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <pattern id="edaGridDjs" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -5053,7 +5053,7 @@ endmodule`
     // ═════════════════════════════════════════════════════════════════════════
     // DUAL ENGINE COLLABORATION: REAL DIGITALJS ONLINE + BEOL CONGESTION ENGINE
     // ═════════════════════════════════════════════════════════════════════════
-    let currentDjsEngineMode = 'live';
+    let currentDjsEngineMode = 'congestion';
     let isCircuitSynthesized = false;
 
     const DIGITALJS_LIVE_HASHES = {
@@ -5068,6 +5068,10 @@ endmodule`
     };
 
     function switchDjsEngineMode(mode) {
+      if (mode === 'live' && !isCircuitSynthesized) {
+        alert("Gate-level netlist is not synthesized yet. Please click '▶ Run' in the toolbar first to synthesize the Verilog HDL into a gate netlist.");
+        return;
+      }
       currentDjsEngineMode = mode;
       const liveWrapper = document.getElementById("djsLiveIframeWrapper");
       const canvasViewport = document.getElementById("djsCanvasViewport");
@@ -5110,7 +5114,7 @@ endmodule`
         return;
       }
       const hash = DIGITALJS_LIVE_HASHES[moduleFilename];
-      const targetUrl = "digitaljs_view.html?v=20261026-v7.2#" + hash;
+      const targetUrl = "digitaljs_view.html?v=20261026-v7.3#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
@@ -5122,6 +5126,13 @@ endmodule`
         } else if (iframe.contentWindow) {
           iframe.contentWindow.postMessage({ type: 'loadHash', hash: hash }, '*');
         }
+        iframe.onload = function() {
+          if (isSimRunning) {
+            setTimeout(() => sendDjsIframeCmd('resume'), 150);
+          } else {
+            sendDjsIframeCmd('pause');
+          }
+        };
       }
       if (extBtn) {
         extBtn.href = externalUrl;
@@ -5206,7 +5217,13 @@ endmodule`
     // Cross-probe element selection & simulation tick relay from DigitalJS engine iframe
     window.addEventListener("message", (event) => {
       if (!event.data) return;
-      if (event.data.type === "djsCellSelected") {
+      if (event.data.type === "djsReady") {
+        if (isSimRunning) {
+          sendDjsIframeCmd('resume');
+        } else {
+          sendDjsIframeCmd('pause');
+        }
+      } else if (event.data.type === "djsCellSelected") {
         handleCircuitSelection(event.data);
       } else if (event.data.type === "djsTick") {
         if (!isSimRunning && !event.data.force) {
@@ -5256,7 +5273,22 @@ endmodule`
         const banner = document.getElementById("djsSelectionBanner");
         if (banner) banner.style.display = "none";
 
-        switchDjsEngineMode('congestion');
+        isCircuitSynthesized = false;
+        simTimeMs = 0;
+        simTick = 0;
+        if (typeof updateTickDisplay === 'function') updateTickDisplay();
+
+        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+        if (liveWrapper) liveWrapper.style.display = "none";
+        const canvasViewport = document.getElementById("djsCanvasViewport");
+        if (canvasViewport) canvasViewport.style.display = "flex";
+
+        currentDjsEngineMode = 'congestion';
+        const btnLive = document.getElementById("djsModeLiveBtn");
+        const btnCongestion = document.getElementById("djsModeCongestionBtn");
+        if (btnLive) { btnLive.style.background = "#ffffff"; btnLive.style.color = "#0284c7"; }
+        if (btnCongestion) { btnCongestion.style.background = "#0284c7"; btnCongestion.style.color = "#ffffff"; }
+
         renderEmptyCircuitState();
         return;
       }
@@ -5296,7 +5328,17 @@ endmodule`
           simTick = 0;
           if (typeof updateTickDisplay === 'function') updateTickDisplay();
         }
-        switchDjsEngineMode('congestion');
+        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+        if (liveWrapper) liveWrapper.style.display = "none";
+        const canvasViewport = document.getElementById("djsCanvasViewport");
+        if (canvasViewport) canvasViewport.style.display = "flex";
+
+        currentDjsEngineMode = 'congestion';
+        const btnLive = document.getElementById("djsModeLiveBtn");
+        const btnCongestion = document.getElementById("djsModeCongestionBtn");
+        if (btnLive) { btnLive.style.background = "#ffffff"; btnLive.style.color = "#0284c7"; }
+        if (btnCongestion) { btnCongestion.style.background = "#0284c7"; btnCongestion.style.color = "#ffffff"; }
+
         renderStandbyCircuitState(filename);
         return;
       }
@@ -6122,6 +6164,13 @@ endmodule`
       if (!codeEl) return;
       const rawCode = codeEl.innerText || codeEl.textContent || "";
       const trimmed = rawCode.trim();
+
+      if (!trimmed || currentModule === "empty_design.sv") {
+        djsPauseSim();
+        isCircuitSynthesized = false;
+        renderErrorCircuitState("Please enter valid synthesizable Verilog HDL with module and endmodule declarations.");
+        return;
+      }
 
       // ── Step 1: Basic Verilog syntax validation ────────────────────────────
       const syntaxErrors = validateVerilogCode(trimmed);

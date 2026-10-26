@@ -314,6 +314,12 @@
         } catch(e) {}
       });
     });
+
+    window.addEventListener('load', function() {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'djsReady' }, '*');
+      }
+    });
   </script>
   <link href="digitaljs_assets/main.css?v=20261009-v3.3" rel="stylesheet">
   <script type="module" src="digitaljs_assets/bundle.js?v=20261009-v3.3"></script>
