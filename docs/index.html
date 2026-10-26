@@ -1215,7 +1215,7 @@ endmodule`
               Congestion Is NOT Happening
             </h2>
             <p id="congestionStatusDesc" style="margin: 0; font-size: 12.5px; color: #166534; line-height: 1.4;">
-              All 10 metal layers are safely within track limits. Peak layer track saturation is <b id="congestionStatusPeakLayer">M2 at 50.8%</b> (below 85.0% threshold).
+              All 10 metal layers are safely within track limits. Peak layer track saturation is <b id="congestionStatusPeakLayer">M2 at 50.8%</b> (safely below 100.0% track capacity).
             </p>
           </div>
         </div>
@@ -1228,8 +1228,8 @@ endmodule`
           </div>
           <div style="border-left: 1px solid #cbd5e1; height: 38px;"></div>
           <div>
-            <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">DRC Rule</div>
-            <div style="font-size: 13px; font-weight: 800; color: #1e293b;">&lt; 85.0% Limit</div>
+            <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">DRC Track Rule</div>
+            <div style="font-size: 13px; font-weight: 800; color: #1e293b;">&le; 100.0% Capacity</div>
             <div id="bannerDrcVerdict" style="font-size: 11px; font-weight: 700; color: #15803d;">PASS (CLEAN)</div>
           </div>
         </div>
@@ -1285,6 +1285,16 @@ endmodule`
               </button>
               <button type="button" id="djsLayoutSideBtn" onclick="setDjsLayout('side')" title="Side-by-side Layout (||)" style="background: #343a40; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                 <span>◫ Side (||)</span>
+              </button>
+            </div>
+
+            <!-- Engine Mode Switcher (Live DigitalJS vs Congestion SVG) -->
+            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Engine Mode" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #0284c7;">
+              <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="Live Interactive DigitalJS Gate Netlist" style="background: #0284c7; color: #ffffff; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #0284c7; display: inline-flex; align-items: center; gap: 4px;">
+                <span>⚡ Live DigitalJS</span>
+              </button>
+              <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="BEOL Hotspot &amp; Congestion Overlay" style="background: #ffffff; color: #0284c7; border: none; padding: 5px 11px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                <span>🔥 Hotspots &amp; Congestion</span>
               </button>
             </div>
 
@@ -1643,7 +1653,7 @@ endmodule`
           <div>
             <span style="color: #15803d; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Recommended Input Changes</span>
             <h3 style="margin: 4px 0; font-size: 16px; font-weight: 800; color: #1a202c;">Resolve Congestion</h3>
-            <p id="recDesc" style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is 50.8% on M2. Click to apply calculated design rules and bring wire density below 80%.</p>
+            <p id="recDesc" style="color: #4a5568; font-size: 12px; margin: 0;">Peak usage is 50.8% on M2. Click to apply calculated design rules and bring wire density below 100%.</p>
           </div>
           <button class="btn-3d" onclick="openFixModal()">Suggest a fix</button>
         </div>
@@ -1664,9 +1674,9 @@ endmodule`
         </div>
 
         <ul id="whyCongestionBullets" style="margin: 0; padding-left: 20px; font-size: 12.5px; color: #7f1d1d; line-height: 1.6;">
-          <li style="margin-bottom: 4px;"><b>Track Capacity Exhaustion:</b> Wire demand on <b>M2 (50.8%)</b> exceeds the 85.0% DRC limit, leaving zero detour tracks for detailed routing.</li>
-          <li style="margin-bottom: 4px;"><b>High Cell Utilization:</b> Core utilization (<b>57.0%</b>) concentrates transistor pins too tightly, blocking inter-cell escape channels.</li>
-          <li><b>Perimeter Bottleneck:</b> Core margin (<b>3.0 mm</b>) is too narrow to provide outer bypass tracks around the core logic.</li>
+          <li style="margin-bottom: 4px;"><b>Track Capacity Exhaustion:</b> Wire demand exceeds 100.0% track capacity, leaving zero detour tracks for detailed routing.</li>
+          <li style="margin-bottom: 4px;"><b>High Cell Utilization:</b> Core utilization concentrates transistor pins too tightly, blocking inter-cell escape channels.</li>
+          <li><b>Perimeter Bottleneck:</b> Core margin is too narrow to provide outer bypass tracks around the core logic.</li>
         </ul>
       </div>
 
@@ -1897,7 +1907,7 @@ endmodule`
         curDemand > 0 ? Math.ceil(curDemand / 0.50) : Math.ceil(curRes * 1.40)
       );
       recRes = Math.max(1000, recRes);
-      const estNewPct = recRes > 0 ? Math.min(100.0, Math.round((curDemand / recRes) * 1000) / 10) : 0;
+      const estNewPct = recRes > 0 ? Math.round((curDemand / recRes) * 1000) / 10 : 0;
 
       document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer + ' Only';
       document.getElementById('modalDesc').innerText = 'Targeted routing track optimization for ' + layer + ' only. Core margin, cell density, utilization, and all other layers remain unchanged:';
@@ -1910,7 +1920,7 @@ endmodule`
         </div>
         <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
           <span style="color:#718096; font-size:10px; font-weight: 700;">${layer} WIRE PRESSURE</span>
-          <div style="font-size:14px; font-weight:800; color:${curPct >= 85 ? '#dc2626' : '#1a202c'}; margin-top:2px;">${curDemand.toLocaleString()} <span style="font-size:11px; font-weight:600;">(${curPct}% Saturation)</span></div>
+          <div style="font-size:14px; font-weight:800; color:${curPct > 100 ? '#dc2626' : curPct >= 80 ? '#ea580c' : '#15803d'}; margin-top:2px;">${curDemand.toLocaleString()} <span style="font-size:11px; font-weight:600;">(${curPct}% Saturation)</span></div>
         </div>
         <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
           <span style="color:#718096; font-size:10px; font-weight: 700;">RECOMMENDED ${layer} TRACKS</span>
@@ -2044,17 +2054,16 @@ endmodule`
         if (cap > 0) {
           pct = Math.round((d / cap) * 1000) / 10;
         }
-        const cappedPct = Math.min(100.0, pct);
-        layerUsage[k] = cappedPct;
-        sumUsage += cappedPct;
-        if (cappedPct > peakVal) {
-          peakVal = cappedPct;
+        layerUsage[k] = pct;
+        sumUsage += pct;
+        if (pct > peakVal) {
+          peakVal = pct;
           peakLayer = k;
         }
       }
 
       const avgUsage = Math.round((sumUsage / 10) * 10) / 10;
-      const isCongested = (peakVal >= 85.0) || (util > 80.0);
+      const isCongested = (peakVal > 100.0) || (util > 100.0);
       const isRoutable = !isCongested;
       const successProb = Math.min(99.4, Math.max(12.0, Math.round((100.0 - (peakVal * 0.42) - (util * 0.25)) * 10) / 10));
       const thermalIndex = Math.round(Math.min(100.0, (density * 30.0) + (avgUsage * 0.40) + (peakVal * 0.30)) * 10) / 10;
@@ -2132,6 +2141,7 @@ endmodule`
 
       if (cBanner) {
         if (isCongested) {
+          const overflowAmt = Math.round((peakVal - 100.0) * 10) / 10;
           cBanner.style.background = 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)';
           cBanner.style.borderColor = '#fca5a5';
           cBanner.style.boxShadow = '0 4px 16px rgba(239, 68, 68, 0.12)';
@@ -2154,7 +2164,7 @@ endmodule`
             cTitle.style.color = '#7f1d1d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `Routing overflow detected! Peak layer track saturation is <b style="color: #b91c1c;">${peakLayer} at ${peakVal}%</b>, exceeding the 85.0% DRC routability threshold.`;
+            cDesc.innerHTML = `Routing overflow detected! Peak layer track saturation is <b style="color: #b91c1c;">${peakLayer} at ${peakVal}%</b>, exceeding 100.0% track capacity (${overflowAmt}% routing overflow).`;
             cDesc.style.color = '#991b1b';
           }
           if (cPeakPct) {
@@ -2191,7 +2201,7 @@ endmodule`
             cTitle.style.color = '#14532d';
           }
           if (cDesc) {
-            cDesc.innerHTML = `All 10 metal layers are safely within track limits. Peak layer track saturation is <b style="color: #15803d;">${peakLayer} at ${peakVal}%</b> (below 85.0% threshold).`;
+            cDesc.innerHTML = `All 10 metal layers are safely within track limits. Peak layer track saturation is <b style="color: #15803d;">${peakLayer} at ${peakVal}%</b> (safely below 100.0% track capacity).`;
             cDesc.style.color = '#166534';
           }
           if (cPeakPct) {
@@ -2237,9 +2247,10 @@ endmodule`
       const recP = document.getElementById('recDesc');
       if (recP) {
         if (isCongested) {
-          recP.innerHTML = `<b style="color:#dc2626;">Congestion is occurring!</b> Peak routing congestion is <b style="color:#dc2626;">${peakVal}% on ${peakLayer}</b> (exceeds 85.0% DRC limit). Click to apply calculated design rules and eliminate routing overflow.`;
+          const overflowAmt = Math.round((peakVal - 100.0) * 10) / 10;
+          recP.innerHTML = `<b style="color:#dc2626;">Congestion is occurring!</b> Peak routing congestion is <b style="color:#dc2626;">${peakVal}% on ${peakLayer}</b> (${overflowAmt}% beyond 100.0% track capacity). Click to apply calculated design rules and eliminate routing overflow.`;
         } else {
-          recP.innerHTML = `<b style="color:#15803d;">Congestion is not occurring.</b> Peak routing congestion is <b style="color:#15803d;">${peakVal}% on ${peakLayer}</b> (safely below 85.0% threshold). Click to experiment with tighter silicon optimization.`;
+          recP.innerHTML = `<b style="color:#15803d;">Congestion is not occurring.</b> Peak routing congestion is <b style="color:#15803d;">${peakVal}% on ${peakLayer}</b> (safely within 100.0% track capacity). Click to experiment with tighter silicon optimization.`;
         }
       }
 
@@ -2251,8 +2262,9 @@ endmodule`
           whyCard.style.display = 'block';
           if (whyBullets) {
             let items = [];
+            const overflowAmt = Math.round((peakVal - 100.0) * 10) / 10;
             // Bullet 1: Track exhaustion
-            items.push(`<li style="margin-bottom: 4px;"><b>Track Capacity Exhaustion:</b> Wire demand on <b>${peakLayer} (${peakVal}%)</b> exceeds the 85.0% DRC limit, leaving zero detour tracks for detailed routing.</li>`);
+            items.push(`<li style="margin-bottom: 4px;"><b>Track Capacity Exhaustion:</b> Wire demand on <b>${peakLayer} (${peakVal}%)</b> exceeds 100.0% track capacity, leaving negative track margin (${overflowAmt}% routing overflow) causing DRC shorts.</li>`);
             // Bullet 2: Cell utilization / placement density
             if (util > 70.0) {
               items.push(`<li style="margin-bottom: 4px;"><b>High Cell Utilization:</b> Core utilization (<b>${util}%</b>) concentrates transistor pins too tightly, blocking inter-cell escape channels.</li>`);
@@ -2283,7 +2295,7 @@ endmodule`
         const el = document.getElementById("pct-" + k);
         if (el) {
           el.innerText = pctVal + "%";
-          el.style.color = (pctVal >= 85.0) ? "#dc2626" : (pctVal >= 70.0) ? "#ea580c" : "#15803d";
+          el.style.color = (pctVal > 100.0) ? "#dc2626" : (pctVal >= 80.0) ? "#ea580c" : "#15803d";
         }
       }
 
