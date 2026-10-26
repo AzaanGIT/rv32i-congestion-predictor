@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.8';
+      const BUILD_VER = '20261026-v8.9';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -324,7 +324,7 @@
     <!-- Brand -->
     <div style="display: flex; align-items: center; gap: 12px;">
       <div class="brand-title" style="font-size: 16.5px; font-weight: 900; margin: 0; color: #1a202c;">
-        ⚡ RV32I CONGESTION PREDICTOR
+        ⚡ CONGESTION PREDICTOR
       </div>
       <span id="activeTargetBadge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px;">
         AWAITING SELECTION
@@ -1215,7 +1215,7 @@ endmodule`
   <div class="top-bar">
     <div>
       <button type="button" class="btn-nav" onclick="showInputForm()">← Edit inputs</button>
-      <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #1a202c;">RV32I CONGESTION PREDICTOR</h2>
+      <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #1a202c;">CONGESTION PREDICTOR</h2>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
       <button id="btnToggleSchematic" class="btn-3d" onclick="toggleSchematicView()">⚡ Logic Gate Schematic</button>
