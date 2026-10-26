@@ -249,308 +249,219 @@
 </head>
 <body>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div>
-      <div class="brand-title">
-        RV32I CONGESTION PREDICTOR
-        <span class="chip-badge">RISC-V 32-Bit Core</span>
+  <!-- COMPACT TOP BAR: BRAND + ARCHITECTURE + PRESETS -->
+  <div class="header" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: 0 4px 16px rgba(103, 80, 164, 0.06); border-radius: 12px; padding: 10px 18px; margin-bottom: 12px; border-bottom: none;">
+    <!-- Brand -->
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="brand-title" style="font-size: 16.5px; font-weight: 900; margin: 0; color: #1a202c;">
+        ⚡ RV32I CONGESTION PREDICTOR
       </div>
-      <div class="subtitle">Silicon floorplanning routing pressure & thermal risk analysis</div>
+      <span id="activeTargetBadge" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px;">
+        TARGET: RV32I
+      </span>
+    </div>
+
+    <!-- Center: Processor Selector -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Core:</span>
+      <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="background: #ffffff; border: 1.5px solid #7c3aed; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer;">
+        <option value="RV32I" selected>RV32I (RISC-V 32-bit Integer ISA Core)</option>
+      </select>
+      <span id="isaLabel" style="display: none;">32-Bit RISC-V (RV32I)</span>
+    </div>
+
+    <!-- Right: Presets -->
+    <div class="preset-bar" style="margin: 0; display: flex; align-items: center; gap: 6px;">
+      <span style="font-size: 11px; font-weight: 800; color: #718096; margin-right: 4px;">PRESETS:</span>
+      <button type="button" class="btn-preset" onclick="applyPreset('default')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">⚡ Standard</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('high_density')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">🔥 High Density</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('conservative')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">🛡️ Safe</button>
     </div>
   </div>
 
-
-
   <form id="floorplanForm" action="/predict" method="POST">
 
-    <!-- PROCESSOR ARCHITECTURE SELECTION -->
-    <div class="card" style="border: 1.5px solid rgba(124, 58, 237, 0.35); background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 243, 255, 0.9) 100%); margin-bottom: 24px;">
-      <div class="card-header" style="margin-bottom: 12px;">
-        <div>
-          <div class="card-title">TARGET PROCESSOR CORE / ARCHITECTURE</div>
-          <div class="card-heading">Select the processor through which you want to proceed</div>
-        </div>
-        <span id="activeTargetBadge" style="background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px;">
-          AWAITING SELECTION
-        </span>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center;">
-        <div>
-          <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="width: 100%; background: #ffffff; border: 2px solid #7c3aed; border-radius: 10px; padding: 13px 18px; font-size: 14px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);">
-            <option value="" selected>-- SELECT PROCESSOR CORE --</option>
-            <option value="RV32I">RV32I (RISC-V 32-bit Integer ISA Core)</option>
-          </select>
-        </div>
-        <div>
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; text-align: right;">
-            <div style="font-size: 10px; font-weight: 800; color: #718096; text-transform: uppercase;">SUPPORTED ARCHITECTURES</div>
-            <div id="isaLabel" style="font-size: 13px; font-weight: 800; color: #718096;">RV32I Available</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- 2-COLUMN DASHBOARD GRID: FITS COMPLETELY IN SINGLE SCREEN -->
+    <div id="processorContent" style="display: block;">
+      <div style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 14px; align-items: stretch;">
 
-    <!-- WRAPPER: VISIBLE ONLY WHEN RV32I IS SELECTED -->
-    <div id="processorContent" style="display: none;">
+        <!-- LEFT COLUMN: Floorplan Geometry & Silicon Metal Stack -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
 
-    <!-- PRESETS SELECTION -->
-    <div class="preset-bar">
-      <span style="font-size: 12px; font-weight: 800; color: #718096; display: flex; align-items: center; margin-right: 6px;">FLOORPLAN PRESETS:</span>
-      <button type="button" class="btn-preset" onclick="applyPreset('default')">⚡ Standard RV32I Core</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('high_density')">🔥 High Density (72% Util)</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('conservative')">🛡️ Safe / Low Congestion</button>
-    </div>
+          <!-- SECTION 1: FLOORPLAN GEOMETRY & DENSITY PARAMETERS -->
+          <div class="card" style="margin-bottom: 0; padding: 12px 14px; border-radius: 12px;">
+            <div class="card-header" style="margin-bottom: 8px;">
+              <div>
+                <div class="card-title" style="font-size: 10.5px;">1. Floorplan Geometry &amp; Density Parameters</div>
+              </div>
+              <span style="font-size: 9.5px; color: #64748b; font-weight: 700;">SkyWater 130nm PDK</span>
+            </div>
 
-    <!-- SECTION 1: FLOORPLAN DESIGN INPUTS -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">1. Floorplan Geometry & Density Parameters</div>
-          <div class="card-heading">Set core cell utilization and margin</div>
-        </div>
-      </div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+              <div class="box" style="padding: 6px 8px; border-radius: 8px;">
+                <label style="font-size: 8.5px;">UTIL <span class="badge" style="font-size: 8px; padding: 1px 4px;">%</span></label>
+                <input type="number" id="inp_util" name="utilization" value="{{ utilization }}" step="any" oninput="updateLiveStats()" style="font-size: 14px; margin-top: 2px;">
+                <input type="range" id="rng_util" min="20" max="95" value="{{ utilization }}" oninput="syncInput('inp_util', this.value)" style="margin-top: 2px; height: 3px;">
+              </div>
 
-      <div class="grid-5">
-        <div class="box">
-          <label>UTILIZATION <span class="badge">%</span></label>
-          <input type="number" id="inp_util" name="utilization" value="{{ utilization or 57 }}" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_util" min="20" max="95" value="{{ utilization or 57 }}" oninput="syncInput('inp_util', this.value)">
-        </div>
+              <div class="box" style="padding: 6px 8px; border-radius: 8px;">
+                <label style="font-size: 8.5px;">ASPECT <span class="badge" style="font-size: 8px; padding: 1px 4px;">RATIO</span></label>
+                <input type="number" id="inp_aspect" name="aspect_ratio" value="{{ aspect_ratio }}" step="any" oninput="updateLiveStats()" style="font-size: 14px; margin-top: 2px;">
+                <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="{{ aspect_ratio }}" oninput="syncInput('inp_aspect', this.value)" style="margin-top: 2px; height: 3px;">
+              </div>
 
-        <div class="box">
-          <label>ASPECT RATIO <span class="badge">ratio</span></label>
-          <input type="number" id="inp_aspect" name="aspect_ratio" value="{{ aspect_ratio or 1.5 }}" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="{{ aspect_ratio or 1.5 }}" oninput="syncInput('inp_aspect', this.value)">
-        </div>
+              <div class="box" style="padding: 6px 8px; border-radius: 8px;">
+                <label style="font-size: 8.5px;">MARGIN <span class="badge" style="font-size: 8px; padding: 1px 4px;">MM</span></label>
+                <input type="number" id="inp_margin" name="core_margin" value="{{ core_margin }}" step="any" oninput="updateLiveStats()" style="font-size: 14px; margin-top: 2px;">
+                <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="{{ core_margin }}" oninput="syncInput('inp_margin', this.value)" style="margin-top: 2px; height: 3px;">
+              </div>
 
-        <div class="box">
-          <label>CORE MARGIN <span class="badge">mm</span></label>
-          <input type="number" id="inp_margin" name="core_margin" value="{{ core_margin or 3 }}" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="{{ core_margin or 3 }}" oninput="syncInput('inp_margin', this.value)">
-        </div>
+              <div class="box" style="padding: 6px 8px; border-radius: 8px;">
+                <label style="font-size: 8.5px;">DENSITY <span class="badge" style="font-size: 8px; padding: 1px 4px;">0-1</span></label>
+                <input type="number" id="inp_density" name="density" value="{{ density }}" step="any" oninput="updateLiveStats()" style="font-size: 14px; margin-top: 2px;">
+                <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="{{ density }}" oninput="syncInput('inp_density', this.value)" style="margin-top: 2px; height: 3px;">
+              </div>
 
-        <div class="box">
-          <label>PLACEMENT DENSITY <span class="badge">0-1</span></label>
-          <input type="number" id="inp_density" name="density" value="{{ density or 0.56 }}" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="{{ density or 0.56 }}" oninput="syncInput('inp_density', this.value)">
-        </div>
-
-        <div class="box">
-          <label>LAYER ADJUSTMENT <span class="badge">0-1</span></label>
-          <input type="number" id="inp_layer_adj" name="layer_adjustment" value="{{ layer_adjustment or 0.6 }}" step="any" oninput="updateLiveStats()">
-          <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="{{ layer_adjustment or 0.6 }}" oninput="syncInput('inp_layer_adj', this.value)">
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 2: PER-METAL-LAYER ROUTING TRACK CAPACITY -->
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-title">2. Silicon Metal Stack Capacity ($M_1$ → $M_{10}$)</div>
-          <div class="card-heading">Available routing track capacity per metal layer</div>
-        </div>
-      </div>
-
-      <div class="grid-5">
-        <div class="box">
-          <label>METAL 1 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">FEOL Std Cell Local</div>
-          <input type="number" name="metal_1" value="{{ resources.M1 if resources else 0 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 2 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Signal Low</div>
-          <input type="number" name="metal_2" value="{{ resources.M2 if resources else 27540 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 3 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Signal Low</div>
-          <input type="number" name="metal_3" value="{{ resources.M3 if resources else 37222 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 4 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Interconnect</div>
-          <input type="number" name="metal_4" value="{{ resources.M4 if resources else 18450 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 5 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Interconnect</div>
-          <input type="number" name="metal_5" value="{{ resources.M5 if resources else 18096 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 6 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Intermediate Bus</div>
-          <input type="number" name="metal_6" value="{{ resources.M6 if resources else 18450 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 7 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Global Bus</div>
-          <input type="number" name="metal_7" value="{{ resources.M7 if resources else 5699 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 8 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">BEOL Global Bus</div>
-          <input type="number" name="metal_8" value="{{ resources.M8 if resources else 5796 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 9 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">Power Grid Mesh</div>
-          <input type="number" name="metal_9" value="{{ resources.M9 if resources else 2758 }}" step="any" oninput="updateLiveStats()">
-        </div>
-
-        <div class="box">
-          <label>METAL 10 <span class="badge">TRACKS</span></label>
-          <div class="layer-tag">VDD / VSS Straps</div>
-          <input type="number" name="metal_10" value="{{ resources.M10 if resources else 2772 }}" step="any" oninput="updateLiveStats()">
-        </div>
-      </div>
-
-      
-    <!-- SECTION 3: VERILOG HDL CODE & DIGITALJS SYNTHESIS -->
-    <div class="card" style="border: 1.5px solid rgba(124, 58, 237, 0.35); margin-bottom: 24px;">
-      <div class="card-header" style="margin-bottom: 14px;">
-        <div>
-          <div class="card-title">3. Verilog HDL Processor Hardware Description</div>
-        </div>
-      </div>
-
-      <!-- Tab Bar -->
-      <div style="background: #f8fafc; border-radius: 10px 10px 0 0; padding: 8px 14px 0 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-        <div style="display: flex; gap: 4px; align-items: center;">
-          <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #64748b; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">Setup</button>
-          <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #64748b; border: none; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0;">I/O</button>
-          <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #ffffff; color: #7c3aed; border: 1px solid #e2e8f0; border-bottom: 2px solid #7c3aed; padding: 7px 16px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; display: flex; align-items: center; gap: 6px;">
-            <span id="tabFilenameLabel">user_design.sv</span>
-            <span style="font-size: 10px; color: #94a3b8;">☁️ ✕</span>
-          </button>
-        </div>
-
-        <div style="display: flex; gap: 8px; align-items: center; padding-bottom: 4px;">
-          <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">📋 Paste</button>
-          <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">📑 Copy</button>
-          <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 5px 12px; border-radius: 5px; font-size: 11px; font-weight: 700; cursor: pointer;">✕ Clear</button>
-        </div>
-      </div>
-
-      <!-- Tab Content 1: Code View -->
-      <div id="hdlTabCodeView" style="display: block; background: #ffffff; border-radius: 0 0 10px 10px; border: 1px solid #e2e8f0; border-top: none; position: relative;">
-        <div id="hdlEditorContainer" style="display: flex; height: 420px; min-height: 290px; overflow: hidden; position: relative; background: #ffffff;">
-          <!-- Line numbers gutter -->
-          <div id="hdlLineNumbers" style="background: #f8fafc; color: #94a3b8; padding: 14px 10px 14px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 20px; text-align: right; user-select: none; width: 48px; min-width: 48px; flex-shrink: 0; border-right: 1px solid #e2e8f0; overflow: hidden; box-sizing: border-box; height: 100%;">
-            <div id="hdlLineNumbersInner" style="will-change: transform; transition: none;">
-              <div style="height: 20px; line-height: 20px;">1</div>
-              <div style="height: 20px; line-height: 20px;">2</div>
-              <div style="height: 20px; line-height: 20px;">3</div>
-              <div style="height: 20px; line-height: 20px;">4</div>
-              <div style="height: 20px; line-height: 20px;">5</div>
-              <div style="height: 20px; line-height: 20px;">6</div>
-              <div style="height: 20px; line-height: 20px;">7</div>
-              <div style="height: 20px; line-height: 20px;">8</div>
-              <div style="height: 20px; line-height: 20px;">9</div>
-              <div style="height: 20px; line-height: 20px;">10</div>
-              <div style="height: 20px; line-height: 20px;">11</div>
-              <div style="height: 20px; line-height: 20px;">12</div>
-              <div style="height: 20px; line-height: 20px;">13</div>
-              <div style="height: 20px; line-height: 20px;">14</div>
-              <div style="height: 20px; line-height: 20px;">15</div>
-              <div style="height: 20px; line-height: 20px;">16</div>
-              <div style="height: 20px; line-height: 20px;">17</div>
-              <div style="height: 20px; line-height: 20px;">18</div>
-              <div style="height: 20px; line-height: 20px;">19</div>
-              <div style="height: 20px; line-height: 20px;">20</div>
-              <div style="height: 20px; line-height: 20px;">21</div>
-              <div style="height: 20px; line-height: 20px;">22</div>
-              <div style="height: 20px; line-height: 20px;">23</div>
-              <div style="height: 20px; line-height: 20px;">24</div>
-              <div style="height: 20px; line-height: 20px;">25</div>
+              <div class="box" style="padding: 6px 8px; border-radius: 8px;">
+                <label style="font-size: 8.5px;">LAYER ADJ <span class="badge" style="font-size: 8px; padding: 1px 4px;">0-1</span></label>
+                <input type="number" id="inp_layer_adj" name="layer_adjustment" value="{{ layer_adjustment }}" step="any" oninput="updateLiveStats()" style="font-size: 14px; margin-top: 2px;">
+                <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="{{ layer_adjustment }}" oninput="syncInput('inp_layer_adj', this.value)" style="margin-top: 2px; height: 3px;">
+              </div>
             </div>
           </div>
-          <!-- Editable code textarea (Empty by default for user input) -->
-          <textarea id="hdlCodeTextarea" name="selected_hdl_code" spellcheck="false" oninput="updateLineNumbers()" onscroll="syncHdlLineNumbers()"
-            style="flex: 1; height: 100%; background: #ffffff; color: #1e293b; border: none; padding: 14px 16px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 20px; resize: none; min-height: 290px; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; overflow-y: auto; tab-size: 2; box-sizing: border-box;"></textarea>
-        </div>
-        <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #64748b; border-radius: 0 0 10px 10px;">
-          <span style="display: flex; align-items: center; gap: 8px;">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
-            <span style="color: #334155;">Target: <b>User Verilog HDL Code ──► Synthesized Gate-Level Netlist</b></span>
-          </span>
-          <span id="hdlCharCount" style="color: #64748b; font-family: monospace;">0 characters (0 lines)</span>
-        </div>
-      </div>
 
-      <!-- Tab Content 2: Setup View -->
-      <div id="hdlTabSetupView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 10px 10px; border: 1px solid #e2e8f0; border-top: none; padding: 22px;">
-        <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 12px;">Synthesis Options</div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 12px; color: #334155;">
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-            <input type="checkbox" checked disabled>
-            <span><b>Optimize in Yosys</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 6px; border-radius: 4px;">opt -full</code>)</span>
-          </label>
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-            <input type="checkbox" checked disabled>
-            <span><b>Simplify diagram</b> (Post-processing reduction)</span>
-          </label>
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-            <input type="checkbox" checked disabled>
-            <span><b>Convert to logic gates</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 6px; border-radius: 4px;">techmap</code> gate level)</span>
-          </label>
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-            <input type="checkbox" checked disabled>
-            <span><b>Gate subset mapping</b> (AND, NAND, OR, NOR, XOR, MUX)</span>
-          </label>
-        </div>
-        <div style="margin-top: 14px; font-size: 11px; color: #5b21b6; background: #f5f3ff; border: 1px solid #ddd6fe; padding: 10px 14px; border-radius: 6px;">
-          ℹ️ When you click <b>Find Congestion</b>, the HDL code is mapped to logic gates and analyzed by the XGBoost backend model to predict silicon routing tracks.
-        </div>
-      </div>
+          <!-- SECTION 2: SILICON METAL STACK CAPACITY -->
+          <div class="card" style="margin-bottom: 0; padding: 12px 14px; border-radius: 12px; flex: 1;">
+            <div class="card-header" style="margin-bottom: 8px;">
+              <div>
+                <div class="card-title" style="font-size: 10.5px;">2. Silicon Metal Stack Capacity ($ → {10}$)</div>
+              </div>
+              <span style="font-size: 9.5px; color: #64748b; font-weight: 700;">10 Routing Metal Layers</span>
+            </div>
 
-      <!-- Tab Content 3: I/O View -->
-      <div id="hdlTabIoView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 10px 10px; border: 1px solid #e2e8f0; border-top: none; padding: 22px;">
-        <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 12px;">Synthesized Module Ports (I/O)</div>
-        <div id="hdlIoPortList" style="font-size: 11px; font-family: monospace; color: #334155; line-height: 1.8;">
-          • input wire clk [1 bit] - System Clock<br>
-          • input wire reset [1 bit] - Synchronous Core Reset<br>
-          • input wire [31:0] instr - Fetched Machine Instruction<br>
-          • input wire [31:0] rdata - Memory Read Bus<br>
-          • output wire [31:0] pc - Program Counter Register<br>
-          • output wire [31:0] alu_out - 32-Bit Arithmetic Result (Critical Wire Hotspot)<br>
-          • output wire [31:0] wdata - Memory Write Bus<br>
-          • output wire mem_write - Data Memory Write Enable
-        </div>
-      </div>
-
-      <!-- Hidden input for file name -->
-      <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="">
-
-      <!-- Validation Error Banner for non-RV32I HDL code -->
-      <div id="hdlValidationErrorBanner" style="display: none; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 14px 18px; margin-top: 14px; color: #991b1b; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);">
-        <div style="display: flex; align-items: flex-start; gap: 10px;">
-          <span style="font-size: 18px; line-height: 1;">❌</span>
-          <div>
-            <div style="font-weight: 800; font-size: 13px; margin-bottom: 2px;">Unsupported HDL Code — Cannot Run or Synthesize</div>
-            <div id="hdlValidationErrorMessage" style="font-size: 12px; font-weight: 500; color: #b91c1c; line-height: 1.4;">Only RV32I-related HDL code is supported (e.g. 5-Stage RV32I Pipeline, RV32I Core, or RV32I ALU). Arbitrary non-RV32I designs cannot be synthesized into a gate-level netlist.</div>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+              {% for i in range(1, 11) %}
+              <div class="box" style="padding: 5px 8px; border-radius: 8px;">
+                <label style="font-size: 8.5px;">M{{ i }} <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+                <input type="number" name="metal_{{ i }}" value="{{ resources['metal_' ~ i] }}" step="any" oninput="updateLiveStats()" style="font-size: 13px; margin-top: 2px;">
+              </div>
+              {% endfor %}
+            </div>
           </div>
+
         </div>
+
+        <!-- RIGHT COLUMN: Verilog HDL Code Description & Find Congestion -->
+        <div class="card" style="margin-bottom: 0; padding: 12px 14px; border: 1.5px solid rgba(124, 58, 237, 0.35); border-radius: 12px; display: flex; flex-direction: column;">
+
+          <div class="card-header" style="margin-bottom: 8px;">
+            <div>
+              <div class="card-title" style="font-size: 10.5px;">3. Verilog HDL Processor Hardware Description</div>
+            </div>
+            <span style="font-size: 9.5px; color: #7c3aed; font-weight: 700;">Synthesizable RTL</span>
+          </div>
+
+          <!-- Tab Bar -->
+          <div style="background: #f8fafc; border-radius: 8px 8px 0 0; padding: 4px 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+            <div style="display: flex; gap: 3px; align-items: center;">
+              <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #64748b; border: none; padding: 5px 10px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 4px;">Setup</button>
+              <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #64748b; border: none; padding: 5px 10px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 4px;">I/O</button>
+              <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #ffffff; color: #7c3aed; border: 1px solid #e2e8f0; border-bottom: 2px solid #7c3aed; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0; display: flex; align-items: center; gap: 6px;">
+                <span id="tabFilenameLabel">user_design.sv</span>
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 5px; align-items: center;">
+              <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📋 Paste</button>
+              <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📑 Copy</button>
+              <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">✕ Clear</button>
+            </div>
+          </div>
+
+          <!-- Tab Content 1: Code View -->
+          <div id="hdlTabCodeView" style="display: block; background: #ffffff; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; position: relative; flex: 1;">
+            <div id="hdlEditorContainer" style="display: flex; height: 180px; overflow: hidden; position: relative; background: #ffffff;">
+              <!-- Line numbers gutter -->
+              <div id="hdlLineNumbers" style="background: #f8fafc; color: #94a3b8; padding: 8px 8px 8px 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; line-height: 18px; text-align: right; user-select: none; width: 38px; min-width: 38px; flex-shrink: 0; border-right: 1px solid #e2e8f0; overflow: hidden; box-sizing: border-box; height: 100%;">
+                <div id="hdlLineNumbersInner" style="will-change: transform; transition: none;">
+                  <div style="height: 18px; line-height: 18px;">1</div>
+                  <div style="height: 18px; line-height: 18px;">2</div>
+                  <div style="height: 18px; line-height: 18px;">3</div>
+                  <div style="height: 18px; line-height: 18px;">4</div>
+                  <div style="height: 18px; line-height: 18px;">5</div>
+                  <div style="height: 18px; line-height: 18px;">6</div>
+                  <div style="height: 18px; line-height: 18px;">7</div>
+                  <div style="height: 18px; line-height: 18px;">8</div>
+                  <div style="height: 18px; line-height: 18px;">9</div>
+                  <div style="height: 18px; line-height: 18px;">10</div>
+                  <div style="height: 18px; line-height: 18px;">11</div>
+                  <div style="height: 18px; line-height: 18px;">12</div>
+                </div>
+              </div>
+              <!-- Editable code textarea (Empty by default for user input) -->
+              <textarea id="hdlCodeTextarea" name="selected_hdl_code" spellcheck="false" oninput="updateLineNumbers()" onscroll="syncHdlLineNumbers()"
+                style="flex: 1; height: 100%; background: #ffffff; color: #1e293b; border: none; padding: 8px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 18px; resize: none; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; overflow-y: auto; tab-size: 2; box-sizing: border-box;"></textarea>
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Setup View -->
+          <div id="hdlTabSetupView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; padding: 14px; height: 180px; overflow-y: auto;">
+            <div style="font-weight: 800; font-size: 12px; color: #7c3aed; margin-bottom: 8px;">Synthesis Options</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 11px; color: #334155;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" checked disabled>
+                <span><b>Optimize in Yosys</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 1px 4px; border-radius: 3px;">opt -full</code>)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" checked disabled>
+                <span><b>Simplify diagram</b></span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" checked disabled>
+                <span><b>Convert to gates</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 1px 4px; border-radius: 3px;">techmap</code>)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" checked disabled>
+                <span><b>Gate subset mapping</b></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tab Content 3: I/O View -->
+          <div id="hdlTabIoView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; padding: 12px; height: 180px; overflow-y: auto;">
+            <div style="font-weight: 800; font-size: 12px; color: #7c3aed; margin-bottom: 6px;">Synthesized Module Ports (I/O)</div>
+            <div id="hdlIoPortList" style="font-size: 10.5px; font-family: monospace; color: #334155; line-height: 1.6;">
+              • input wire clk [1 bit] - System Clock<br>
+              • input wire reset [1 bit] - Synchronous Core Reset<br>
+              • input wire [31:0] instr - Fetched Machine Instruction<br>
+              • input wire [31:0] rdata - Memory Read Bus<br>
+              • output wire [31:0] pc - Program Counter Register<br>
+              • output wire [31:0] alu_out - 32-Bit Arithmetic Result (Hotspot)<br>
+              • output wire [31:0] wdata - Memory Write Bus<br>
+              • output wire mem_write - Data Memory Write Enable
+            </div>
+          </div>
+
+          <!-- Hidden input for file name -->
+          <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="">
+
+          <!-- Validation Error Banner for non-RV32I HDL code -->
+          <div id="hdlValidationErrorBanner" style="display: none; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 8px 12px; margin-top: 8px; color: #991b1b;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 14px;">❌</span>
+              <div id="hdlValidationErrorMessage" style="font-size: 11px; font-weight: 600; color: #b91c1c;">Only RV32I-related HDL code is supported.</div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Bar: Char Counter on Left, FIND CONGESTION on Right -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 8px 8px;">
+            <span id="hdlCharCount" style="color: #64748b; font-family: monospace; font-size: 10.5px;">0 characters (0 lines)</span>
+            <button type="submit" id="btnRunSynthesize" class="btn-submit" style="width: auto; padding: 8px 22px; font-size: 12.5px; border-radius: 8px; margin: 0; box-shadow: 0 3px 12px rgba(124, 58, 237, 0.3);">FIND CONGESTION</button>
+          </div>
+
+        </div>
+
       </div>
-    </div>
-
-
-      <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
-        <button type="submit" class="btn-submit" style="width: auto; padding: 14px 32px; margin-top: 0;">FIND CONGESTION</button>
-      </div>
-
-    </div>
     </div> <!-- END #processorContent -->
   </form>
 
