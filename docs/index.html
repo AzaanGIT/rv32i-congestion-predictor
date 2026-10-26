@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.1';
+      const BUILD_VER = '20261026-v8.2';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -255,7 +255,7 @@
       const resultsEl = document.getElementById('resultsView');
       const controlsEl = document.getElementById('controlsView');
       if (resultsEl) resultsEl.style.display = 'none';
-      if (controlsEl) controlsEl.style.display = 'block';
+      if (controlsEl) controlsEl.style.display = 'flex';
       if (window.location.hash) {
         try { history.replaceState(null, document.title, window.location.pathname + window.location.search); } catch(e) {}
       }
@@ -352,237 +352,240 @@
   <form id="floorplanForm" action="javascript:void(0);" method="GET" onsubmit="triggerAnalysisFromForm(); return false;" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
 
     <!-- 2-COLUMN DASHBOARD GRID: FILLS 100% OF AVAILABLE VIEWPORT HEIGHT -->
-    <div id="processorContent" style="display: flex; flex: 1; min-height: 0; flex-direction: column;">
-      <div style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 14px; flex: 1; min-height: 0; height: 100%;">
+    <div id="processorContent" style="display: flex; flex: 1; min-height: 0; flex-direction: column; gap: 10px;">
 
-        <!-- LEFT COLUMN: Floorplan Geometry & Silicon Metal Stack -->
-        <div style="display: flex; flex-direction: column; gap: 12px; height: 100%; min-height: 0;">
+      <!-- TOP ROW: (1 2) SIDE-BY-SIDE IN ONE ROW -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-shrink: 0; width: 100%; box-sizing: border-box;">
 
-          <!-- SECTION 1: FLOORPLAN GEOMETRY & DENSITY PARAMETERS -->
-          <div class="card" style="flex: 1; min-height: 0; margin-bottom: 0; padding: 14px 16px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div class="card-header" style="margin-bottom: 10px; flex-shrink: 0;">
-              <div>
-                <div class="card-title" style="font-size: 11px;">1. Floorplan Geometry &amp; Density Parameters</div>
-              </div>
-              <span style="font-size: 10px; color: #64748b; font-weight: 700;">SkyWater 130nm PDK</span>
+        <!-- SECTION 1: FLOORPLAN GEOMETRY & DENSITY PARAMETERS -->
+        <div class="card" style="margin-bottom: 0; padding: 10px 14px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+          <div class="card-header" style="margin-bottom: 8px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div class="card-title" style="font-size: 11px; font-weight: 800; color: #7c3aed; margin: 0;">1. Floorplan Geometry &amp; Density Parameters</div>
             </div>
-
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; flex: 1; align-items: stretch;">
-              <div class="box" style="padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">UTIL <span class="badge" style="font-size: 8.5px; padding: 2px 5px;">%</span></label>
-                <input type="number" id="inp_util" name="utilization" value="57.0" step="any" oninput="updateLiveStats()" style="font-size: 18px; margin: 4px 0;">
-                <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)" style="margin-top: 4px; height: 5px;">
-              </div>
-
-              <div class="box" style="padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">ASPECT <span class="badge" style="font-size: 8.5px; padding: 2px 5px;">RATIO</span></label>
-                <input type="number" id="inp_aspect" name="aspect_ratio" value="1.5" step="any" oninput="updateLiveStats()" style="font-size: 18px; margin: 4px 0;">
-                <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)" style="margin-top: 4px; height: 5px;">
-              </div>
-
-              <div class="box" style="padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">MARGIN <span class="badge" style="font-size: 8.5px; padding: 2px 5px;">MM</span></label>
-                <input type="number" id="inp_margin" name="core_margin" value="3.0" step="any" oninput="updateLiveStats()" style="font-size: 18px; margin: 4px 0;">
-                <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)" style="margin-top: 4px; height: 5px;">
-              </div>
-
-              <div class="box" style="padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">DENSITY <span class="badge" style="font-size: 8.5px; padding: 2px 5px;">0-1</span></label>
-                <input type="number" id="inp_density" name="density" value="0.56" step="any" oninput="updateLiveStats()" style="font-size: 18px; margin: 4px 0;">
-                <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)" style="margin-top: 4px; height: 5px;">
-              </div>
-
-              <div class="box" style="padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">LAYER ADJ <span class="badge" style="font-size: 8.5px; padding: 2px 5px;">0-1</span></label>
-                <input type="number" id="inp_layer_adj" name="layer_adjustment" value="0.6" step="any" oninput="updateLiveStats()" style="font-size: 18px; margin: 4px 0;">
-                <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)" style="margin-top: 4px; height: 5px;">
-              </div>
-            </div>
+            <span style="font-size: 9.5px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">SkyWater 130nm PDK</span>
           </div>
 
-          <!-- SECTION 2: SILICON METAL STACK CAPACITY -->
-          <div class="card" style="flex: 1.25; min-height: 0; margin-bottom: 0; padding: 14px 16px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div class="card-header" style="margin-bottom: 10px; flex-shrink: 0;">
-              <div>
-                <div class="card-title" style="font-size: 11px;">2. Silicon Metal Stack Capacity (M1 → M10)</div>
-              </div>
-              <span style="font-size: 10px; color: #64748b; font-weight: 700;">10 Routing Metal Layers</span>
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; flex: 1; align-items: stretch;">
+            <div class="box" style="padding: 6px 8px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">UTIL <span class="badge" style="font-size: 8px; padding: 1px 4px;">%</span></label>
+              <input type="number" id="inp_util" name="utilization" value="57.0" step="any" oninput="updateLiveStats()" style="font-size: 15px; font-weight: 800; margin: 2px 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+              <input type="range" id="rng_util" min="20" max="95" value="57.0" oninput="syncInput('inp_util', this.value)" style="margin: 2px 0 0 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; flex: 1; align-items: stretch;">
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M1 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_1" value="0" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
+            <div class="box" style="padding: 6px 8px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">ASPECT <span class="badge" style="font-size: 8px; padding: 1px 4px;">RATIO</span></label>
+              <input type="number" id="inp_aspect" name="aspect_ratio" value="1.5" step="any" oninput="updateLiveStats()" style="font-size: 15px; font-weight: 800; margin: 2px 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+              <input type="range" id="rng_aspect" min="0.5" max="3.0" step="0.1" value="1.5" oninput="syncInput('inp_aspect', this.value)" style="margin: 2px 0 0 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+            </div>
 
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M2 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_2" value="27540" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
+            <div class="box" style="padding: 6px 8px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">MARGIN <span class="badge" style="font-size: 8px; padding: 1px 4px;">MM</span></label>
+              <input type="number" id="inp_margin" name="core_margin" value="3.0" step="any" oninput="updateLiveStats()" style="font-size: 15px; font-weight: 800; margin: 2px 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+              <input type="range" id="rng_margin" min="0.5" max="10" step="0.5" value="3.0" oninput="syncInput('inp_margin', this.value)" style="margin: 2px 0 0 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+            </div>
 
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M3 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_3" value="37221" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
+            <div class="box" style="padding: 6px 8px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">DENSITY <span class="badge" style="font-size: 8px; padding: 1px 4px;">0-1</span></label>
+              <input type="number" id="inp_density" name="density" value="0.56" step="any" oninput="updateLiveStats()" style="font-size: 15px; font-weight: 800; margin: 2px 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+              <input type="range" id="rng_density" min="0.1" max="0.95" step="0.01" value="0.56" oninput="syncInput('inp_density', this.value)" style="margin: 2px 0 0 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
+            </div>
 
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M4 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_4" value="18450" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
-
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M5 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_5" value="18096" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
-
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M6 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_6" value="18450" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
-
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M7 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_7" value="5699" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
-
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M8 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_8" value="5796" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
-
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M9 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_9" value="2758" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
-
-              <div class="box" style="padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-                <label style="font-size: 9px;">M10 <span class="badge" style="font-size: 8px; padding: 2px 4px;">TRK</span></label>
-                <input type="number" name="metal_10" value="2772" step="any" oninput="updateLiveStats()" style="font-size: 16px; margin: 4px 0;">
-              </div>
+            <div class="box" style="padding: 6px 8px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">LAYER ADJ <span class="badge" style="font-size: 8px; padding: 1px 4px;">0-1</span></label>
+              <input type="number" id="inp_layer_adj" name="layer_adjustment" value="0.6" step="any" oninput="updateLiveStats()" style="font-size: 15px; font-weight: 800; margin: 2px 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+              <input type="range" id="rng_layer_adj" min="0.1" max="1.0" step="0.05" value="0.6" oninput="syncInput('inp_layer_adj', this.value)" style="margin: 2px 0 0 0; height: 4px; width: 100%; accent-color: #7c3aed; cursor: pointer;">
             </div>
           </div>
-
         </div>
 
-        <!-- RIGHT COLUMN: Verilog HDL Code Description & Find Congestion -->
-        <div class="card" style="height: 100%; min-height: 0; margin-bottom: 0; padding: 14px 16px; border: 1.5px solid rgba(124, 58, 237, 0.35); border-radius: 12px; display: flex; flex-direction: column;">
-
-          <div class="card-header" style="margin-bottom: 10px; flex-shrink: 0;">
+        <!-- SECTION 2: SILICON METAL STACK CAPACITY (M1 → M10) -->
+        <div class="card" style="margin-bottom: 0; padding: 10px 14px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
+          <div class="card-header" style="margin-bottom: 8px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <div class="card-title" style="font-size: 11px;">3. Verilog HDL Processor Hardware Description</div>
+              <div class="card-title" style="font-size: 11px; font-weight: 800; color: #7c3aed; margin: 0;">2. Silicon Metal Stack Capacity (M1 → M10)</div>
             </div>
-            <span style="font-size: 10px; color: #7c3aed; font-weight: 700;">Synthesizable RTL</span>
+            <span style="font-size: 9.5px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">10 Routing Metal Layers</span>
           </div>
 
-          <!-- Tab Bar -->
-          <div style="flex-shrink: 0; background: #f8fafc; border-radius: 8px 8px 0 0; padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-            <div style="display: flex; gap: 4px; align-items: center;">
-              <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #64748b; border: none; padding: 5px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer; border-radius: 4px;">Setup</button>
-              <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #64748b; border: none; padding: 5px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer; border-radius: 4px;">I/O</button>
-              <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #ffffff; color: #7c3aed; border: 1px solid #e2e8f0; border-bottom: 2px solid #7c3aed; padding: 5px 14px; font-size: 11.5px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0; display: flex; align-items: center; gap: 6px;">
-                <span id="tabFilenameLabel">user_design.sv</span>
-              </button>
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px 8px; flex: 1; align-items: stretch;">
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M1 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_1" value="0" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
             </div>
 
-            <div style="display: flex; gap: 6px; align-items: center;">
-              <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">📋 Paste</button>
-              <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">📑 Copy</button>
-              <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">✕ Clear</button>
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M2 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_2" value="27540" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M3 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_3" value="37221" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M4 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_4" value="18450" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M5 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_5" value="18096" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M6 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_6" value="18450" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M7 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_7" value="5699" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M8 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_8" value="5796" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M9 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_9" value="2758" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
+            </div>
+
+            <div class="box" style="padding: 4px 6px; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+              <label style="font-size: 8.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M10 <span class="badge" style="font-size: 7.5px; padding: 1px 3px;">TRK</span></label>
+              <input type="number" name="metal_10" value="2772" step="any" oninput="updateLiveStats()" style="font-size: 13.5px; font-weight: 800; margin: 2px 0 0 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
             </div>
           </div>
-
-          <!-- Tab Content 1: Code View -->
-          <div id="hdlTabCodeView" style="display: flex; flex-direction: column; flex: 1; min-height: 0; background: #ffffff; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; position: relative;">
-            <div id="hdlEditorContainer" style="display: flex; flex: 1; min-height: 0; height: 100%; overflow: hidden; position: relative; background: #ffffff;">
-              <!-- Line numbers gutter -->
-              <div id="hdlLineNumbers" style="background: #f8fafc; color: #94a3b8; padding: 10px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 20px; text-align: right; user-select: none; width: 42px; min-width: 42px; flex-shrink: 0; border-right: 1px solid #e2e8f0; overflow: hidden; box-sizing: border-box; height: 100%;">
-                <div id="hdlLineNumbersInner" style="will-change: transform; transition: none;">
-                  <div style="height: 20px; line-height: 20px;">1</div>
-                  <div style="height: 20px; line-height: 20px;">2</div>
-                  <div style="height: 20px; line-height: 20px;">3</div>
-                  <div style="height: 20px; line-height: 20px;">4</div>
-                  <div style="height: 20px; line-height: 20px;">5</div>
-                  <div style="height: 20px; line-height: 20px;">6</div>
-                  <div style="height: 20px; line-height: 20px;">7</div>
-                  <div style="height: 20px; line-height: 20px;">8</div>
-                  <div style="height: 20px; line-height: 20px;">9</div>
-                  <div style="height: 20px; line-height: 20px;">10</div>
-                  <div style="height: 20px; line-height: 20px;">11</div>
-                  <div style="height: 20px; line-height: 20px;">12</div>
-                  <div style="height: 20px; line-height: 20px;">13</div>
-                  <div style="height: 20px; line-height: 20px;">14</div>
-                  <div style="height: 20px; line-height: 20px;">15</div>
-                  <div style="height: 20px; line-height: 20px;">16</div>
-                  <div style="height: 20px; line-height: 20px;">17</div>
-                  <div style="height: 20px; line-height: 20px;">18</div>
-                  <div style="height: 20px; line-height: 20px;">19</div>
-                  <div style="height: 20px; line-height: 20px;">20</div>
-                </div>
-              </div>
-              <!-- Editable code textarea (Empty by default for user input) -->
-              <textarea id="hdlCodeTextarea" name="selected_hdl_code" spellcheck="false" oninput="updateLineNumbers()" onscroll="syncHdlLineNumbers()"
-                style="flex: 1; height: 100%; background: #ffffff; color: #1e293b; border: none; padding: 10px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 20px; resize: none; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; overflow-y: auto; tab-size: 2; box-sizing: border-box;"></textarea>
-            </div>
-          </div>
-
-          <!-- Tab Content 2: Setup View -->
-          <div id="hdlTabSetupView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; padding: 18px; flex: 1; min-height: 0; overflow-y: auto;">
-            <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 12px;">Synthesis Options</div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; font-size: 11.5px; color: #334155;">
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" checked disabled>
-                <span><b>Optimize in Yosys</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 5px; border-radius: 4px;">opt -full</code>)</span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" checked disabled>
-                <span><b>Simplify diagram</b></span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" checked disabled>
-                <span><b>Convert to gates</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 5px; border-radius: 4px;">techmap</code>)</span>
-              </label>
-              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" checked disabled>
-                <span><b>Gate subset mapping</b></span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Tab Content 3: I/O View -->
-          <div id="hdlTabIoView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; padding: 16px; flex: 1; min-height: 0; overflow-y: auto;">
-            <div style="font-weight: 800; font-size: 13px; color: #7c3aed; margin-bottom: 8px;">Synthesized Module Ports (I/O)</div>
-            <div id="hdlIoPortList" style="font-size: 11px; font-family: monospace; color: #334155; line-height: 1.7;">
-              • input wire clk [1 bit] - System Clock<br>
-              • input wire reset [1 bit] - Synchronous Core Reset<br>
-              • input wire [31:0] instr - Fetched Machine Instruction<br>
-              • input wire [31:0] rdata - Memory Read Bus<br>
-              • output wire [31:0] pc - Program Counter Register<br>
-              • output wire [31:0] alu_out - 32-Bit Arithmetic Result (Hotspot)<br>
-              • output wire [31:0] wdata - Memory Write Bus<br>
-              • output wire mem_write - Data Memory Write Enable
-            </div>
-          </div>
-
-          <!-- Hidden input for file name -->
-          <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="">
-
-          <!-- Validation Error Banner for non-RV32I HDL code -->
-          <div id="hdlValidationErrorBanner" style="display: none; flex-shrink: 0; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 8px 12px; margin-top: 8px; color: #991b1b;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 14px;">❌</span>
-              <div id="hdlValidationErrorMessage" style="font-size: 11px; font-weight: 600; color: #b91c1c;">Only RV32I-related HDL code is supported.</div>
-            </div>
-          </div>
-
-          <!-- Bottom Action Bar: Char Counter on Left, FIND CONGESTION on Right -->
-          <div style="flex-shrink: 0; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 8px 8px; margin-top: 0;">
-            <span id="hdlCharCount" style="color: #64748b; font-family: monospace; font-size: 11px; font-weight: 600;">0 characters (0 lines)</span>
-            <button type="button" id="btnRunSynthesize" class="btn-submit" onclick="triggerAnalysisFromForm(); return false;" style="width: auto; padding: 10px 28px; font-size: 13.5px; border-radius: 8px; margin: 0; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);">FIND CONGESTION</button>
-          </div>
-
         </div>
 
       </div>
+
+      <!-- BOTTOM ROW: 3. VERILOG HDL PROCESSOR HARDWARE DESCRIPTION (FULL WIDTH, FILLS REST OF SPACE) -->
+      <div class="card" style="flex: 1; min-height: 0; width: 100%; margin-bottom: 0; padding: 10px 14px 10px 14px; border: 1.5px solid rgba(124, 58, 237, 0.35); border-radius: 12px; display: flex; flex-direction: column; box-sizing: border-box; background: rgba(255, 255, 255, 0.95);">
+
+        <div class="card-header" style="margin-bottom: 8px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div class="card-title" style="font-size: 11px; font-weight: 800; color: #7c3aed; margin: 0;">3. Verilog HDL Processor Hardware Description</div>
+          </div>
+          <span style="font-size: 9.5px; color: #7c3aed; font-weight: 700; background: #f3e8ff; padding: 2px 6px; border-radius: 4px;">Synthesizable RTL</span>
+        </div>
+
+        <!-- Tab Bar -->
+        <div style="flex-shrink: 0; background: #f8fafc; border-radius: 8px 8px 0 0; padding: 5px 10px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <button type="button" class="djs-tab-btn" id="tab_editor_setup" onclick="switchHdlTab('setup')" style="background: transparent; color: #64748b; border: none; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 4px;">Setup</button>
+            <button type="button" class="djs-tab-btn" id="tab_editor_io" onclick="switchHdlTab('io')" style="background: transparent; color: #64748b; border: none; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 4px;">I/O</button>
+            <button type="button" class="djs-tab-btn active" id="tab_editor_code" onclick="switchHdlTab('code')" style="background: #ffffff; color: #7c3aed; border: 1px solid #e2e8f0; border-bottom: 2px solid #7c3aed; padding: 4px 12px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 5px 5px 0 0; display: flex; align-items: center; gap: 6px;">
+              <span id="tabFilenameLabel">user_design.sv</span>
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📋 Paste</button>
+            <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📑 Copy</button>
+            <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">✕ Clear</button>
+          </div>
+        </div>
+
+        <!-- Tab Content 1: Code View -->
+        <div id="hdlTabCodeView" style="display: flex; flex-direction: column; flex: 1; min-height: 0; background: #ffffff; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; position: relative;">
+          <div id="hdlEditorContainer" style="display: flex; flex: 1; min-height: 0; height: 100%; overflow: hidden; position: relative; background: #ffffff;">
+            <!-- Line numbers gutter -->
+            <div id="hdlLineNumbers" style="background: #f8fafc; color: #94a3b8; padding: 8px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11.5px; line-height: 20px; text-align: right; user-select: none; width: 40px; min-width: 40px; flex-shrink: 0; border-right: 1px solid #e2e8f0; overflow: hidden; box-sizing: border-box; height: 100%;">
+              <div id="hdlLineNumbersInner" style="will-change: transform; transition: none;">
+                <div style="height: 20px; line-height: 20px;">1</div>
+                <div style="height: 20px; line-height: 20px;">2</div>
+                <div style="height: 20px; line-height: 20px;">3</div>
+                <div style="height: 20px; line-height: 20px;">4</div>
+                <div style="height: 20px; line-height: 20px;">5</div>
+                <div style="height: 20px; line-height: 20px;">6</div>
+                <div style="height: 20px; line-height: 20px;">7</div>
+                <div style="height: 20px; line-height: 20px;">8</div>
+                <div style="height: 20px; line-height: 20px;">9</div>
+                <div style="height: 20px; line-height: 20px;">10</div>
+                <div style="height: 20px; line-height: 20px;">11</div>
+                <div style="height: 20px; line-height: 20px;">12</div>
+                <div style="height: 20px; line-height: 20px;">13</div>
+                <div style="height: 20px; line-height: 20px;">14</div>
+                <div style="height: 20px; line-height: 20px;">15</div>
+                <div style="height: 20px; line-height: 20px;">16</div>
+                <div style="height: 20px; line-height: 20px;">17</div>
+                <div style="height: 20px; line-height: 20px;">18</div>
+                <div style="height: 20px; line-height: 20px;">19</div>
+                <div style="height: 20px; line-height: 20px;">20</div>
+                <div style="height: 20px; line-height: 20px;">21</div>
+                <div style="height: 20px; line-height: 20px;">22</div>
+                <div style="height: 20px; line-height: 20px;">23</div>
+                <div style="height: 20px; line-height: 20px;">24</div>
+                <div style="height: 20px; line-height: 20px;">25</div>
+              </div>
+            </div>
+            <!-- Editable code textarea (Empty by default for user input) -->
+            <textarea id="hdlCodeTextarea" name="selected_hdl_code" spellcheck="false" oninput="updateLineNumbers()" onscroll="syncHdlLineNumbers()"
+              style="flex: 1; height: 100%; background: #ffffff; color: #1e293b; border: none; padding: 8px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; line-height: 20px; resize: none; outline: none; white-space: pre; overflow-wrap: normal; overflow-x: auto; overflow-y: auto; tab-size: 2; box-sizing: border-box;"></textarea>
+          </div>
+        </div>
+
+        <!-- Tab Content 2: Setup View -->
+        <div id="hdlTabSetupView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; padding: 16px; flex: 1; min-height: 0; overflow-y: auto;">
+          <div style="font-weight: 800; font-size: 12.5px; color: #7c3aed; margin-bottom: 10px;">Synthesis Options</div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 11.5px; color: #334155;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" checked disabled>
+              <span><b>Optimize in Yosys</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 5px; border-radius: 4px;">opt -full</code>)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" checked disabled>
+              <span><b>Simplify diagram</b></span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" checked disabled>
+              <span><b>Convert to gates</b> (<code style="color: #7c3aed; background: #f3e8ff; padding: 2px 5px; border-radius: 4px;">techmap</code>)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" checked disabled>
+              <span><b>Gate subset mapping</b></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Tab Content 3: I/O View -->
+        <div id="hdlTabIoView" style="display: none; background: #ffffff; color: #1e293b; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none; padding: 14px; flex: 1; min-height: 0; overflow-y: auto;">
+          <div style="font-weight: 800; font-size: 12.5px; color: #7c3aed; margin-bottom: 8px;">Synthesized Module Ports (I/O)</div>
+          <div id="hdlIoPortList" style="font-size: 11px; font-family: monospace; color: #334155; line-height: 1.6;">
+            • input wire clk [1 bit] - System Clock<br>
+            • input wire reset [1 bit] - Synchronous Core Reset<br>
+            • input wire [31:0] instr - Fetched Machine Instruction<br>
+            • input wire [31:0] rdata - Memory Read Bus<br>
+            • output wire [31:0] pc - Program Counter Register<br>
+            • output wire [31:0] alu_out - 32-Bit Arithmetic Result (Hotspot)<br>
+            • output wire [31:0] wdata - Memory Write Bus<br>
+            • output wire mem_write - Data Memory Write Enable
+          </div>
+        </div>
+
+        <!-- Hidden input for file name -->
+        <input type="hidden" id="selectedHdlFilenameInput" name="selected_hdl_filename" value="">
+
+        <!-- Validation Error Banner for non-RV32I HDL code -->
+        <div id="hdlValidationErrorBanner" style="display: none; flex-shrink: 0; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 8px 12px; margin-top: 6px; color: #991b1b;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 14px;">❌</span>
+            <div id="hdlValidationErrorMessage" style="font-size: 11px; font-weight: 600; color: #b91c1c;">Only RV32I-related HDL code is supported.</div>
+          </div>
+        </div>
+
+        <!-- Bottom Action Bar: Char Counter on Left, FIND CONGESTION on Right -->
+        <div style="flex-shrink: 0; background: #f8fafc; border: 1px solid #e2e8f0; border-top: none; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 8px 8px; margin-top: 0;">
+          <span id="hdlCharCount" style="color: #64748b; font-family: monospace; font-size: 11px; font-weight: 600;">0 characters (0 lines)</span>
+          <button type="button" id="btnRunSynthesize" class="btn-submit" onclick="triggerAnalysisFromForm(); return false;" style="width: auto; padding: 8px 24px; font-size: 13px; font-weight: 800; border-radius: 8px; margin: 0; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);">FIND CONGESTION</button>
+        </div>
+
+      </div>
+
     </div> <!-- END #processorContent -->
   </form>
 
@@ -594,7 +597,7 @@
       const isaLabel = document.getElementById('isaLabel');
 
       if (val === 'RV32I') {
-        if (content) content.style.display = 'block';
+        if (content) content.style.display = 'flex';
         if (promptBanner) promptBanner.style.display = 'none';
         if (activeBadge) {
           activeBadge.innerText = 'TARGET LOADED: RV32I';
