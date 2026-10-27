@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261027-v8.17';
+      const BUILD_VER = '20261027-v8.18';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -374,7 +374,7 @@
             <div>
               <div class="card-title" style="font-size: 13.5px; font-weight: 800; color: #7c3aed; margin: 0;">1. Floorplan Geometry &amp; Density Parameters</div>
             </div>
-            <span style="font-size: 10px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 7px; border-radius: 4px;">SkyWater 130nm PDK</span>
+            <span style="font-size: 10px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 7px; border-radius: 4px;">NanGate 45nm</span>
           </div>
 
 <div style="display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0;">
@@ -1676,7 +1676,7 @@ endmodule`
 
               <div style="margin-top: 16px; border-top: 1px solid #dee2e6; padding-top: 12px;">
                 <div style="font-size: 11.5px; font-weight: 700; color: #7c3aed; margin-bottom: 4px;">Silicon PDK Target</div>
-                <div style="font-size: 11px; color: #475569;">SkyWater 130nm (<code>sky130_fd_sc_hd</code>)</div>
+                <div style="font-size: 11px; color: #475569;">NanGate 45nm (<code>NangateOpenCellLibrary</code>)</div>
               </div>
             </div>
 
@@ -4262,7 +4262,7 @@ endmodule`
           cellPins: `${inst.portList.length} Pins on M1/M2`,
           transistors: `${inst.portList.length * 4} CMOS FETs`,
           badge: "SUBCIRCUIT BLOCK",
-          impact: "Synthesized standard-cell subcircuit instance mapped onto SkyWater 130nm standard cell rows."
+          impact: "Synthesized standard-cell subcircuit instance mapped onto NanGate 45nm standard cell rows."
         };
       });
 

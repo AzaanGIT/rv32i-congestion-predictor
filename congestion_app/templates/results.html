@@ -631,7 +631,7 @@
 
               <div style="margin-top: 16px; border-top: 1px solid #dee2e6; padding-top: 12px;">
                 <div style="font-size: 11.5px; font-weight: 700; color: #7c3aed; margin-bottom: 4px;">Silicon PDK Target</div>
-                <div style="font-size: 11px; color: #475569;">SkyWater 130nm (<code>sky130_fd_sc_hd</code>)</div>
+                <div style="font-size: 11px; color: #475569;">NanGate 45nm (<code>NangateOpenCellLibrary</code>)</div>
                 <div style="font-size: 10.5px; color: #94a3b8; margin-top: 4px;">Gate logic directly impacts M1 pin density and M2/M3 wire tracks.</div>
               </div>
             </div>
@@ -3259,7 +3259,7 @@ endmodule`
           cellPins: `${inst.portList.length} Pins on M1/M2`,
           transistors: `${inst.portList.length * 4} CMOS FETs`,
           badge: "SUBCIRCUIT BLOCK",
-          impact: "Synthesized standard-cell subcircuit instance mapped onto SkyWater 130nm standard cell rows."
+          impact: "Synthesized standard-cell subcircuit instance mapped onto NanGate 45nm standard cell rows."
         };
       });
 
