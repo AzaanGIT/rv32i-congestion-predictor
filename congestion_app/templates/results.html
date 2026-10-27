@@ -1110,7 +1110,11 @@
       }
 
       // 3. Demand stress model (Matches backend XGBoost / analytical physics)
-      const stress = (util / 57.0) * (density / 0.56) * (3.0 / Math.max(0.5, margin));
+      const utilFactor = Math.pow(util / 57.0, 1.8);
+      const densityFactor = Math.pow(density / 0.56, 1.5);
+      const marginFactor = Math.pow(3.0 / Math.max(0.5, margin), 0.9);
+      const layerAdjFactor = Math.pow(0.6 / Math.max(0.1, layerAdj), 0.5);
+      const stress = utilFactor * densityFactor * marginFactor * layerAdjFactor;
       const baseDemands = {
         M1: 0, M2: 14186, M3: 16986, M4: 6621, M5: 4580,
         M6: 4547, M7: 860, M8: 783, M9: 470, M10: 410
@@ -1118,8 +1122,10 @@
 
       const demands = {};
       const layerUsage = {};
+      const rawOverflow = {};
       let peakLayer = "M2";
       let peakVal = 0;
+      let rawPeakVal = 0;
       let sumUsage = 0;
 
       for (let i = 1; i <= 10; i++) {
@@ -1137,20 +1143,25 @@
         if (cap > 0) {
           pct = Math.round((d / cap) * 1000) / 10;
         }
+        rawOverflow[k] = pct;
         const cappedPct = Math.min(100.0, pct);
         layerUsage[k] = cappedPct;
         sumUsage += cappedPct;
+        if (pct > rawPeakVal) {
+          rawPeakVal = pct;
+          peakLayer = k;
+        }
         if (cappedPct > peakVal) {
           peakVal = cappedPct;
-          peakLayer = k;
         }
       }
 
       const avgUsage = Math.round((sumUsage / 10) * 10) / 10;
-      const isCongested = (peakVal >= 85.0) || (util > 80.0);
+      const isCongested = (rawPeakVal >= 80.0) || (util >= 70.0) || (density >= 0.70);
       const isRoutable = !isCongested;
-      const successProb = Math.min(99.4, Math.max(12.0, Math.round((100.0 - (peakVal * 0.42) - (util * 0.25)) * 10) / 10));
-      const thermalIndex = Math.round(Math.min(100.0, (density * 30.0) + (avgUsage * 0.40) + (peakVal * 0.30)) * 10) / 10;
+      const peakDisplayVal = Math.round(rawPeakVal * 10) / 10;
+      const successProb = Math.min(99.4, Math.max(12.0, Math.round((100.0 - (rawPeakVal * 0.42) - (util * 0.25)) * 10) / 10));
+      const thermalIndex = Math.round(Math.min(100.0, (density * 30.0) + (avgUsage * 0.40) + (Math.min(100.0, rawPeakVal) * 0.30)) * 10) / 10;
       const peakTemp = Math.round((38.0 + (thermalIndex * 0.44)) * 10) / 10;
 
       // 4. Update Global State

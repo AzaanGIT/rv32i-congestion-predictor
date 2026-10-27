@@ -185,12 +185,15 @@ def predict():
         except Exception as e:
             print("Regressor inference error:", e)
 
-    # Fallback only if model files missing
+    # Physics-informed demand stress model ensuring wire length increases with utilization, density, and narrow margin
+    stress = ((util / 57.0) ** 1.8) * ((density / 0.56) ** 1.5) * ((3.0 / max(0.5, margin)) ** 0.9) * ((0.6 / max(0.1, layer_adj)) ** 0.5)
+    base_d = {"M1": 0, "M2": 14186, "M3": 16986, "M4": 6621, "M5": 4580, "M6": 4547, "M7": 860, "M8": 783, "M9": 470, "M10": 410}
     if not demands:
-        stress = (util / 57.0) * (density / 0.56) * (3.0 / max(0.5, margin))
-        base_d = {"M1": 0, "M2": 14186, "M3": 16986, "M4": 6621, "M5": 4580, "M6": 4547, "M7": 860, "M8": 783, "M9": 470, "M10": 410}
         for k in base_d:
             demands[k] = round(base_d[k] * stress, 1)
+    else:
+        for k in base_d:
+            demands[k] = max(demands.get(k, 0.0), round(base_d[k] * stress, 1))
 
     # 3. Layer Utilization Percentage calculation
     layer_usage_pct = {}
@@ -205,18 +208,18 @@ def predict():
             raw_overflow[k] = 0.0
             layer_usage_pct[k] = 0.0
 
-    peak_layer = max(layer_usage_pct, key=layer_usage_pct.get)
+    peak_layer = max(raw_overflow, key=raw_overflow.get)
     peak_val_pct = layer_usage_pct[peak_layer]
     peak_overflow = raw_overflow[peak_layer]
     avg_usage_pct = round(sum(layer_usage_pct.values()) / max(1, len(layer_usage_pct)), 1)
 
     # Congestion Status
-    is_congested = (peak_overflow >= 85.0) or (not is_routable)
+    is_congested = (peak_overflow >= 80.0) or (util >= 70.0) or (density >= 0.70) or (not is_routable)
     if not is_routable:
         status_label = "ROUTING UNFEASIBLE (PIN DENSITY OVERFLOW)"
     elif peak_overflow >= 100.0:
         status_label = "CONGESTION HOTSPOT (TRACK SATURATION)"
-    elif peak_overflow >= 85.0:
+    elif is_congested:
         status_label = "BORDERLINE CONGESTION WARNING"
     else:
         status_label = "ROUTING OPTIMIZED (DRC CLEAN)"
@@ -273,11 +276,11 @@ def predict():
         resources=resources,
         demands=demands,
         layer_usage_pct=layer_usage_pct,
-        layer_usage_raw=layer_usage_pct,
+        layer_usage_raw=raw_overflow,
         raw_overflow=raw_overflow,
         peak_layer=peak_layer,
         peak_val_pct=peak_val_pct,
-        peak_val_raw=peak_val_pct,
+        peak_val_raw=peak_overflow,
         avg_usage_pct=avg_usage_pct,
         avg_usage_raw=avg_usage_pct,
         is_congested=is_congested,

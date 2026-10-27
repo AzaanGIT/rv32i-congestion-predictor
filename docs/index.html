@@ -10,13 +10,11 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261028-v8.24';
-      const stored = localStorage.getItem('rv32i_build_ver');
-      if (stored !== BUILD_VER) {
-        localStorage.setItem('rv32i_build_ver', BUILD_VER);
-        if (window.location.search.indexOf('v=') === -1) {
-          window.location.replace(window.location.pathname + '?v=' + BUILD_VER);
-        }
+      const BUILD_VER = '20261028-v8.25';
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('v') !== BUILD_VER) {
+        urlParams.set('v', BUILD_VER);
+        window.location.replace(window.location.pathname + '?' + urlParams.toString());
       }
     })();
   </script>
@@ -825,27 +823,48 @@
       updateLiveStats();
     }
 
+    function updatePhysicalMetrics(util, aspect, margin, density, layerAdj) {
+      const u = parseFloat(util) || 57.0;
+      const a = parseFloat(aspect) || 1.5;
+      const m = parseFloat(margin) || 3.0;
+      const d = parseFloat(density) || 0.56;
+      const l = parseFloat(layerAdj) || 0.6;
+
+      const pin = (u * d * 1.85).toFixed(2);
+      const hpwl = (Math.sqrt(Math.max(0.1, u * a)) * m * 14.2).toFixed(2);
+      const blk = ((1.0 - d) * (u / 100.0) * 100.0).toFixed(1);
+      const via = (d * l * 1.25).toFixed(2);
+
+      const pinEl = document.getElementById('valPin') || document.querySelector('#valPin');
+      if (pinEl) pinEl.innerHTML = `${pin} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span>`;
+      const hpwlEl = document.getElementById('valHpwl') || document.querySelector('#valHpwl');
+      if (hpwlEl) hpwlEl.innerHTML = `${hpwl} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span>`;
+      const blkEl = document.getElementById('valBlock') || document.querySelector('#valBlock');
+      if (blkEl) blkEl.innerHTML = `${blk} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span>`;
+      const viaEl = document.getElementById('valVia') || document.querySelector('#valVia');
+      if (viaEl) viaEl.innerHTML = `${via} <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span>`;
+    }
+
     function updateLiveStats() {
-      const util = parseFloat(document.getElementById('inp_util').value) || 57;
-      const margin = parseFloat(document.getElementById('inp_margin').value) || 3;
-      const aspect = parseFloat(document.getElementById('inp_aspect').value) || 1.5;
+      const util = parseFloat(document.getElementById('inp_util')?.value) || 57;
+      const margin = parseFloat(document.getElementById('inp_margin')?.value) || 3;
+      const aspect = parseFloat(document.getElementById('inp_aspect')?.value) || 1.5;
       const density = parseFloat(document.getElementById('inp_density')?.value) || 0.56;
       const layerAdj = parseFloat(document.getElementById('inp_layer_adj')?.value) || 0.6;
       
+      // Sync range sliders to number inputs
+      const ru = document.getElementById('rng_util'); if (ru && ru.value != util) ru.value = util;
+      const ra = document.getElementById('rng_aspect'); if (ra && ra.value != aspect) ra.value = aspect;
+      const rm = document.getElementById('rng_margin'); if (rm && rm.value != margin) rm.value = margin;
+      const rd = document.getElementById('rng_density'); if (rd && rd.value != density) rd.value = density;
+      const rl = document.getElementById('rng_layer_adj'); if (rl && rl.value != layerAdj) rl.value = layerAdj;
+
       // Calculate estimated area
       const baseArea = (util * 0.02) + (margin * 0.1) * aspect;
       const da = document.getElementById('disp_area'); if (da) da.innerText = baseArea.toFixed(2) + ' mm²';
 
       // Update physical VLSI feature metrics
-      const pin = (util * density * 1.85).toFixed(2);
-      const hpwl = (Math.sqrt(Math.max(0.1, util * aspect)) * margin * 14.2).toFixed(2);
-      const blk = ((1.0 - density) * (util / 100.0) * 100.0).toFixed(1);
-      const via = (density * layerAdj * 1.25).toFixed(2);
-
-      const pinEl = document.querySelector('#valPin'); if (pinEl) pinEl.innerHTML = pin + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span>';
-      const hpwlEl = document.querySelector('#valHpwl'); if (hpwlEl) hpwlEl.innerHTML = hpwl + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span>';
-      const blkEl = document.querySelector('#valBlock'); if (blkEl) blkEl.innerHTML = blk + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span>';
-      const viaEl = document.querySelector('#valVia'); if (viaEl) viaEl.innerHTML = via + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span>';
+      updatePhysicalMetrics(util, aspect, margin, density, layerAdj);
 
       // Estimate total tracks sum
       let sumTracks = 0;
@@ -853,19 +872,22 @@
         const inp = document.getElementsByName('metal_' + i)[0];
         if (inp) sumTracks += parseFloat(inp.value) || 0;
       }
-      document.getElementById('disp_tracks').innerText = Math.round(sumTracks).toLocaleString() + ' tracks';
+      const dt = document.getElementById('disp_tracks');
+      if (dt) dt.innerText = Math.round(sumTracks).toLocaleString() + ' tracks';
 
       // Risk Class
       const riskEl = document.getElementById('disp_risk');
-      if (util > 70) {
-        riskEl.innerText = 'High Congestion Warning';
-        riskEl.style.color = '#dc2626';
-      } else if (util > 60) {
-        riskEl.innerText = 'Borderline Pressure';
-        riskEl.style.color = '#d97706';
-      } else {
-        riskEl.innerText = 'DRC Clean / Safe';
-        riskEl.style.color = '#15803d';
+      if (riskEl) {
+        if (util >= 70 || density >= 0.70) {
+          riskEl.innerText = 'High Congestion Warning';
+          riskEl.style.color = '#dc2626';
+        } else if (util >= 60 || density >= 0.60) {
+          riskEl.innerText = 'Borderline Pressure';
+          riskEl.style.color = '#d97706';
+        } else {
+          riskEl.innerText = 'DRC Clean / Safe';
+          riskEl.style.color = '#15803d';
+        }
       }
     }
 
@@ -2100,15 +2122,7 @@ endmodule`
       const layerAdj = parseFloat(document.getElementById('inp_layer_adj')?.value) || currentParams.layer_adjustment || 0.6;
 
       // 1. Update physical VLSI feature metrics
-      const pin = (util * density * 1.85).toFixed(2);
-      const hpwl = (Math.sqrt(Math.max(0.1, util * aspect)) * margin * 14.2).toFixed(2);
-      const blk = ((1.0 - density) * (util / 100.0) * 100.0).toFixed(1);
-      const via = (density * layerAdj * 1.25).toFixed(2);
-
-      const pinEl = document.querySelector('#valPin'); if (pinEl) pinEl.innerHTML = pin + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">pins/mm²</span>';
-      const hpwlEl = document.querySelector('#valHpwl'); if (hpwlEl) hpwlEl.innerHTML = hpwl + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">μm</span>';
-      const blkEl = document.querySelector('#valBlock'); if (blkEl) blkEl.innerHTML = blk + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">%</span>';
-      const viaEl = document.querySelector('#valVia'); if (viaEl) viaEl.innerHTML = via + ' <span style="font-size: 11px; font-weight: 600; color: #4a5568;">/μm²</span>';
+      updatePhysicalMetrics(util, aspect, margin, density, layerAdj);
 
       // 2. Read Tracks (Resources) per metal layer
       const resources = {};
@@ -2119,7 +2133,11 @@ endmodule`
       }
 
       // 3. Demand stress model (Matches backend XGBoost / analytical physics)
-      const stress = (util / 57.0) * (density / 0.56) * (3.0 / Math.max(0.5, margin));
+      const utilFactor = Math.pow(util / 57.0, 1.8);
+      const densityFactor = Math.pow(density / 0.56, 1.5);
+      const marginFactor = Math.pow(3.0 / Math.max(0.5, margin), 0.9);
+      const layerAdjFactor = Math.pow(0.6 / Math.max(0.1, layerAdj), 0.5);
+      const stress = utilFactor * densityFactor * marginFactor * layerAdjFactor;
       const baseDemands = {
         M1: 0, M2: 14186, M3: 16986, M4: 6621, M5: 4580,
         M6: 4547, M7: 860, M8: 783, M9: 470, M10: 410
@@ -2127,15 +2145,16 @@ endmodule`
 
       const demands = {};
       const layerUsage = {};
+      const rawOverflow = {};
       let peakLayer = "M2";
       let peakVal = 0;
+      let rawPeakVal = 0;
       let sumUsage = 0;
 
       for (let i = 1; i <= 10; i++) {
         const k = "M" + i;
         let d;
         if (isFix && targetFixedLayer && allDemands && allDemands[k] !== undefined && allDemands[k] > 0) {
-          // Single-layer fix: placement and floorplan are identical, so demands remain exactly the same
           d = allDemands[k];
         } else {
           d = Math.round(baseDemands[k] * stress * 10) / 10;
@@ -2146,19 +2165,25 @@ endmodule`
         if (cap > 0) {
           pct = Math.round((d / cap) * 1000) / 10;
         }
-        layerUsage[k] = pct;
-        sumUsage += pct;
-        if (pct > peakVal) {
-          peakVal = pct;
+        rawOverflow[k] = pct;
+        const cappedPct = Math.min(100.0, pct);
+        layerUsage[k] = cappedPct;
+        sumUsage += cappedPct;
+        if (pct > rawPeakVal) {
+          rawPeakVal = pct;
           peakLayer = k;
+        }
+        if (cappedPct > peakVal) {
+          peakVal = cappedPct;
         }
       }
 
       const avgUsage = Math.round((sumUsage / 10) * 10) / 10;
-      const isCongested = (peakVal > 100.0) || (util > 100.0);
+      const isCongested = (rawPeakVal >= 80.0) || (util >= 70.0) || (density >= 0.70);
       const isRoutable = !isCongested;
-      const successProb = Math.min(99.4, Math.max(12.0, Math.round((100.0 - (peakVal * 0.42) - (util * 0.25)) * 10) / 10));
-      const thermalIndex = Math.round(Math.min(100.0, (density * 30.0) + (avgUsage * 0.40) + (peakVal * 0.30)) * 10) / 10;
+      const peakDisplayVal = Math.round(rawPeakVal * 10) / 10;
+      const successProb = Math.min(99.4, Math.max(12.0, Math.round((100.0 - (rawPeakVal * 0.42) - (util * 0.25)) * 10) / 10));
+      const thermalIndex = Math.round(Math.min(100.0, (density * 30.0) + (avgUsage * 0.40) + (Math.min(100.0, rawPeakVal) * 0.30)) * 10) / 10;
       const peakTemp = Math.round((38.0 + (thermalIndex * 0.44)) * 10) / 10;
 
       // 4. Update Global State
@@ -2205,7 +2230,7 @@ endmodule`
 
       const kpiPeak = document.getElementById('kpiPeakPct');
       if (kpiPeak) {
-        kpiPeak.innerText = peakVal + '%';
+        kpiPeak.innerText = peakDisplayVal + '%';
         kpiPeak.style.color = isCongested ? '#dc2626' : '#15803d';
       }
       const kpiPeakB = document.getElementById('kpiPeakBadge');
@@ -2235,11 +2260,13 @@ endmodule`
             cPill.style.background = '#dc2626';
           }
           if (cTitle) {
-            cTitle.innerText = 'Congestion Is Happening! (Routing Overflow)';
+            cTitle.innerText = rawPeakVal >= 100.0 ? 'Congestion Is Happening! (Routing Overflow)' : 'Congestion Is Happening! (Track Saturation)';
             cTitle.style.color = '#7f1d1d';
           }
           if (cDesc) {
-            cDesc.innerHTML = 'Routing overflow detected! Wire demand exceeds 100.0% track capacity.';
+            cDesc.innerHTML = rawPeakVal >= 100.0
+              ? `Routing overflow detected! Wire demand on <b>${peakLayer} (${peakDisplayVal}%)</b> exceeds 100.0% track capacity.`
+              : `Routing congestion detected! Wire demand on <b>${peakLayer} (${peakDisplayVal}%)</b> exceeds safe 80.0% track capacity threshold.`;
             cDesc.style.color = '#991b1b';
           }
         } else {
@@ -2274,13 +2301,13 @@ endmodule`
           sideBox.style.borderColor = '#dc2626';
           sideBox.style.background = '#fef2f2';
           if (sideBadge) { sideBadge.innerText = 'YES'; sideBadge.style.background = '#dc2626'; }
-          if (sidePct) { sidePct.innerText = peakVal + '%'; sidePct.style.color = '#dc2626'; }
+          if (sidePct) { sidePct.innerText = peakDisplayVal + '%'; sidePct.style.color = '#dc2626'; }
           if (sideTxt) { sideTxt.innerText = 'Happening!'; sideTxt.style.color = '#b91c1c'; }
         } else {
           sideBox.style.borderColor = '#16a34a';
           sideBox.style.background = '#f0fdf4';
           if (sideBadge) { sideBadge.innerText = 'NO'; sideBadge.style.background = '#16a34a'; }
-          if (sidePct) { sidePct.innerText = peakVal + '%'; sidePct.style.color = '#15803d'; }
+          if (sidePct) { sidePct.innerText = peakDisplayVal + '%'; sidePct.style.color = '#15803d'; }
           if (sideTxt) { sideTxt.innerText = 'Not Happening'; sideTxt.style.color = '#166534'; }
         }
       }
@@ -2293,10 +2320,13 @@ endmodule`
       const recP = document.getElementById('recDesc');
       if (recP) {
         if (isCongested) {
-          const overflowAmt = Math.round((peakVal - 100.0) * 10) / 10;
-          recP.innerHTML = `<b style="color:#dc2626;">Congestion is occurring!</b> Peak routing congestion is <b style="color:#dc2626;">${peakVal}% on ${peakLayer}</b> (${overflowAmt}% beyond 100.0% track capacity). Click to apply calculated design rules and eliminate routing overflow.`;
+          const overflowAmt = Math.round((rawPeakVal - 100.0) * 10) / 10;
+          const overflowText = (overflowAmt > 0)
+            ? `(${overflowAmt}% beyond 100.0% track capacity)`
+            : `(wire demand reaches ${peakDisplayVal}%, exceeding safe 80.0% threshold)`;
+          recP.innerHTML = `<b style="color:#dc2626;">Congestion is occurring!</b> Peak routing congestion is <b style="color:#dc2626;">${peakDisplayVal}% on ${peakLayer}</b> ${overflowText}. Click to apply calculated design rules and eliminate routing overflow.`;
         } else {
-          recP.innerHTML = `<b style="color:#15803d;">Congestion is not occurring.</b> Peak routing congestion is <b style="color:#15803d;">${peakVal}% on ${peakLayer}</b> (safely within 100.0% track capacity). Click to experiment with tighter silicon optimization.`;
+          recP.innerHTML = `<b style="color:#15803d;">Congestion is not occurring.</b> Peak routing congestion is <b style="color:#15803d;">${peakDisplayVal}% on ${peakLayer}</b> (safely within 100.0% track capacity). Click to experiment with tighter silicon optimization.`;
         }
       }
 
@@ -2308,11 +2338,14 @@ endmodule`
           whyCard.style.display = 'block';
           if (whyBullets) {
             let items = [];
-            const overflowAmt = Math.round((peakVal - 100.0) * 10) / 10;
-            // Bullet 1: Track exhaustion
-            items.push(`<li style="margin-bottom: 4px;"><b>Track Capacity Exhaustion:</b> Wire demand on <b>${peakLayer} (${peakVal}%)</b> exceeds 100.0% track capacity, leaving negative track margin (${overflowAmt}% routing overflow) causing DRC shorts.</li>`);
+            if (rawPeakVal >= 100.0) {
+              const overflowAmt = Math.round((rawPeakVal - 100.0) * 10) / 10;
+              items.push(`<li style="margin-bottom: 4px;"><b>Track Capacity Exhaustion:</b> Wire demand on <b>${peakLayer} (${peakDisplayVal}%)</b> exceeds 100.0% track capacity, leaving negative track margin (${overflowAmt}% routing overflow) causing DRC shorts.</li>`);
+            } else {
+              items.push(`<li style="margin-bottom: 4px;"><b>Routing Track Saturation:</b> Wire demand on <b>${peakLayer} (${peakDisplayVal}%)</b> reaches high saturation (>80%), risking DRC wire-to-wire spacing shorts during detailed routing.</li>`);
+            }
             // Bullet 2: Cell utilization / placement density
-            if (util > 70.0) {
+            if (util >= 70.0) {
               items.push(`<li style="margin-bottom: 4px;"><b>High Cell Utilization:</b> Core utilization (<b>${util}%</b>) concentrates transistor pins too tightly, blocking inter-cell escape channels.</li>`);
             } else if (density > 0.60) {
               items.push(`<li style="margin-bottom: 4px;"><b>Dense Placement:</b> High placement density (<b>${density}</b>) leaves inadequate routing whitespace between cell rows.</li>`);
