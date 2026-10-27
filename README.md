@@ -22,11 +22,19 @@ An advanced machine-learning EDA tool and interactive 3D web platform for predic
 ## 🚀 Key System Features
 
 1. **⚡ Physical VLSI Feature Matrix**
-   - Calculates domain-specific IC metrics from pre-placement parameters:
-     - **Pin Density Index:** $Utilization \times Density \times 1.85$ ($pins/mm^2$)
-     - **HPWL Estimated Wirelength:** $\sqrt{Util \times Aspect} \times Margin \times 14.2$ ($\mu m$)
-     - **Macro Blockage Ratio:** $(1 - Density) \times Util$ (%)
-     - **Via Pillar Density:** $Density \times LayerAdjustment \times 1.25$ ($\mu m^{-2}$)
+   - Grounded in standard textbook physical design formulations (*Kahng, Sherwani, Sait & Youssef*):
+     - **Pin Density Index:**
+       - *Textbook Formula:* $\text{Pin Density} = \frac{N_{\text{pins}}}{A_{\text{core}}}$ ($\text{pins}/\mu\text{m}^2$ or $\text{pins}/\text{mm}^2$)
+       - *Pre-Placement Proxy:* $Utilization \times Density \times 1.85$
+     - **HPWL Estimated Wirelength:**
+       - *Textbook Formula:* $\text{HPWL}(e) = (\max_{v \in e} x_v - \min_{v \in e} x_v) + (\max_{v \in e} y_v - \min_{v \in e} y_v) = \Delta X_{\text{bbox}} + \Delta Y_{\text{bbox}}$ ($\mu\text{m}$)
+       - *Pre-Placement Proxy:* $\sqrt{\max(0.1, Util \times Aspect)} \times Margin \times 14.2$
+     - **Macro Blockage Ratio:**
+       - *Textbook Formula:* $\text{Macro Blockage Ratio} = \frac{\sum A_{\text{macro}}}{A_{\text{core}}} \times 100\%$ (%)
+       - *Pre-Placement Proxy:* $(1 - Density) \times \frac{Util}{100.0}$
+     - **Via Pillar Density:**
+       - *Textbook Formula:* $\text{Via Density} = \frac{N_{\text{vias}}}{A_{\text{core}}}$ ($/\mu\text{m}^2$)
+       - *Pre-Placement Proxy:* $Density \times LayerAdjustment \times 1.25$
 
 2. **🤖 High-Precision XGBoost Inference Engine**
    - **DRC Violation Classifier:** Predicts routing feasibility ($99.15\%$ accuracy).

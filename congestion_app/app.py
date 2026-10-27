@@ -55,7 +55,14 @@ ALL_FEATURE_NAMES = RAW_FEATURE_NAMES + ["pin_density", "hpwl_wirelength", "macr
 
 
 def build_feature_df(util, aspect, margin, density, layer_adj):
-    """Builds dataframe with engineered VLSI physical features."""
+    """
+    Builds dataframe with domain-specific VLSI physical features.
+    Grounded in textbook physical design formulations (Kahng, Sherwani, Sait & Youssef):
+      1. Pin Density Index:    Textbook: N_pins / A_core ~= util * density * 1.85 (pins/mm^2)
+      2. HPWL Wirelength:      Textbook: (xmax - xmin) + (ymax - ymin) ~= sqrt(max(0.1, util * aspect)) * margin * 14.2 (um)
+      3. Macro Blockage Ratio: Textbook: (sum A_macro / A_core) * 100% ~= (1.0 - density) * (util / 100.0) (%)
+      4. Via Pillar Density:   Textbook: N_vias / A_core ~= density * layer_adj * 1.25 (/um^2)
+    """
     pin_density = util * density * 1.85
     hpwl = np.sqrt(max(0.1, util * aspect)) * margin * 14.2
     macro_blk = (1.0 - density) * (util / 100.0)

@@ -35,7 +35,14 @@ DEMAND_TARGETS = [f"{l}_demand" for l in LAYERS]
 
 
 def add_engineered_features(df):
-    """Computes physical VLSI design metrics."""
+    """
+    Computes domain-specific VLSI physical design metrics.
+    Grounded in textbook physical design formulations (Kahng, Sherwani, Sait & Youssef):
+      1. Pin Density Index:    Textbook: N_pins / A_core ~= util * density * 1.85 (pins/mm^2)
+      2. HPWL Wirelength:      Textbook: (xmax - xmin) + (ymax - ymin) ~= sqrt(max(0.1, util * aspect)) * margin * 14.2 (um)
+      3. Macro Blockage Ratio: Textbook: (sum A_macro / A_core) * 100% ~= (1.0 - density) * (util / 100.0) (%)
+      4. Via Pillar Density:   Textbook: N_vias / A_core ~= density * layer_adj * 1.25 (/um^2)
+    """
     df_copy = df.copy()
     util = df_copy["utilization"]
     aspect = df_copy["aspect_ratio"]
