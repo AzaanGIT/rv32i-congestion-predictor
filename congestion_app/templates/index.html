@@ -256,7 +256,7 @@
     <!-- Brand -->
     <div style="display: flex; align-items: center; gap: 12px;">
       <div class="brand-title" style="font-size: 16.5px; font-weight: 900; margin: 0; color: #1a202c;">
-        ⚡ CONGESTION PREDICTOR
+        CONGESTION PREDICTOR
       </div>
       <span id="activeTargetBadge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px;">
         AWAITING SELECTION
@@ -279,15 +279,15 @@
     <!-- Right: Presets -->
     <div id="presetBarGroup" class="preset-bar" style="margin: 0; display: flex; align-items: center; gap: 6px; opacity: 0.4; pointer-events: none; transition: opacity 0.3s ease;">
       <span style="font-size: 11px; font-weight: 800; color: #718096; margin-right: 4px;">PRESETS:</span>
-      <button type="button" class="btn-preset" onclick="applyPreset('default')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">⚡ Standard</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('high_density')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">🔥 High Density</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('conservative')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">🛡️ Safe</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('default')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">Standard</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('high_density')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">High Density</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('conservative')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">Safe</button>
     </div>
   </div>
 
   <!-- CENTER WELCOME MESSAGE (DIRECTLY ABOVE CENTERED SELECTOR) -->
   <div id="centerWelcome" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 38vh; left: 50%; transform: translate(-50%, -100%); z-index: 90; text-align: center; pointer-events: none; transition: opacity 0.3s ease;">
-    <div style="font-size: 32px; margin-bottom: 6px;">⚡</div>
+    
     <div style="font-size: 17px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">
       Select Target Processor Core
     </div>
@@ -446,9 +446,9 @@
           </div>
 
           <div style="display: flex; gap: 6px; align-items: center;">
-            <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📋 Paste</button>
-            <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📑 Copy</button>
-            <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">✕ Clear</button>
+            <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">Paste</button>
+            <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">Copy</button>
+            <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">Clear</button>
           </div>
         </div>
 
@@ -530,7 +530,7 @@
         <!-- Validation Error Banner for non-RV32I HDL code -->
         <div id="hdlValidationErrorBanner" style="display: none; flex-shrink: 0; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 8px 12px; margin-top: 6px; color: #991b1b;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 14px;">❌</span>
+            
             <div id="hdlValidationErrorMessage" style="font-size: 11px; font-weight: 600; color: #b91c1c;">Only RV32I-related HDL code is supported.</div>
           </div>
         </div>

@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261026-v8.15';
+      const BUILD_VER = '20261027-v8.16';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -324,7 +324,7 @@
     <!-- Brand -->
     <div style="display: flex; align-items: center; gap: 12px;">
       <div class="brand-title" style="font-size: 16.5px; font-weight: 900; margin: 0; color: #1a202c;">
-        ⚡ CONGESTION PREDICTOR
+        CONGESTION PREDICTOR
       </div>
       <span id="activeTargetBadge" style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 5px;">
         AWAITING SELECTION
@@ -347,15 +347,15 @@
     <!-- Right: Presets -->
     <div id="presetBarGroup" class="preset-bar" style="margin: 0; display: flex; align-items: center; gap: 6px; opacity: 0.4; pointer-events: none; transition: opacity 0.3s ease;">
       <span style="font-size: 11px; font-weight: 800; color: #718096; margin-right: 4px;">PRESETS:</span>
-      <button type="button" class="btn-preset" onclick="applyPreset('default')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">⚡ Standard</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('high_density')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">🔥 High Density</button>
-      <button type="button" class="btn-preset" onclick="applyPreset('conservative')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">🛡️ Safe</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('default')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">Standard</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('high_density')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">High Density</button>
+      <button type="button" class="btn-preset" onclick="applyPreset('conservative')" style="padding: 5px 12px; font-size: 11px; border-radius: 6px;">Safe</button>
     </div>
   </div>
 
   <!-- CENTER WELCOME MESSAGE (DIRECTLY ABOVE CENTERED SELECTOR) -->
   <div id="centerWelcome" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 38vh; left: 50%; transform: translate(-50%, -100%); z-index: 90; text-align: center; pointer-events: none; transition: opacity 0.3s ease;">
-    <div style="font-size: 32px; margin-bottom: 6px;">⚡</div>
+    
     <div style="font-size: 17px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">
       Select Target Processor Core
     </div>
@@ -575,9 +575,9 @@
           </div>
 
           <div style="display: flex; gap: 6px; align-items: center;">
-            <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📋 Paste</button>
-            <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">📑 Copy</button>
-            <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">✕ Clear</button>
+            <button type="button" onclick="pasteHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">Paste</button>
+            <button type="button" onclick="copyHdlCode()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">Copy</button>
+            <button type="button" onclick="clearHdlCode()" style="background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; padding: 3px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer;">Clear</button>
           </div>
         </div>
 
@@ -659,7 +659,7 @@
         <!-- Validation Error Banner for non-RV32I HDL code -->
         <div id="hdlValidationErrorBanner" style="display: none; flex-shrink: 0; background: #fef2f2; border: 1.5px solid #f87171; border-radius: 8px; padding: 8px 12px; margin-top: 6px; color: #991b1b;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 14px;">❌</span>
+            
             <div id="hdlValidationErrorMessage" style="font-size: 11px; font-weight: 600; color: #b91c1c;">Only RV32I-related HDL code is supported.</div>
           </div>
         </div>
@@ -1218,7 +1218,7 @@ endmodule`
       <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #1a202c;">CONGESTION PREDICTOR</h2>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-      <button id="btnToggleSchematic" class="btn-3d" onclick="toggleSchematicView()">⚡ Logic Gate Schematic</button>
+      <button id="btnToggleSchematic" class="btn-3d" onclick="toggleSchematicView()">Logic Gate Schematic</button>
     </div>
   </div>
 
@@ -1431,7 +1431,7 @@ endmodule`
           </div>
 
           <span style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
-            ⚡ Inference: &lt;25ms
+            Inference: &lt;25ms
           </span>
         </div>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 14px;">
@@ -1582,9 +1582,9 @@ endmodule`
 
             <!-- Player Controls Group (Slate Gray #6c757d) -->
             <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Time control" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d;">
-              <button type="button" id="djsBtnPause" onclick="djsPauseSim()" title="Pause simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">⏸</button>
+              <button type="button" id="djsBtnPause" onclick="djsPauseSim()" title="Pause simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer; border-right: 1px solid #5a6268;">❚❚</button>
               <button type="button" id="djsBtnResume" onclick="djsResumeSim()" title="Resume simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">▶</button>
-              <button type="button" id="djsBtnFastFwd" onclick="djsFastFwdSim()" title="Fast-forward simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">⏩</button>
+              <button type="button" id="djsBtnFastFwd" onclick="djsFastFwdSim()" title="Fast-forward simulation" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 12px; font-weight: bold; cursor: pointer; border-right: 1px solid #5a6268;">»</button>
               <button type="button" id="djsBtnStep" onclick="djsStepSim()" title="Run single time step" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">→</button>
               <button type="button" id="djsBtnNext" onclick="djsNextEventSim()" title="Run until next event" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 12px; font-size: 13px; cursor: pointer;">⇥</button>
             </div>
@@ -1592,16 +1592,16 @@ endmodule`
             <!-- Tick Counter Input Group -->
             <div class="input-group me-2 upper-toolbar-group" style="display: inline-flex; align-items: stretch; border: 1px solid #ced4da; border-radius: 4px; overflow: hidden;">
               <div class="input-group-prepend" style="background: #e9ecef; border-right: 1px solid #ced4da; padding: 5px 10px; display: flex; align-items: center; color: #495057;">
-                <span title="Simulation Time (ms)" style="font-size: 13px;">⏱</span>
+                <span title="Simulation Time (ms)" style="font-size: 11px; font-weight: 700;">ms</span>
               </div>
               <input type="text" id="djsTickVal" value="0 ms" readonly style="background: #ffffff; border: none; padding: 5px 10px; font-family: monospace; font-size: 13px; width: 7.5em; color: #212529; outline: none;" />
             </div>
 
             <!-- File Actions Button Group -->
             <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Saving and sharing" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d;">
-              <button type="button" onclick="djsLoadDialog()" title="Load from file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">📁</button>
-              <button type="button" onclick="djsExportJson()" title="Save to file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer; border-right: 1px solid #5a6268;">💾</button>
-              <button type="button" onclick="djsShareLink()" title="Get link" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 11px; font-size: 13px; cursor: pointer;">🔗</button>
+              <button type="button" onclick="djsLoadDialog()" title="Load from file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 9px; font-size: 11px; font-weight: 600; cursor: pointer; border-right: 1px solid #5a6268;">Open</button>
+              <button type="button" onclick="djsExportJson()" title="Save to file" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 9px; font-size: 11px; font-weight: 600; cursor: pointer; border-right: 1px solid #5a6268;">Save</button>
+              <button type="button" onclick="djsShareLink()" title="Get link" style="background: #6c757d; color: #ffffff; border: none; padding: 5px 9px; font-size: 11px; font-weight: 600; cursor: pointer;">Link</button>
             </div>
 
             <!-- Layout Orientation Switcher (" = " Stacked vs " || " Side) -->
@@ -1627,14 +1627,14 @@ endmodule`
           <!-- LEFT COLUMN: CODE EDITOR & SETUP / IO TABS -->
           <div id="djsEditorContainer" style="background: #ffffff; display: flex; flex-direction: column; height: 100%; min-height: 0; max-height: 100%; overflow: hidden; width: 100%; border-right: 1px solid #dee2e6;">
             
-            <!-- Nav Tabs (Setup | I/O | Active User File ☁️ ✕) -->
+            <!-- Nav Tabs (Setup | I/O | Active User File ✕) -->
             <nav style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 6px 8px 0 8px;">
               <div class="nav nav-tabs" style="display: flex; gap: 4px; align-items: flex-end; border-bottom: none;">
                 <button type="button" id="djsSubTabSetup" onclick="switchDjsLeftTab('setup')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">Setup</button>
                 <button type="button" id="djsSubTabIo" onclick="switchDjsLeftTab('io')" class="nav-item nav-link" style="background: transparent; border: none; color: #0d6efd; font-size: 12px; font-weight: 500; padding: 6px 12px; cursor: pointer; border-radius: 4px 4px 0 0;">I/O</button>
                 <button type="button" id="djsSubTabCode" onclick="switchDjsLeftTab('code')" class="nav-item nav-link active" style="background: #ffffff; border: 1px solid #dee2e6; border-bottom: 1px solid #ffffff; color: #495057; font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; border-radius: 4px 4px 0 0; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px;">
                   <span id="djsActiveFileTabName">empty_design.sv</span>
-                  <span style="font-size: 11px; color: #6c757d;">☁️ ✕</span>
+                  <span style="font-size: 11px; color: #6c757d;">✕</span>
                 </button>
               </div>
             </nav>
@@ -1658,7 +1658,7 @@ endmodule`
                   <code id="djsSelectionName" style="background: #ffffff; border: 1px solid #fef08a; padding: 1px 6px; border-radius: 3px; font-weight: 700; color: #b45309;">pc_plus4_if</code>
                   <span id="djsSelectionLine" style="color: #475569; font-weight: 600;">(Line 23)</span>
                 </div>
-                <button type="button" onclick="clearCodeHighlight(); document.getElementById('djsSelectionBanner').style.display='none';" style="background: transparent; border: none; font-size: 11px; color: #a16207; cursor: pointer; padding: 0 4px; font-weight: bold;">✕ Clear</button>
+                <button type="button" onclick="clearCodeHighlight(); document.getElementById('djsSelectionBanner').style.display='none';" style="background: transparent; border: none; font-size: 11px; color: #a16207; cursor: pointer; padding: 0 4px; font-weight: bold;">Clear</button>
               </div>
 
             </div>
@@ -1753,7 +1753,7 @@ endmodule`
       <div class="card" id="whyCongestionCard" style="display: none; border: 1.5px solid #fca5a5; background: #fff5f5; margin-top: 24px; padding: 18px 22px;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 18px;">⚠️</span>
+            
             <h3 style="margin: 0; font-size: 14.5px; font-weight: 800; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px;">
               Why Congestion Is Happening:
             </h3>
@@ -2225,7 +2225,7 @@ endmodule`
           cBanner.style.background = '#fef2f2';
           cBanner.style.borderColor = '#fca5a5';
           if (cIconBox) {
-            cIconBox.innerText = '⚠️';
+            cIconBox.innerText = '!';
             cIconBox.style.background = '#ef4444';
           }
           if (cPill) {
@@ -2832,14 +2832,14 @@ endmodule`
         impact: "~175 DFFs form the largest pipeline register. Bubble insertion MUX multiplies control pin count. Creates significant local routing pressure near forwarding unit inputs."
       },
       pip_ex_stage: {
-        name: "EX Stage: Execute ⚡ CONGESTION HOTSPOT",
+        name: "EX Stage: Execute [CONGESTION HOTSPOT]",
         sub: "fwd_mux_a(4:1) · fwd_mux_b(4:1) · alusrc_mux · ALU · comparator · BTA",
         eq: "alu_result = forward_a OP alu_input_b; branch_taken = CMP(forward_a, forward_b)",
         pins: () => `ALU out=0x${(pinState.alu_out||0).toString(16).padStart(8,'0')}, op=${pinState.instr_name||'ADD'}`,
         cell: "MUX4:1×2 + MUX2:1 + XOR2×64 + AND2×32 + OR2×32 + ADD32 + CMP32",
         cellPins: "forward_a[31:0], forward_b[31:0], imm[31:0], funct3[2:0], ctrl → alu_result[31:0], branch_taken",
         transistors: "~1,240 CMOS FETs (64 XOR cluster + AND/OR logic + forwarding MUXes)",
-        badge: "HOTSPOT STAGE 🔥",
+        badge: "HOTSPOT STAGE",
         impact: "Primary congestion hotspot. 64 XOR cells cluster (ADD/SUB + logic ops) saturate M1→M2 horizontal tracks. Two 4:1 forwarding MUXes add 128+ extra wire connections. M2/M3 track saturation exceeds 50.8% on M2."
       },
       pip_alu: {
@@ -2850,7 +2850,7 @@ endmodule`
         cell: "XOR2×64 + AND2×32 + OR2×32 + ADD32 + SUB32 + OP_MUX",
         cellPins: "A[31:0], B[31:0], funct3[2:0], funct7[6:0] → Y[31:0]",
         transistors: "~1,240 CMOS FETs",
-        badge: "ALU HOTSPOT 🔥",
+        badge: "ALU HOTSPOT",
         impact: "64 XOR gate cluster for ADD/SUB creates the primary Metal 1–3 routing bottleneck. Arithmetic carry chain + parallel logic paths = maximum cell row density."
       },
       pip_fwd_a: {
@@ -3417,7 +3417,7 @@ endmodule`
 
       const exInner = `
         <rect width="300" height="300" fill="#fff5f5" rx="4" stroke="#ef4444" stroke-width="1.8"/>
-        <text x="10" y="16" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">32-Bit ALU [🔥 M2 HOTSPOT GATES]</text>
+        <text x="10" y="16" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">32-Bit ALU [M2 HOTSPOT GATES]</text>
         ${svgXorGate(20, 35, "alu_xor1", "XOR1 (A⊕B)", true)}
         ${svgXorGate(110, 35, "alu_xor2", "XOR2 (Sum)", true)}
         ${svgOrGate(200, 35, "alu_or1", "OR_COUT", true)}
@@ -3438,7 +3438,7 @@ endmodule`
       return `
         <!-- Title & Clock Banner -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="30" y="25" fill="#0284c7">⚡ RV32I PROCESSOR CORE GATE NETLIST | 5 PIPELINE STAGES WITH INTERACTIVE SIMULATION</text>
+          <text x="30" y="25" fill="#0284c7">RV32I PROCESSOR CORE GATE NETLIST | 5 PIPELINE STAGES WITH INTERACTIVE SIMULATION</text>
         </g>
 
         <!-- Dynamic Rubber-Banding Inter-Stage Wires -->
@@ -3506,7 +3506,7 @@ endmodule`
     function renderAluCircuit() {
       return `
         <g font-size="11" font-family="monospace" font-weight="bold">
-          <text x="30" y="35" fill="#b91c1c">🔥 32-BIT ARITHMETIC LOGIC UNIT (ALU) GATE-LEVEL HOTSPOT</text>
+          <text x="30" y="35" fill="#b91c1c">32-BIT ARITHMETIC LOGIC UNIT (ALU) GATE-LEVEL HOTSPOT</text>
           <text x="30" y="55" fill="#64748b">Primary cause of M2 (50.8%) track congestion in RISC-V core.</text>
         </g>
 
@@ -3804,7 +3804,7 @@ endmodule`
       // ── STAGE 3 (EX - CONGESTION HOTSPOT) Inner SVG ────────────────────
       const exInner = expandedBlocks.pip_ex ? `
         <rect width="310" height="380" fill="#fff5f5" rx="4" stroke="#ef4444" stroke-width="1.8"/>
-        <text x="10" y="16" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">STAGE 3: EX ⚡ [CONGESTION HOTSPOT]</text>
+        <text x="10" y="16" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">STAGE 3: EX [CONGESTION HOTSPOT]</text>
         <text x="10" y="30" fill="#ef4444" font-size="7.5" font-family="monospace">Causes peak M2 (50.8%) track saturation</text>
         <!-- Forwarding Muxes -->
         <g transform="translate(10, 40)">
@@ -3847,8 +3847,8 @@ endmodule`
         <text x="10" y="365" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">ALU OUT: ${aluHex}</text>
       ` : `
         <rect width="220" height="220" fill="#fff5f5" rx="4" stroke="#ef4444" stroke-width="2"/>
-        <text x="10" y="18" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">EXECUTION &amp; ALU 🔥</text>
-        <text x="10" y="34" fill="#ef4444" font-size="7.5" font-family="monospace">🔥 M2 Hotspot (50.8% Track Congestion)</text>
+        <text x="10" y="18" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">EXECUTION &amp; ALU</text>
+        <text x="10" y="34" fill="#ef4444" font-size="7.5" font-family="monospace">M2 Hotspot (50.8% Track Congestion)</text>
         <text x="10" y="52" fill="#334155" font-size="8" font-family="monospace">• Forwarding MUX A (4:1)</text>
         <text x="10" y="69" fill="#334155" font-size="8" font-family="monospace">• Forwarding MUX B (4:1)</text>
         <text x="10" y="86" fill="#334155" font-size="8" font-family="monospace">• ALUSrc Immediate MUX (2:1)</text>
@@ -3943,7 +3943,7 @@ endmodule`
       return `
         <!-- Top Status Bar & DigitalJS Synthesis Info -->
         <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="30" y="24" fill="#0284c7">⚡ 5-STAGE PIPELINED RV32I PROCESSOR NETLIST (Gate-Level Synthesis Engine)</text>
+          <text x="30" y="24" fill="#0284c7">5-STAGE PIPELINED RV32I PROCESSOR NETLIST (Gate-Level Synthesis Engine)</text>
           <text x="30" y="42" fill="#64748b">Module: rv32i_pipeline_top | Stages: IF → ID → EX [HOTSPOT] → MEM → WB | Clocked: posedge clk | Click [+] to drill down</text>
         </g>
 
@@ -3998,7 +3998,7 @@ endmodule`
         <!-- 4. PIPELINE REGISTER 2: ID/EX (175 BITS) -->
         ${svgDigitalJsDffBank("pip_idex_reg", p.pip_idex_reg.x, p.pip_idex_reg.y, "ID/EX REG", "idex_imm", 175, [51, 52, 53, 54, 55, 57, 58, 59])}
 
-        <!-- 5. STAGE 3: EX (EXECUTE & ALU ⚡ CONGESTION HOTSPOT) -->
+        <!-- 5. STAGE 3: EX (EXECUTE & ALU CONGESTION HOTSPOT) -->
         ${renderSubcircuitBox(
           "pip_ex_stage", "STAGE 3", "EX_HOTSPOT", expandedBlocks.pip_ex, exW, exH, p.pip_ex_stage.x, p.pip_ex_stage.y, [74, 75, 76, 77, 80, 81],
           exInner,
@@ -4495,7 +4495,7 @@ endmodule`
           
           <!-- Chip Synthesis Icon -->
           <circle cx="0" cy="-55" r="30" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8"/>
-          <text x="0" y="-47" text-anchor="middle" font-size="24" fill="#2563eb">⚡</text>
+          <path d="M-10 -65 L10 -65 L10 -45 L-10 -45 Z M-10 -55 L-15 -55 M10 -55 L15 -55 M-5 -65 L-5 -70 M5 -65 L5 -70 M-5 -45 L-5 -40 M5 -45 L5 -40" stroke="#2563eb" stroke-width="2" stroke-linecap="round" fill="none"/>
 
           <!-- Module Name Pill Badge -->
           <rect x="-100" y="-12" width="200" height="22" rx="11" fill="#f1f5f9" stroke="#e2e8f0"/>
@@ -5461,7 +5461,7 @@ endmodule`
     const GATE_ISSUES_RELOCATION_MAP = {
       pip_ex_stage: {
         issue: {
-          badge: "HOTSPOT STAGE 🔥",
+          badge: "HOTSPOT STAGE",
           title: "Peak M2 Wire Track Saturation (50.8%)",
           desc: "64 parallel XOR gates & arithmetic carry cells clustered across 4 standard cell rows cause severe horizontal track saturation. Two 4:1 forwarding multiplexers add 128+ cross-stage nets directly into ALU input pins.",
           bottleneck: "Metal 2 Horizontal (M1→M2 Overflows)",
@@ -5505,7 +5505,7 @@ endmodule`
       },
       pip_hazard: {
         issue: {
-          badge: "LONG NET BOTTLENECK ⚠️",
+          badge: "LONG NET BOTTLENECK",
           title: "Multi-Stage Control Fan-out Track Consumption",
           desc: "Hazard stall/flush signals fan out across 3 pipeline stages (IF, ID, EX) across 192 load pins. High fan-out nets cause horizontal M2 track blockage and require buffer insertion.",
           bottleneck: "Metal 2 / Metal 3 Span",
@@ -5549,7 +5549,7 @@ endmodule`
       },
       pip_regfile: {
         issue: {
-          badge: "PIN CONGESTION HOTSPOT ⚠️",
+          badge: "PIN CONGESTION HOTSPOT",
           title: "Dual-Port Bitline Track Competition (44.6%)",
           desc: "32×32-bit register array has 64 read bitlines and 32 write bitlines running vertically on Metal 3. Dense pin layout creates severe routing channel congestion at read port multiplexers.",
           bottleneck: "Metal 3 Vertical Bitlines",
@@ -5593,7 +5593,7 @@ endmodule`
       },
       pip_wb_stage: {
         issue: {
-          badge: "LONG FEEDBACK LOOP ⚠️",
+          badge: "LONG FEEDBACK LOOP",
           title: "Cross-Chip Writeback Bus Traversal",
           desc: "32-bit writeback data and 5-bit rd address must route from the far-right WB stage all the way back to the far-left Register File, crossing 4 pipeline stages.",
           bottleneck: "Metal 3 Long Return Tracks",
@@ -5637,7 +5637,7 @@ endmodule`
       },
       pip_mem_stage: {
         issue: {
-          badge: "SRAM MACRO BLOCKAGE ⚠️",
+          badge: "SRAM MACRO BLOCKAGE",
           title: "Memory Routing Halo Blockage (42.1%)",
           desc: "Data memory macro imposes large placement blockage on lower metal layers (M1-M3). Interconnect routes are forced into narrow routing corridors along macro boundaries.",
           bottleneck: "Metal 2 Channel Pinches",
@@ -5681,7 +5681,7 @@ endmodule`
       },
       pip_imem: {
         issue: {
-          badge: "CLOCK & FETCH TREE ⚠️",
+          badge: "CLOCK & FETCH TREE",
           title: "Instruction Fetch Bus & Clock Tree Load",
           desc: "32-bit instruction bus feeds IF/ID pipeline registers. Program counter adder requires branch target loop closure from EX stage.",
           bottleneck: "Metal 2 Horizontal Feeders",
@@ -5725,7 +5725,7 @@ endmodule`
       },
       pip_fwd_a: {
         issue: {
-          badge: "CROSS-STAGE BYPASS ⚡",
+          badge: "CROSS-STAGE BYPASS",
           title: "4:1 Multiplexer Pin Congestion & Long Feeds",
           desc: "Receives 32-bit inputs from ID/EX, EX/MEM, and MEM/WB. Wires converge from across the chip directly into the ALU input pins, jamming horizontal tracks.",
           bottleneck: "Metal 2 Inter-Stage Feeders",
@@ -5803,7 +5803,7 @@ endmodule`
       if (isWire) {
         return {
           issue: {
-            badge: "NET ROUTING TRACK ⚡",
+            badge: "NET ROUTING TRACK",
             title: `Interconnect Net (${cleanKey || gateKey}) Track Demand`,
             desc: `This signal net spans standard cell routing channels. In high-density regions, parallel routing causes capacitive crosstalk and local track saturation.`,
             bottleneck: "Metal 2 / Metal 3 Channel",
@@ -5852,7 +5852,7 @@ endmodule`
 
       return {
         issue: {
-          badge: "LOGIC GATE CELL ℹ️",
+          badge: "LOGIC GATE CELL",
           title: `Standard Cell Placement (${cleanKey || gateKey})`,
           desc: `Cell placed in standard cell row with pin connections on local Metal 1 and Metal 2. Pin access requires clear vertical routing tracks.`,
           bottleneck: "Metal 1 Local / Metal 2 Channel",
@@ -6387,16 +6387,16 @@ endmodule`
       if (!hud) return;
       const ms = Math.max(0, Math.floor(simTimeMs || 0));
       if (currentModule === "dff_master_slave.sv") {
-        hud.textContent = `d=${pinState.dff_d} | clk=${pinState.dff_clk} | qm=${pinState.dff_qm} | Q=${pinState.dff_q} | Q̄=${pinState.dff_nq} | ⏱ Time: ${ms} ms`;
+        hud.textContent = `d=${pinState.dff_d} | clk=${pinState.dff_clk} | qm=${pinState.dff_qm} | Q=${pinState.dff_q} | Q̄=${pinState.dff_nq} | Time: ${ms} ms`;
       } else if (currentModule === "sr_latch.sv") {
-        hud.textContent = `s=${pinState.s || 0} | r=${pinState.r || 0} | Q=${pinState.q !== undefined ? pinState.q : 0} | Q̄=${pinState.nq !== undefined ? pinState.nq : 1} | ⏱ Time: ${ms} ms`;
+        hud.textContent = `s=${pinState.s || 0} | r=${pinState.r || 0} | Q=${pinState.q !== undefined ? pinState.q : 0} | Q̄=${pinState.nq !== undefined ? pinState.nq : 1} | Time: ${ms} ms`;
       } else if (currentModule === "sr_neg_gate.sv") {
-        hud.textContent = `ns=${pinState.ns} | nr=${pinState.nr} | Q=${pinState.q} | Q̄=${pinState.nq} | ⏱ Time: ${ms} ms`;
+        hud.textContent = `ns=${pinState.ns} | nr=${pinState.nr} | Q=${pinState.q} | Q̄=${pinState.nq} | Time: ${ms} ms`;
       } else if (currentModule === "fulladder.sv") {
         const sum = pinState.fa_a ^ pinState.fa_b ^ pinState.fa_cin;
-        hud.textContent = `A=${pinState.fa_a} | B=${pinState.fa_b} | Cin=${pinState.fa_cin} | Sum=${sum} | ⏱ Time: ${ms} ms`;
+        hud.textContent = `A=${pinState.fa_a} | B=${pinState.fa_b} | Cin=${pinState.fa_cin} | Sum=${sum} | Time: ${ms} ms`;
       } else {
-        hud.textContent = `clk=${simClock} | pc=0x${(pinState.pc_val||0).toString(16).padStart(8,'0')} | instr=ADD | alu_out=0x00000008 | Cout=0 | ⏱ Time: ${ms} ms`;
+        hud.textContent = `clk=${simClock} | pc=0x${(pinState.pc_val||0).toString(16).padStart(8,'0')} | instr=ADD | alu_out=0x00000008 | Cout=0 | Time: ${ms} ms`;
       }
     }
 
