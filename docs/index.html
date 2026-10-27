@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261027-v8.16';
+      const BUILD_VER = '20261027-v8.17';
       const stored = localStorage.getItem('rv32i_build_ver');
       if (stored !== BUILD_VER) {
         localStorage.setItem('rv32i_build_ver', BUILD_VER);
@@ -83,7 +83,7 @@
     .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
     .box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02); transition: 0.2s; }
     .box:focus-within, .box:hover { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12); background: #ffffff; }
-    .box label { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-weight: 800; color: #4a5568; text-transform: uppercase; letter-spacing: 0.3px; }
+    .box label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.3px; }
     .layer-tag { font-size: 9px; color: #7c3aed; font-weight: 700; margin-top: 2px; }
     .badge { background: #edf2f7; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; }
     input[type="number"] { width: 100%; background: transparent; border: none; color: #1a202c; font-size: 18px; font-weight: 800; margin-top: 8px; outline: none; font-family: inherit; }
@@ -109,7 +109,7 @@
     .sidebar-subtitle { color: #718096; font-size: 13px; margin-bottom: 28px; line-height: 1.5; }
     .section-label { color: #7c3aed; font-size: 11px; font-weight: 800; text-transform: uppercase; margin: 32px 0 12px 0; letter-spacing: 0.5px; }
     .input-box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
-    .input-box label { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #4a5568; margin-bottom: 6px; text-transform: uppercase; }
+    .input-box label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: #475569; margin-bottom: 6px; text-transform: uppercase; }
     .input-box .val { color: #1a202c; font-size: 16px; font-weight: 800; }
 
     /* Digital Logic Gate Schematic Styling (DigitalJS-inspired) */
@@ -372,7 +372,7 @@
         <div class="card" style="height: 100%; margin-bottom: 0; padding: 12px 16px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
           <div class="card-header" style="margin-bottom: 10px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <div class="card-title" style="font-size: 11.5px; font-weight: 800; color: #7c3aed; margin: 0;">1. Floorplan Geometry &amp; Density Parameters</div>
+              <div class="card-title" style="font-size: 13.5px; font-weight: 800; color: #7c3aed; margin: 0;">1. Floorplan Geometry &amp; Density Parameters</div>
             </div>
             <span style="font-size: 10px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 7px; border-radius: 4px;">SkyWater 130nm PDK</span>
           </div>
@@ -382,8 +382,8 @@
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; flex: 1; min-height: 0; align-items: stretch;">
               <!-- UTIL -->
               <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                  UTIL <span class="badge" style="font-size: 8px; padding: 2px 5px;">%</span>
+                <label style="font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569; letter-spacing: 0.3px;">
+                  UTIL <span class="badge" style="font-size: 10px; padding: 2px 6px;">%</span>
                 </label>
                 <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                   <input type="number" id="inp_util" name="utilization" value="57.0" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
@@ -399,8 +399,8 @@
 
               <!-- ASPECT RATIO -->
               <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                  ASPECT <span class="badge" style="font-size: 8px; padding: 2px 5px;">RATIO</span>
+                <label style="font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569; letter-spacing: 0.3px;">
+                  ASPECT <span class="badge" style="font-size: 10px; padding: 2px 6px;">RATIO</span>
                 </label>
                 <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                   <input type="number" id="inp_aspect" name="aspect_ratio" value="1.5" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
@@ -416,8 +416,8 @@
 
               <!-- MARGIN -->
               <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                  MARGIN <span class="badge" style="font-size: 8px; padding: 2px 5px;">MM</span>
+                <label style="font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569; letter-spacing: 0.3px;">
+                  MARGIN <span class="badge" style="font-size: 10px; padding: 2px 6px;">MM</span>
                 </label>
                 <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                   <input type="number" id="inp_margin" name="core_margin" value="3.0" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
@@ -436,8 +436,8 @@
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; flex: 1; min-height: 0; align-items: stretch;">
               <!-- DENSITY -->
               <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                  DENSITY <span class="badge" style="font-size: 8px; padding: 2px 5px;">0-1</span>
+                <label style="font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569; letter-spacing: 0.3px;">
+                  DENSITY <span class="badge" style="font-size: 10px; padding: 2px 6px;">0-1</span>
                 </label>
                 <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                   <input type="number" id="inp_density" name="density" value="0.56" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
@@ -453,8 +453,8 @@
 
               <!-- LAYER ADJ -->
               <div class="box" style="padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-                <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">
-                  LAYER ADJ <span class="badge" style="font-size: 8px; padding: 2px 5px;">0-1</span>
+                <label style="font-size: 13.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569; letter-spacing: 0.3px;">
+                  LAYER ADJ <span class="badge" style="font-size: 10px; padding: 2px 6px;">0-1</span>
                 </label>
                 <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                   <input type="number" id="inp_layer_adj" name="layer_adjustment" value="0.6" step="any" oninput="updateLiveStats()" style="font-size: 19px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
@@ -474,77 +474,77 @@
         <div class="card" style="height: 100%; margin-bottom: 0; padding: 12px 16px; border-radius: 12px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box;">
           <div class="card-header" style="margin-bottom: 10px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <div class="card-title" style="font-size: 11.5px; font-weight: 800; color: #7c3aed; margin: 0;">2. Silicon Metal Stack Capacity (M1 → M10)</div>
+              <div class="card-title" style="font-size: 13.5px; font-weight: 800; color: #7c3aed; margin: 0;">2. Silicon Metal Stack Capacity (M1 → M10)</div>
             </div>
             <span style="font-size: 10px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 7px; border-radius: 4px;">10 Routing Metal Layers</span>
           </div>
 
           <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px 10px; flex: 1; min-height: 0; align-items: stretch;">
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M1 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M1 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_1" value="0" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M2 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M2 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_2" value="27540" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M3 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M3 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_3" value="37221" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M4 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M4 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_4" value="18450" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M5 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M5 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_5" value="18096" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M6 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M6 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_6" value="18450" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M7 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M7 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_7" value="5699" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M8 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M8 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_8" value="5796" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M9 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M9 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_9" value="2758" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
             </div>
 
             <div class="box" style="padding: 6px 8px; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box;">
-              <label style="font-size: 9px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M10 <span class="badge" style="font-size: 7.5px; padding: 1px 4px;">TRK</span></label>
+              <label style="font-size: 11.5px; display: flex; justify-content: space-between; align-items: center; margin: 0; font-weight: 800; color: #475569;">M10 <span class="badge" style="font-size: 8.5px; padding: 1.5px 5px;">TRK</span></label>
               <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
                 <input type="number" name="metal_10" value="2772" step="any" oninput="updateLiveStats()" style="font-size: 16px; font-weight: 900; color: #1e1b4b; margin: 0; text-align: center; width: 100%; border: none; outline: none; background: transparent;">
               </div>
@@ -559,7 +559,7 @@
 
         <div class="card-header" style="margin-bottom: 8px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <div class="card-title" style="font-size: 11.5px; font-weight: 800; color: #7c3aed; margin: 0;">3. Verilog HDL Processor Hardware Description</div>
+            <div class="card-title" style="font-size: 13.5px; font-weight: 800; color: #7c3aed; margin: 0;">3. Verilog HDL Processor Hardware Description</div>
           </div>
           <span style="font-size: 10px; color: #7c3aed; font-weight: 700; background: #f3e8ff; padding: 2px 7px; border-radius: 4px;">Synthesizable RTL</span>
         </div>
