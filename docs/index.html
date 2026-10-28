@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261028-v8.28';
+      const BUILD_VER = '20261028-v8.29';
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('v') !== BUILD_VER) {
         urlParams.set('v', BUILD_VER);
@@ -1252,7 +1252,7 @@ endmodule`
       <h2 style="display:inline; margin-left: 14px; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; color: #1a202c;">CONGESTION PREDICTOR</h2>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-      <button id="btnToggleSchematic" class="btn-3d" onclick="toggleSchematicView()">Logic Gate Schematic</button>
+      <button id="btnToggleSchematic" class="btn-3d" style="display: none;" onclick="toggleSchematicView()">Logic Gate Schematic</button>
     </div>
   </div>
 
@@ -1592,7 +1592,7 @@ endmodule`
         </div>
       </div>
 
-<div id="panelSchematic" style="margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); background: #ffffff;">
+<div id="panelSchematic" style="display: none; margin-bottom: 24px; border-radius: 8px; overflow: hidden; border: 1px solid #dee2e6; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06); background: #ffffff;">
 
         <!-- 1. DIGITALJS SIGNATURE TOOLBAR (Exact replica of digitaljs.tilk.eu / Screenshot 2) -->
         <div id="toolbar" style="width: 100%; box-sizing: border-box; border-bottom: 5px solid #eee; padding: 4px 10px; background: #ffffff;">
@@ -2395,16 +2395,25 @@ endmodule`
 
       // 9. DigitalJS Module sync
       const userCode = document.getElementById('hdlCodeTextarea')?.value;
+      const schematicPanel = document.getElementById('panelSchematic');
+      const schematicToggleBtn = document.getElementById('btnToggleSchematic');
+
       if (userCode && userCode.trim().length > 0) {
         const trimmed = userCode.trim();
         if (!isRv32iRelatedCode(trimmed)) {
           // Reject non-RV32I HDL code: DO NOT synthesize or generate netlist
           window.userSubmittedCode = "";
+          if (schematicPanel) schematicPanel.style.display = 'none';
+          if (schematicToggleBtn) schematicToggleBtn.style.display = 'none';
           if (typeof renderErrorCircuitState === 'function') {
             renderErrorCircuitState("Only RV32I-related HDL code is supported");
           }
           return;
         }
+
+        // RTL code is uploaded and valid RV32I: show schematic workbench and toggle button
+        if (schematicPanel) schematicPanel.style.display = 'block';
+        if (schematicToggleBtn) schematicToggleBtn.style.display = 'inline-flex';
 
         let targetModule = 'user_design.sv';
         if (typeof parseVerilogCode === 'function') {
@@ -2423,8 +2432,10 @@ endmodule`
           djsSelectModule(targetModule);
         }
       } else {
-        // User inputted NO code: keep Page 2 empty!
+        // User inputted NO code: keep schematic workbench completely hidden
         window.userSubmittedCode = "";
+        if (schematicPanel) schematicPanel.style.display = 'none';
+        if (schematicToggleBtn) schematicToggleBtn.style.display = 'none';
         if (typeof djsSelectModule === 'function') {
           djsSelectModule("empty_design.sv");
         }
@@ -6701,18 +6712,31 @@ endmodule`
     // Initialize DigitalJS Workbench & Layer Routing Density Heatmaps on Load
     window.addEventListener("DOMContentLoaded", () => {
       drawAllLayerHeatmaps();
-      if (userSubmittedCode && userSubmittedCode.trim().length > 0) {
-        if (!isRv32iRelatedCode(userSubmittedCode)) {
+      const userCodeInput = document.getElementById('hdlCodeTextarea')?.value;
+      const initialCode = (typeof userSubmittedCode !== 'undefined' && userSubmittedCode && userSubmittedCode.trim().length > 0)
+        ? userSubmittedCode
+        : (userCodeInput || "");
+      const schematicPanel = document.getElementById('panelSchematic');
+      const schematicToggleBtn = document.getElementById('btnToggleSchematic');
+
+      if (initialCode && initialCode.trim().length > 0) {
+        if (!isRv32iRelatedCode(initialCode)) {
+          if (schematicPanel) schematicPanel.style.display = 'none';
+          if (schematicToggleBtn) schematicToggleBtn.style.display = 'none';
           currentModule = "empty_design.sv";
           renderErrorCircuitState("Only RV32I-related HDL code is supported");
         } else {
-          const parsed = parseVerilogCode(userSubmittedCode);
+          if (schematicPanel) schematicPanel.style.display = 'block';
+          if (schematicToggleBtn) schematicToggleBtn.style.display = 'inline-flex';
+          const parsed = parseVerilogCode(initialCode);
           const moduleFileName = (parsed.moduleName ? parsed.moduleName : "user_design") + ".sv";
-          HDL_PRESETS[moduleFileName] = userSubmittedCode;
+          HDL_PRESETS[moduleFileName] = initialCode;
           currentModule = moduleFileName;
           djsSelectModule(currentModule);
         }
       } else {
+        if (schematicPanel) schematicPanel.style.display = 'none';
+        if (schematicToggleBtn) schematicToggleBtn.style.display = 'none';
         currentModule = "empty_design.sv";
         djsSelectModule(currentModule);
       }
