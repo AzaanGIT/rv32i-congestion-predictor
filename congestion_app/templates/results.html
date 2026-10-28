@@ -559,6 +559,17 @@
               </button>
             </div>
 
+            <!-- Schematic Engine Switcher (Gate Netlist vs DigitalJS Live) -->
+            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Engine mode" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #ced4da;">
+              <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="Native SVG Gate-Level Netlist (NanGate 45nm Congestion View)" style="background: #0d6efd; color: #ffffff; border: none; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #ced4da; display: inline-flex; align-items: center; gap: 4px;">
+                <span>Gate Netlist</span>
+              </button>
+              <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="DigitalJS Live JointJS Simulator Engine" style="background: #ffffff; color: #495057; border: none; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                <span>DigitalJS Live</span>
+              </button>
+            </div>
+
+
           </div>
         </div>
 
@@ -2701,357 +2712,334 @@ endmodule`
       `;
     }
 
-    // (E) 5-Stage Pipelined RV32I Processor Gate-Level Circuit (DigitalJS Synthesis Quality)
-    function renderPipelinedRV32ICircuit() {
-      const p = nodePos;
-      
-      // Default positions for pipeline elements
-      p.pip_in_clk    = p.pip_in_clk    || { x: 25, y: 120 };
-      p.pip_in_rst    = p.pip_in_rst    || { x: 25, y: 210 };
-      p.pip_if_stage  = p.pip_if_stage  || { x: 105, y: 80 };
-      p.pip_ifid_reg  = p.pip_ifid_reg  || { x: 345, y: 100 };
-      p.pip_id_stage  = p.pip_id_stage  || { x: 445, y: 80 };
-      p.pip_idex_reg  = p.pip_idex_reg  || { x: 695, y: 100 };
-      p.pip_ex_stage  = p.pip_ex_stage  || { x: 795, y: 70 };
-      p.pip_exmem_reg = p.pip_exmem_reg || { x: 1085, y: 100 };
-      p.pip_mem_stage = p.pip_mem_stage || { x: 1185, y: 80 };
-      p.pip_memwb_reg = p.pip_memwb_reg || { x: 1395, y: 100 };
-      p.pip_wb_stage  = p.pip_wb_stage  || { x: 1495, y: 80 };
-      
-      // Stage dimensions based on expand/collapse states
-      const ifW = expandedBlocks.pip_if ? 270 : 190;
-      const ifH = expandedBlocks.pip_if ? 360 : 210;
-      const idW = expandedBlocks.pip_id ? 280 : 200;
-      const idH = expandedBlocks.pip_id ? 380 : 220;
-      const exW = expandedBlocks.pip_ex ? 330 : 240;
-      const exH = expandedBlocks.pip_ex ? 420 : 260;
-      const memW = expandedBlocks.pip_mem ? 240 : 170;
-      const memH = expandedBlocks.pip_mem ? 360 : 210;
-      const wbW = expandedBlocks.pip_wb ? 220 : 160;
-      const wbH = expandedBlocks.pip_wb ? 340 : 210;
-
-      const clkHigh = (simClock === 1);
-      const rstHigh = (pinState.rv_reset !== undefined ? pinState.rv_reset === 1 : true);
-      const pcHex = "0x" + (pinState.pc_val || 0).toString(16).padStart(8, '0');
-      const aluHex = "0x" + (pinState.alu_out || 8).toString(16).padStart(8, '0');
-
-      // ── STAGE 1 (IF) Inner SVG ──────────────────────────────────────────
-      const ifInner = expandedBlocks.pip_if ? `
-        <rect width="250" height="320" fill="#f8fafc" rx="4" stroke="#0284c7" stroke-width="1.2"/>
-        <text x="10" y="16" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">STAGE 1: FETCH LOGIC</text>
-        ${svgDigitalJsMuxTrapezoid("pip_pc_mux", 15, 35, "PC_MUX", 32, 50, false, [24])}
-        <g transform="translate(65, 35)">
-          <rect width="70" height="50" rx="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.5"/>
-          <text x="35" y="18" fill="#0f172a" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle">PC_REG</text>
-          <text x="35" y="32" fill="#0284c7" font-size="8" font-family="monospace" text-anchor="middle">/32 DFF</text>
-          <path d="M 0 38 L 6 43 L 0 48 Z" fill="none" stroke="#1e293b" stroke-width="1.2"/>
-        </g>
-        <g transform="translate(155, 35)">
-          <rect width="75" height="50" rx="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.5"/>
-          <text x="37" y="18" fill="#0f172a" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle">ADD_4</text>
-          <text x="37" y="32" fill="#64748b" font-size="7.5" font-family="monospace" text-anchor="middle">pc + 32'd4</text>
-        </g>
-        <!-- Instruction Memory Subcircuit Block -->
-        <g id="elem-pip_imem" class="comp-box" transform="translate(15, 110)" style="cursor: pointer;"
-           onclick="selectGate('pip_imem')" onmouseenter="highlightCodeLines([118,119,120,121])" onmouseleave="clearCodeHighlight()">
-          <rect width="220" height="120" rx="4" fill="#ffffff" stroke="#0284c7" stroke-width="1.6"/>
-          <rect width="220" height="20" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.2"/>
-          <text x="10" y="14" fill="#0369a1" font-size="9" font-family="monospace" font-weight="bold">u_imem: instruction_memory</text>
-          <text x="10" y="42" fill="#475569" font-size="8" font-family="monospace">addr[31:0]  → rom[pc[7:2]]</text>
-          <text x="10" y="62" fill="#0284c7" font-size="8.5" font-family="monospace" font-weight="bold">instr[31:0] = 0x00000013 (NOP)</text>
-          <text x="10" y="82" fill="#64748b" font-size="7.5" font-family="monospace">Word aligned: addr[1:0] ignored</text>
-          <text x="10" y="102" fill="#16a34a" font-size="8" font-family="monospace">ROM Array Size: 64 words (256 B)</text>
-        </g>
-        <text x="10" y="250" fill="#334155" font-size="8.5" font-family="monospace">PC: ${pcHex}</text>
-      ` : `
-        <rect width="170" height="170" fill="#f8fafc" rx="4" stroke="#0284c7" stroke-width="1.2"/>
-        <text x="10" y="18" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">INSTRUCTION FETCH</text>
-        <text x="10" y="38" fill="#334155" font-size="8" font-family="monospace">• PC Reg [31:0] (32 DFFs)</text>
-        <text x="10" y="55" fill="#334155" font-size="8" font-family="monospace">• PC+4 Adder</text>
-        <text x="10" y="72" fill="#334155" font-size="8" font-family="monospace">• Branch Target MUX (2:1)</text>
-        <text x="10" y="89" fill="#0369a1" font-size="8" font-family="monospace" font-weight="bold">• u_imem (ROM 64x32)</text>
-        <rect x="8" y="105" width="154" height="40" rx="3" fill="#ffffff" stroke="#cbd5e1"/>
-        <text x="14" y="120" fill="#64748b" font-size="7.5" font-family="monospace">CURRENT PC:</text>
-        <text x="14" y="136" fill="#0f172a" font-size="10" font-family="monospace" font-weight="bold">${pcHex}</text>
-      `;
-
-      // ── STAGE 2 (ID) Inner SVG ──────────────────────────────────────────
-      const idInner = expandedBlocks.pip_id ? `
-        <rect width="260" height="340" fill="#f8fafc" rx="4" stroke="#7c3aed" stroke-width="1.2"/>
-        <text x="10" y="16" fill="#7c3aed" font-size="9" font-family="monospace" font-weight="bold">STAGE 2: DECODE &amp; REGFILE</text>
-        <!-- Decoder Gates -->
-        <g transform="translate(10, 28)">
-          <text x="0" y="10" fill="#6d28d9" font-size="8" font-family="monospace" font-weight="bold">OPCODE DECODER MATRIX</text>
-          ${svgAndGate(5, 18, "dec_and_r", "R-TYPE (0x33)", false, [32, 193])}
-          ${svgAndGate(85, 18, "dec_and_i", "I-TYPE (0x13)", false, [198])}
-          ${svgAndGate(165, 18, "dec_and_br", "BRANCH (0x63)", false, [218])}
-        </g>
-        <!-- Register File Subcircuit -->
-        <g id="elem-pip_regfile" class="comp-box" transform="translate(10, 110)" style="cursor: pointer;"
-           onclick="selectGate('pip_regfile')" onmouseenter="highlightCodeLines([128,129,130,131,132,133,134,135,136,137])" onmouseleave="clearCodeHighlight()">
-          <rect width="240" height="110" rx="4" fill="#ffffff" stroke="#d97706" stroke-width="1.6"/>
-          <rect width="240" height="20" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
-          <text x="10" y="14" fill="#b45309" font-size="9" font-family="monospace" font-weight="bold">u_regfile: 32x32 Dual-Port RF</text>
-          <text x="10" y="42" fill="#475569" font-size="8" font-family="monospace">rs1[4:0] → rs1_data[31:0]</text>
-          <text x="10" y="60" fill="#475569" font-size="8" font-family="monospace">rs2[4:0] → rs2_data[31:0]</text>
-          <text x="10" y="78" fill="#d97706" font-size="8" font-family="monospace">rd[4:0] &amp; write_data[31:0] (from WB)</text>
-          <text x="10" y="96" fill="#16a34a" font-size="7.5" font-family="monospace">32 General Registers (x0 hardwired to 0)</text>
-        </g>
-        <!-- Immediate Generator & Hazard Unit -->
-        <g transform="translate(10, 230)">
-          <rect width="115" height="60" rx="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.2"/>
-          <text x="6" y="14" fill="#0f172a" font-size="8" font-family="monospace" font-weight="bold">IMM GENERATOR</text>
-          <text x="6" y="30" fill="#64748b" font-size="7.5" font-family="monospace">I, S, B, U, J types</text>
-          <text x="6" y="46" fill="#0284c7" font-size="7.5" font-family="monospace">Sign ext to 32b</text>
-        </g>
-        <g id="elem-pip_hazard" class="comp-box" transform="translate(135, 230)" style="cursor: pointer;"
-           onclick="selectGate('pip_hazard')" onmouseenter="highlightCodeLines([109,110,111,268])" onmouseleave="clearCodeHighlight()">
-          <rect width="115" height="60" rx="3" fill="#fff1f2" stroke="#e11d48" stroke-width="1.4"/>
-          <text x="6" y="14" fill="#be123c" font-size="8" font-family="monospace" font-weight="bold">HAZARD UNIT</text>
-          <text x="6" y="30" fill="#be123c" font-size="7.5" font-family="monospace">load_use_stall: [0]</text>
-          <text x="6" y="46" fill="#64748b" font-size="7.5" font-family="monospace">Stalls IF, bubbles ID</text>
-        </g>
-      ` : `
-        <rect width="180" height="180" fill="#f8fafc" rx="4" stroke="#7c3aed" stroke-width="1.2"/>
-        <text x="10" y="18" fill="#7c3aed" font-size="9" font-family="monospace" font-weight="bold">INSTRUCTION DECODE</text>
-        <text x="10" y="38" fill="#334155" font-size="8" font-family="monospace">• Opcode Slicer [6:0]</text>
-        <text x="10" y="55" fill="#334155" font-size="8" font-family="monospace">• Funct3 [14:12], Funct7</text>
-        <text x="10" y="72" fill="#b45309" font-size="8" font-family="monospace" font-weight="bold">• u_regfile (32x32 DFFs)</text>
-        <text x="10" y="89" fill="#334155" font-size="8" font-family="monospace">• Immediate Generator</text>
-        <text x="10" y="106" fill="#be123c" font-size="8" font-family="monospace">• Load-Use Hazard Unit</text>
-        <rect x="8" y="120" width="164" height="42" rx="3" fill="#ffffff" stroke="#cbd5e1"/>
-        <text x="12" y="136" fill="#64748b" font-size="7.5" font-family="monospace">DECODED REGS:</text>
-        <text x="12" y="152" fill="#7c3aed" font-size="9" font-family="monospace" font-weight="bold">rs1=x5 | rs2=x3 | rd=x1</text>
-      `;
-
-      // ── STAGE 3 (EX - CONGESTION HOTSPOT) Inner SVG ────────────────────
-      const exInner = expandedBlocks.pip_ex ? `
-        <rect width="310" height="380" fill="#fff5f5" rx="4" stroke="#ef4444" stroke-width="1.8"/>
-        <text x="10" y="16" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">STAGE 3: EX [CONGESTION HOTSPOT]</text>
-        <text x="10" y="30" fill="#ef4444" font-size="7.5" font-family="monospace">Causes peak {{ peak_layer }} ({{ peak_val_pct }}%) track saturation</text>
-        <!-- Forwarding Muxes -->
-        <g transform="translate(10, 40)">
-          <text x="0" y="10" fill="#b91c1c" font-size="8" font-family="monospace" font-weight="bold">FORWARDING MUXES</text>
-          ${svgDigitalJsMuxTrapezoid("pip_fwd_a", 5, 18, "FWD_A", 32, 55, true, [74, 275])}
-          <text x="5" y="85" fill="#64748b" font-size="7" font-family="monospace">rs1 fwd</text>
-          ${svgDigitalJsMuxTrapezoid("pip_fwd_b", 55, 18, "FWD_B", 32, 55, true, [75, 287])}
-          <text x="55" y="85" fill="#64748b" font-size="7" font-family="monospace">rs2 fwd</text>
-          ${svgDigitalJsMuxTrapezoid("pip_alusrc_mux", 110, 18, "ALUSRC", 30, 55, false, [76, 295])}
-          <text x="110" y="85" fill="#64748b" font-size="7" font-family="monospace">imm/rs2</text>
-        </g>
-        <!-- 32-Bit ALU Gate Hotspot -->
-        <g id="elem-pip_alu" class="comp-box" transform="translate(10, 140)" style="cursor: pointer;"
-           onclick="selectGate('pip_alu')" onmouseenter="highlightCodeLines([77,302,304])" onmouseleave="clearCodeHighlight()">
-          <rect width="290" height="150" rx="4" fill="#ffffff" stroke="#ef4444" stroke-width="2"/>
-          <rect width="290" height="22" rx="4" fill="#fee2e2" stroke="#ef4444" stroke-width="1.2"/>
-          <text x="10" y="15" fill="#991b1b" font-size="9" font-family="monospace" font-weight="bold">32-Bit ALU Gate Cluster (Hotspot)</text>
-          <g transform="translate(10, 30)">
-            ${svgXorGate(5, 5, "alu_xor1", "XOR1 (A⊕B)", true, [77, 322, 344])}
-            ${svgXorGate(95, 5, "alu_xor2", "XOR2 (Sum)", true, [77, 322])}
-            ${svgOrGate(185, 5, "alu_or_cout", "OR_COUT", true, [77])}
-            ${svgAndGate(5, 55, "alu_and_op", "AND (Logic)", false, [77, 316, 338])}
-            ${svgOrGate(95, 55, "alu_or_op", "OR (Logic)", false, [77, 319, 341])}
-            ${svgXorGate(185, 55, "alu_xor_op", "XOR (Logic)", true, [77, 322, 344])}
-          </g>
-        </g>
-        <!-- Branch Target Adder & Comparator -->
-        <g transform="translate(10, 300)">
-          <g id="elem-pip_bta" class="comp-box" style="cursor: pointer;" onclick="selectGate('pip_bta')">
-            <rect width="135" height="42" rx="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.2"/>
-            <text x="6" y="16" fill="#0f172a" font-size="8" font-family="monospace" font-weight="bold">BRANCH TARGET ADDER</text>
-            <text x="6" y="32" fill="#64748b" font-size="7.5" font-family="monospace">pc + b_imm → BTA[31:0]</text>
-          </g>
-          <g id="elem-pip_cmp" class="comp-box" transform="translate(145, 0)" style="cursor: pointer;" onclick="selectGate('pip_cmp')">
-            <rect width="145" height="42" rx="3" fill="#ffffff" stroke="#1e293b" stroke-width="1.2"/>
-            <text x="6" y="16" fill="#0f172a" font-size="8" font-family="monospace" font-weight="bold">BRANCH COMPARATOR</text>
-            <text x="6" y="32" fill="#64748b" font-size="7.5" font-family="monospace">BEQ/BNE: cond = [0]</text>
-          </g>
-        </g>
-        <text x="10" y="365" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">ALU OUT: ${aluHex}</text>
-      ` : `
-        <rect width="220" height="220" fill="#fff5f5" rx="4" stroke="#ef4444" stroke-width="2"/>
-        <text x="10" y="18" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">EXECUTION &amp; ALU</text>
-        <text x="10" y="34" fill="#ef4444" font-size="7.5" font-family="monospace">{{ peak_layer }} Hotspot ({{ peak_val_pct }}% Track Congestion)</text>
-        <text x="10" y="52" fill="#334155" font-size="8" font-family="monospace">• Forwarding MUX A (4:1)</text>
-        <text x="10" y="69" fill="#334155" font-size="8" font-family="monospace">• Forwarding MUX B (4:1)</text>
-        <text x="10" y="86" fill="#334155" font-size="8" font-family="monospace">• ALUSrc Immediate MUX (2:1)</text>
-        <text x="10" y="103" fill="#b91c1c" font-size="8" font-family="monospace" font-weight="bold">• 32-Bit ALU (64 XOR Gates)</text>
-        <text x="10" y="120" fill="#334155" font-size="8" font-family="monospace">• Branch Target Adder (BTA)</text>
-        <text x="10" y="137" fill="#334155" font-size="8" font-family="monospace">• Zero / Branch Comparator</text>
-        <rect x="8" y="152" width="204" height="42" rx="3" fill="#ffffff" stroke="#ef4444"/>
-        <text x="14" y="168" fill="#b91c1c" font-size="7.5" font-family="monospace" font-weight="bold">ALU HOTSPOT RESULT:</text>
-        <text x="14" y="185" fill="#b91c1c" font-size="11" font-family="monospace" font-weight="bold">${aluHex}</text>
-      `;
-
-      // ── STAGE 4 (MEM) Inner SVG ─────────────────────────────────────────
-      const memInner = expandedBlocks.pip_mem ? `
-        <rect width="220" height="320" fill="#f8fafc" rx="4" stroke="#d97706" stroke-width="1.2"/>
-        <text x="10" y="16" fill="#d97706" font-size="9" font-family="monospace" font-weight="bold">STAGE 4: DATA MEMORY</text>
-        <g id="elem-pip_dmem" class="comp-box" transform="translate(10, 35)" style="cursor: pointer;"
-           onclick="selectGate('pip_dmem')" onmouseenter="highlightCodeLines([95,377,378,381])" onmouseleave="clearCodeHighlight()">
-          <rect width="200" height="180" rx="4" fill="#ffffff" stroke="#d97706" stroke-width="1.6"/>
-          <rect width="200" height="20" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
-          <text x="10" y="14" fill="#b45309" font-size="9" font-family="monospace" font-weight="bold">u_dmem: data_memory (RAM)</text>
-          <text x="10" y="45" fill="#475569" font-size="8" font-family="monospace">clk: posedge</text>
-          <text x="10" y="65" fill="#475569" font-size="8" font-family="monospace">mem_read:  [0]</text>
-          <text x="10" y="85" fill="#475569" font-size="8" font-family="monospace">mem_write: [0]</text>
-          <text x="10" y="105" fill="#0284c7" font-size="8" font-family="monospace">addr[31:0]  (from ALU)</text>
-          <text x="10" y="125" fill="#d97706" font-size="8" font-family="monospace">wdata[31:0] (from rs2)</text>
-          <text x="10" y="145" fill="#16a34a" font-size="8" font-family="monospace">rdata[31:0] (to WB)</text>
-          <text x="10" y="165" fill="#64748b" font-size="7" font-family="monospace">256 Words (1 KB Data RAM)</text>
-        </g>
-        <text x="10" y="240" fill="#64748b" font-size="8" font-family="monospace">Memory Access: IDLE</text>
-      ` : `
-        <rect width="150" height="170" fill="#f8fafc" rx="4" stroke="#d97706" stroke-width="1.2"/>
-        <text x="10" y="18" fill="#d97706" font-size="9" font-family="monospace" font-weight="bold">DATA MEMORY</text>
-        <text x="10" y="38" fill="#334155" font-size="8" font-family="monospace">• u_dmem 256x32 RAM</text>
-        <text x="10" y="55" fill="#334155" font-size="8" font-family="monospace">• Address Bus: 32-bit</text>
-        <text x="10" y="72" fill="#334155" font-size="8" font-family="monospace">• Write Data: 32-bit</text>
-        <text x="10" y="89" fill="#334155" font-size="8" font-family="monospace">• Read Data: 32-bit</text>
-        <rect x="8" y="105" width="134" height="40" rx="3" fill="#ffffff" stroke="#cbd5e1"/>
-        <text x="12" y="120" fill="#64748b" font-size="7.5" font-family="monospace">SRAM STATUS:</text>
-        <text x="12" y="136" fill="#16a34a" font-size="9" font-family="monospace" font-weight="bold">READY (No Wait)</text>
-      `;
-
-      // ── STAGE 5 (WB) Inner SVG ──────────────────────────────────────────
-      const wbInner = expandedBlocks.pip_wb ? `
-        <rect width="200" height="300" fill="#f8fafc" rx="4" stroke="#16a34a" stroke-width="1.2"/>
-        <text x="10" y="16" fill="#16a34a" font-size="9" font-family="monospace" font-weight="bold">STAGE 5: WRITE-BACK</text>
-        ${svgDigitalJsMuxTrapezoid("pip_wb_mux", 15, 35, "WB_MUX", 32, 50, false, [106])}
-        <g transform="translate(60, 35)">
-          <text x="0" y="15" fill="#475569" font-size="8" font-family="monospace">0: alu_res</text>
-          <text x="0" y="32" fill="#475569" font-size="8" font-family="monospace">1: rdata</text>
-          <text x="0" y="48" fill="#16a34a" font-size="8" font-family="monospace">sel: memtoreg</text>
-        </g>
-        <g transform="translate(10, 110)">
-          <rect width="180" height="45" rx="3" fill="#ffffff" stroke="#0284c7" stroke-width="1.2"/>
-          <text x="8" y="16" fill="#0284c7" font-size="8" font-family="monospace" font-weight="bold">DEBUG_PC PROBE [31:0]</text>
-          <text x="8" y="34" fill="#0f172a" font-size="10" font-family="monospace" font-weight="bold">${pcHex}</text>
-        </g>
-        <g transform="translate(10, 170)">
-          <rect width="180" height="45" rx="3" fill="#ffffff" stroke="#ef4444" stroke-width="1.2"/>
-          <text x="8" y="16" fill="#b91c1c" font-size="8" font-family="monospace" font-weight="bold">DEBUG_ALU_RESULT [31:0]</text>
-          <text x="8" y="34" fill="#b91c1c" font-size="10" font-family="monospace" font-weight="bold">${aluHex}</text>
-        </g>
-      ` : `
-        <rect width="140" height="170" fill="#f8fafc" rx="4" stroke="#16a34a" stroke-width="1.2"/>
-        <text x="10" y="18" fill="#16a34a" font-size="9" font-family="monospace" font-weight="bold">WRITE-BACK (WB)</text>
-        <text x="10" y="38" fill="#334155" font-size="8" font-family="monospace">• MUX 2:1 (memtoreg)</text>
-        <text x="10" y="55" fill="#334155" font-size="8" font-family="monospace">• debug_pc</text>
-        <text x="10" y="72" fill="#334155" font-size="8" font-family="monospace">• debug_alu_result</text>
-        <rect x="8" y="90" width="124" height="60" rx="3" fill="#ffffff" stroke="#cbd5e1"/>
-        <text x="12" y="106" fill="#64748b" font-size="7" font-family="monospace">WRITE DATA WB:</text>
-        <text x="12" y="122" fill="#16a34a" font-size="10" font-family="monospace" font-weight="bold">${aluHex}</text>
-        <text x="12" y="138" fill="#64748b" font-size="7" font-family="monospace">→ Loop to RegFile</text>
-      `;
-
-      // ── Inter-stage Wires ───────────────────────────────────────────────
-      const wIf_to_ifid   = orthoWirePath(p.pip_if_stage.x + ifW, p.pip_if_stage.y + 60, p.pip_ifid_reg.x, p.pip_ifid_reg.y + 45);
-      const wIfid_to_id   = orthoWirePath(p.pip_ifid_reg.x + 70, p.pip_ifid_reg.y + 45, p.pip_id_stage.x, p.pip_id_stage.y + 60);
-      const wId_to_idex   = orthoWirePath(p.pip_id_stage.x + idW, p.pip_id_stage.y + 60, p.pip_idex_reg.x, p.pip_idex_reg.y + 45);
-      const wIdex_to_ex   = orthoWirePath(p.pip_idex_reg.x + 70, p.pip_idex_reg.y + 45, p.pip_ex_stage.x, p.pip_ex_stage.y + 60);
-      const wEx_to_exmem  = orthoWirePath(p.pip_ex_stage.x + exW, p.pip_ex_stage.y + 60, p.pip_exmem_reg.x, p.pip_exmem_reg.y + 45);
-      const wExmem_to_mem = orthoWirePath(p.pip_exmem_reg.x + 70, p.pip_exmem_reg.y + 45, p.pip_mem_stage.x, p.pip_mem_stage.y + 60);
-      const wMem_to_memwb = orthoWirePath(p.pip_mem_stage.x + memW, p.pip_mem_stage.y + 60, p.pip_memwb_reg.x, p.pip_memwb_reg.y + 45);
-      const wMemwb_to_wb  = orthoWirePath(p.pip_memwb_reg.x + 70, p.pip_memwb_reg.y + 45, p.pip_wb_stage.x, p.pip_wb_stage.y + 60);
-
-      // Long feedback loops
-      // 1. WB to RegFile Write Port
-      const wWb_loop = `M ${p.pip_wb_stage.x + 70} ${p.pip_wb_stage.y + wbH} L ${p.pip_wb_stage.x + 70} 640 L ${p.pip_id_stage.x + 80} 640 L ${p.pip_id_stage.x + 80} ${p.pip_id_stage.y + idH}`;
-      // 2. Branch Target from EX to PC MUX
-      const wBranch_loop = `M ${p.pip_ex_stage.x + 100} ${p.pip_ex_stage.y + exH} L ${p.pip_ex_stage.x + 100} 590 L ${p.pip_if_stage.x + 40} 590 L ${p.pip_if_stage.x + 40} ${p.pip_if_stage.y + ifH}`;
-      // 3. EX Forwarding back to EX
-      const wFwd_loop = `M ${p.pip_exmem_reg.x + 35} ${p.pip_exmem_reg.y + 240} L ${p.pip_exmem_reg.x + 35} 530 L ${p.pip_ex_stage.x + 50} 530 L ${p.pip_ex_stage.x + 50} ${p.pip_ex_stage.y + exH}`;
-
+    // Helper: DigitalJS Adder Block Cell
+    function svgAdderBlock(id, x, y, label, sublabel, lineNums=[]) {
       return `
-        <!-- Top Status Bar & DigitalJS Synthesis Info -->
-        <g font-size="10" font-family="monospace" font-weight="bold">
-          <text x="30" y="24" fill="#0284c7">5-STAGE PIPELINED RV32I PROCESSOR NETLIST (Gate-Level Synthesis Engine)</text>
-          <text x="30" y="42" fill="#64748b">Module: rv32i_pipeline_top | Stages: IF → ID → EX [HOTSPOT] → MEM → WB | Clocked: posedge clk | Click [+] to drill down</text>
+        <g id="elem-${id}" class="djs-gate comp-box" transform="translate(${x}, ${y})" style="cursor: pointer;"
+           onclick="selectGate('${id}')" onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" onmouseleave="clearCodeHighlight()">
+          <rect width="70" height="55" rx="4" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+          <text x="35" y="15" fill="#0f172a" font-size="8" font-family="monospace" font-weight="bold" text-anchor="middle">${label}</text>
+          <circle cx="35" cy="33" r="13" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.2"/>
+          <text x="35" y="38" fill="#0284c7" font-size="16" font-family="monospace" font-weight="bold" text-anchor="middle">+</text>
+          <text x="35" y="51" fill="#64748b" font-size="7" font-family="monospace" text-anchor="middle">${sublabel}</text>
         </g>
-
-        <!-- Wires Container -->
-        <g id="djsWiresGroup">
-          <!-- Forward Dataflow Wires -->
-          ${svgWire("w_if_ifid", wIf_to_ifid, true, true, [20, 21, 23, 26, 27, 28])}
-          ${svgWire("w_ifid_id", wIfid_to_id, true, true, [26, 27, 28, 31, 32, 33, 34])}
-          ${svgWire("w_id_idex", wId_to_idex, true, true, [38, 39, 40, 50, 51, 52, 53, 54])}
-          ${svgWire("w_idex_ex", wIdex_to_ex, true, true, [52, 53, 54, 73, 74, 75, 76])}
-          ${svgWire("w_ex_exmem", wEx_to_exmem, true, true, [77, 84, 85, 86, 87])}
-          ${svgWire("w_exmem_mem", wExmem_to_mem, true, true, [84, 85, 95])}
-          ${svgWire("w_mem_memwb", wMem_to_memwb, true, true, [95, 98, 99, 100, 101])}
-          ${svgWire("w_memwb_wb", wMemwb_to_wb, true, true, [98, 99, 106, 134, 140])}
-          
-          <!-- Long Feedback Loops -->
-          ${svgWire("w_wb_loop", wWb_loop, true, true, [106, 134, 140])}
-          ${svgWire("w_branch_loop", wBranch_loop, false, false, [80, 81, 366])}
-          ${svgWire("w_fwd_loop", wFwd_loop, true, true, [74, 75, 275, 287])}
-        </g>
-
-        <!-- Bus Labels for Feedback Wires -->
-        <g font-size="8" font-family="monospace">
-          <text x="800" y="635" fill="#d97706" font-weight="bold">◀◀ WRITE-BACK BUS: write_data_wb[31:0] (Loops from WB stage back to Register File)</text>
-          <text x="450" y="585" fill="#ef4444" font-weight="bold">◀◀ BRANCH TARGET BUS: branch_target_ex[31:0] (Loops from EX to PC MUX)</text>
-          <text x="890" y="525" fill="#8b5cf6" font-weight="bold">◀ FORWARDING PATH: EX/MEM → Forwarding MUX A/B</text>
-        </g>
-
-        <!-- Inputs: Clock & Reset -->
-        ${svgButtonInput("pip_in_clk", p.pip_in_clk.x, p.pip_in_clk.y, "clk", "clk_val", [12])}
-        ${svgButtonInput("pip_in_rst", p.pip_in_rst.x, p.pip_in_rst.y, "rst_n", "rv_reset", [13])}
-
-        <!-- 1. STAGE 1: IF (INSTRUCTION FETCH) -->
-        ${renderSubcircuitBox(
-          "pip_if_stage", "STAGE 1", "IF", expandedBlocks.pip_if, ifW, ifH, p.pip_if_stage.x, p.pip_if_stage.y, [21, 22, 23, 24, 118, 119, 120, 121],
-          ifInner,
-          [{ name: "clk", y: 40 }, { name: "rst_n", y: 70 }, { name: "branch", y: 100 }],
-          [{ name: "pc", y: 50 }, { name: "instr", y: 80 }]
-        )}
-
-        <!-- 2. PIPELINE REGISTER 1: IF/ID (96 BITS) -->
-        ${svgDigitalJsDffBank("pip_ifid_reg", p.pip_ifid_reg.x, p.pip_ifid_reg.y, "IF/ID REG", "ifid_instr", 96, [27, 28, 29])}
-
-        <!-- 3. STAGE 2: ID (INSTRUCTION DECODE & REGFILE) -->
-        ${renderSubcircuitBox(
-          "pip_id_stage", "STAGE 2", "ID", expandedBlocks.pip_id, idW, idH, p.pip_id_stage.x, p.pip_id_stage.y, [32, 33, 34, 35, 36, 38, 39, 40],
-          idInner,
-          [{ name: "instr", y: 50 }, { name: "wb_data", y: 80 }],
-          [{ name: "rs1_d", y: 50 }, { name: "rs2_d", y: 75 }, { name: "imm", y: 100 }]
-        )}
-
-        <!-- 4. PIPELINE REGISTER 2: ID/EX (175 BITS) -->
-        ${svgDigitalJsDffBank("pip_idex_reg", p.pip_idex_reg.x, p.pip_idex_reg.y, "ID/EX REG", "idex_imm", 175, [51, 52, 53, 54, 55, 57, 58, 59])}
-
-        <!-- 5. STAGE 3: EX (EXECUTE & ALU CONGESTION HOTSPOT) -->
-        ${renderSubcircuitBox(
-          "pip_ex_stage", "STAGE 3", "EX_HOTSPOT", expandedBlocks.pip_ex, exW, exH, p.pip_ex_stage.x, p.pip_ex_stage.y, [74, 75, 76, 77, 80, 81],
-          exInner,
-          [{ name: "A", y: 50 }, { name: "B", y: 75 }, { name: "imm", y: 100 }],
-          [{ name: "alu_res", y: 60 }, { name: "branch", y: 90 }]
-        )}
-
-        <!-- 6. PIPELINE REGISTER 3: EX/MEM (73 BITS) -->
-        ${svgDigitalJsDffBank("pip_exmem_reg", p.pip_exmem_reg.x, p.pip_exmem_reg.y, "EX/MEM REG", "exmem_alu", 73, [84, 85, 86, 87, 89, 90, 91, 92])}
-
-        <!-- 7. STAGE 4: MEM (DATA MEMORY ACCESS) -->
-        ${renderSubcircuitBox(
-          "pip_mem_stage", "STAGE 4", "MEM", expandedBlocks.pip_mem, memW, memH, p.pip_mem_stage.x, p.pip_mem_stage.y, [95, 377, 378, 381],
-          memInner,
-          [{ name: "addr", y: 50 }, { name: "wdata", y: 75 }],
-          [{ name: "rdata", y: 60 }]
-        )}
-
-        <!-- 8. PIPELINE REGISTER 4: MEM/WB (70 BITS) -->
-        ${svgDigitalJsDffBank("pip_memwb_reg", p.pip_memwb_reg.x, p.pip_memwb_reg.y, "MEM/WB REG", "memwb_res", 70, [98, 99, 100, 101, 103, 104])}
-
-        <!-- 9. STAGE 5: WB (WRITE BACK) -->
-        ${renderSubcircuitBox(
-          "pip_wb_stage", "STAGE 5", "WB", expandedBlocks.pip_wb, wbW, wbH, p.pip_wb_stage.x, p.pip_wb_stage.y, [106, 140],
-          wbInner,
-          [{ name: "alu_res", y: 50 }, { name: "rdata", y: 75 }],
-          [{ name: "wb_data", y: 60 }]
-        )}
       `;
     }
+
+    // Helper: DigitalJS Memory Macro Block Cell (ROM / RAM / RegFile)
+    function svgMemoryMacroBlock(id, x, y, label, sublabel, w, h, details=[], lineNums=[]) {
+      let detailsHtml = "";
+      details.forEach((d, i) => {
+        detailsHtml += `<text x="10" y="${38 + i * 16}" fill="${d.color || '#475569'}" font-size="7.5" font-family="monospace">${d.text}</text>`;
+      });
+      return `
+        <g id="elem-${id}" class="djs-gate comp-box" transform="translate(${x}, ${y})" style="cursor: pointer;"
+           onclick="selectGate('${id}')" onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" onmouseleave="clearCodeHighlight()">
+          <rect width="${w}" height="${h}" rx="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
+          <rect width="${w}" height="20" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.2"/>
+          <text x="10" y="14" fill="#0369a1" font-size="8.5" font-family="monospace" font-weight="bold">${label}</text>
+          ${detailsHtml}
+        </g>
+      `;
+    }
+
+    // Helper: DigitalJS Bus Slicer / Splitter Cell
+    function svgBusSplitter(id, x, y, inBusLabel, outputs, lineNums=[]) {
+      let outsHtml = "";
+      outputs.forEach((o, i) => {
+        const oy = y + 16 + i * 22;
+        outsHtml += `
+          <line x1="${x+28}" y1="${oy}" x2="${x+65}" y2="${oy}" stroke="#334155" stroke-width="1.5"/>
+          <text x="${x+70}" y="${oy+3}" fill="#334155" font-size="7.5" font-family="monospace" font-weight="bold">${o.name} [${o.bits}]</text>
+          <line x1="${x+44}" y1="${oy-4}" x2="${x+49}" y2="${oy+4}" stroke="#64748b" stroke-width="1.2"/>
+          <text x="${x+46}" y="${oy-6}" fill="#64748b" font-size="6.5" font-family="monospace">/${o.width}</text>
+        `;
+      });
+      return `
+        <g id="elem-${id}" class="djs-bus-splitter" style="cursor: pointer;"
+           onclick="selectGate('${id}')" onmouseenter="highlightCodeLines(${JSON.stringify(lineNums)})" onmouseleave="clearCodeHighlight()">
+          <line x1="${x}" y1="${y+25}" x2="${x+28}" y2="${y+25}" stroke="#334155" stroke-width="2.5"/>
+          <line x1="${x+12}" y1="${y+21}" x2="${x+17}" y2="${y+29}" stroke="#64748b" stroke-width="1.5"/>
+          <text x="${x+14}" y="${y+17}" fill="#64748b" font-size="7" font-family="monospace">/32</text>
+          <path d="M ${x+28} ${y+10} L ${x+28} ${y + 16 + (outputs.length-1)*22}" stroke="#0f172a" stroke-width="2.5"/>
+          ${outsHtml}
+        </g>
+      `;
+    }
+
+    // (E) 5-Stage Pipelined RV32I Processor Gate-Level Circuit (DigitalJS Synthesis Quality)
+    // (E) 5-Stage Pipelined RV32I Processor Gate-Level Netlist (Authentic DigitalJS ANSI/IEEE Standard)
+    function renderPipelinedRV32ICircuit() {
+      const clkHigh = (simClock === 1);
+      const rstHigh = (pinState.rv_reset !== undefined ? pinState.rv_reset === 1 : true);
+      const pcHex = (pinState.pc_val || 0).toString(16).padStart(8, '0');
+      const aluHex = (pinState.alu_out || 8).toString(16).padStart(8, '0');
+      const clkLineColor = clkHigh ? '#10b981' : '#64748b';
+      const rstLineColor = rstHigh ? '#3b82f6' : '#ef4444';
+
+      return `
+        <!-- Title & Subtitle Banner -->
+        <g font-size="11" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-weight="bold">
+          <text x="30" y="30" fill="#0f172a" font-size="12">RV32I 5-STAGE PIPELINED PROCESSOR | GATE-LEVEL SYNTHESIZED NETLIST</text>
+          <text x="30" y="48" fill="#64748b" font-size="9.5">DigitalJS Logic Topology • NanGate 45nm Library Cells • Active Simulation Clock &amp; Signal State Propagation</text>
+        </g>
+
+        <!-- Stage Background Group Columns -->
+        <!-- Stage 1: IF -->
+        <rect x="40" y="65" width="370" height="455" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="4,4"/>
+        <text x="50" y="82" fill="#0284c7" font-size="9" font-family="monospace" font-weight="bold">STAGE 1: INSTRUCTION FETCH (IF)</text>
+
+        <!-- Pipeline Reg 1: IF/ID -->
+        <rect x="425" y="65" width="75" height="455" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2"/>
+        <text x="462" y="82" fill="#475569" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle">IF/ID</text>
+
+        <!-- Stage 2: ID -->
+        <rect x="515" y="65" width="415" height="455" rx="6" fill="#faf5ff" stroke="#e9d5ff" stroke-width="1.2" stroke-dasharray="4,4"/>
+        <text x="525" y="82" fill="#7c3aed" font-size="9" font-family="monospace" font-weight="bold">STAGE 2: INSTRUCTION DECODE (ID)</text>
+
+        <!-- Pipeline Reg 2: ID/EX -->
+        <rect x="945" y="65" width="75" height="455" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2"/>
+        <text x="982" y="82" fill="#475569" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle">ID/EX</text>
+
+        <!-- Stage 3: EX (Hotspot) -->
+        <rect x="1035" y="65" width="445" height="455" rx="6" fill="#fff5f5" stroke="#fca5a5" stroke-width="1.5" stroke-dasharray="4,4"/>
+        <text x="1045" y="82" fill="#b91c1c" font-size="9" font-family="monospace" font-weight="bold">STAGE 3: EXECUTE (EX) [HOTSPOT AREA]</text>
+
+        <!-- Pipeline Reg 3: EX/MEM -->
+        <rect x="1495" y="65" width="75" height="455" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2"/>
+        <text x="1532" y="82" fill="#475569" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle">EX/MEM</text>
+
+        <!-- Stage 4: MEM -->
+        <rect x="1585" y="65" width="205" height="455" rx="6" fill="#fffbeb" stroke="#fde68a" stroke-width="1.2" stroke-dasharray="4,4"/>
+        <text x="1595" y="82" fill="#d97706" font-size="9" font-family="monospace" font-weight="bold">STAGE 4: MEMORY (MEM)</text>
+
+        <!-- Pipeline Reg 4: MEM/WB -->
+        <rect x="1805" y="65" width="75" height="455" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.2"/>
+        <text x="1842" y="82" fill="#475569" font-size="8.5" font-family="monospace" font-weight="bold" text-anchor="middle">MEM/WB</text>
+
+        <!-- Stage 5: WB -->
+        <rect x="1895" y="65" width="195" height="455" rx="6" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.2" stroke-dasharray="4,4"/>
+        <text x="1905" y="82" fill="#16a34a" font-size="9" font-family="monospace" font-weight="bold">STAGE 5: WRITE-BACK (WB)</text>
+
+        <!-- Outputs Column -->
+        <rect x="2105" y="65" width="155" height="455" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+        <text x="2115" y="82" fill="#0f172a" font-size="9" font-family="monospace" font-weight="bold">OUTPUT PORTS</text>
+
+        <!-- ================= STAGE 1: INSTRUCTION FETCH (IF) ================= -->
+        <!-- Next PC MUX -->
+        ${svgDigitalJsMuxTrapezoid("pip_pc_mux", 55, 195, "PC_MUX", 34, 70, false, [24])}
+
+        <!-- PC Register (32-bit DFF) -->
+        <g id="elem-pip_pc_reg" class="djs-gate comp-box" transform="translate(125, 185)" style="cursor: pointer;"
+           onclick="selectGate('pip_pc_reg')" onmouseenter="highlightCodeLines([21])" onmouseleave="clearCodeHighlight()">
+          <rect width="80" height="90" rx="4" fill="#ffffff" stroke="#1e293b" stroke-width="1.8"/>
+          <rect width="80" height="18" rx="4" fill="#f1f5f9" stroke="#1e293b" stroke-width="1.8"/>
+          <text x="40" y="13" fill="#0f172a" font-size="8" font-family="monospace" font-weight="bold" text-anchor="middle">PC_REG [31:0]</text>
+          <!-- Ports -->
+          <text x="8" y="42" fill="#334155" font-size="8" font-family="monospace" font-weight="bold">D</text>
+          <text x="72" y="42" fill="#334155" font-size="8" font-family="monospace" font-weight="bold" text-anchor="end">Q</text>
+          <!-- Clock Wedge -->
+          <path d="M 0 68 L 6 73 L 0 78 Z" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+          <text x="10" y="75" fill="#64748b" font-size="7" font-family="monospace">CLK</text>
+          <!-- Bit Width Badge -->
+          <rect x="18" y="32" width="44" height="16" rx="3" fill="#e0f2fe" stroke="#0284c7" stroke-width="1"/>
+          <text x="40" y="43" fill="#0284c7" font-size="7.5" font-family="monospace" font-weight="bold" text-anchor="middle">/32 DFF</text>
+          <!-- Live Hex Value -->
+          <text x="40" y="60" fill="#0f172a" font-size="8" font-family="monospace" text-anchor="middle">0x${pcHex}</text>
+        </g>
+
+        <!-- PC+4 Adder -->
+        ${svgAdderBlock("pip_pc_adder", 240, 115, "PC+4 ADD", "pc + 32'd4", [23])}
+
+        <!-- Instruction Memory (IMEM ROM) -->
+        ${svgMemoryMacroBlock("pip_imem", 240, 225, "u_imem: ROM", "64x32 Instruction Memory", 155, 115, [
+          { text: "addr[31:2] ← pc", color: "#475569" },
+          { text: "instr[31:0] output", color: "#0284c7" },
+          { text: "NOP: 0x00000013", color: "#16a34a" },
+          { text: "Hex: 0x00510113", color: "#64748b" },
+          { text: "Word aligned (addr[1:0]=0)", color: "#94a3b8" }
+        ], [118, 119, 120, 121])}
+
+        <!-- IF Local Interconnect Wires -->
+        <path d="M 89 230 L 125 230" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 205 230 L 225 230 L 225 142 L 240 142" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 225 230 L 240 250" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 310 142 L 340 142 L 340 100 L 45 100 L 45 210 L 55 210" stroke="#334155" stroke-width="2" fill="none"/>
+        <circle cx="225" cy="230" r="3.5" fill="#334155"/>
+        <circle cx="340" cy="142" r="3.5" fill="#334155"/>
+
+        <!-- ================= PIPELINE REGISTER 1: IF/ID ================= -->
+        ${svgDigitalJsDffBank("pip_ifid_reg", 432, 110, "IF/ID REG", "ifid_instr", 64, [27, 28, 29])}
+        <path d="M 395 270 L 432 270" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 340 142 L 432 142" stroke="#334155" stroke-width="2.5" fill="none"/>
+
+        <!-- ================= STAGE 2: INSTRUCTION DECODE (ID) ================= -->
+        <!-- Bus Splitter from IF/ID -->
+        ${svgBusSplitter("pip_bus_split", 525, 120, "ifid_instr", [
+          { name: "opcode", bits: "6:0", width: 7 },
+          { name: "rd", bits: "11:7", width: 5 },
+          { name: "funct3", bits: "14:12", width: 3 },
+          { name: "rs1", bits: "19:15", width: 5 },
+          { name: "rs2", bits: "24:20", width: 5 },
+          { name: "funct7", bits: "31:25", width: 7 },
+          { name: "imm", bits: "31:0", width: 32 }
+        ], [31, 32, 33, 34, 35, 36])}
+
+        <!-- Opcode Decoder Logic Gate Matrix (Real Logic Gates) -->
+        <g id="elem-pip_dec_matrix" transform="translate(610, 90)">
+          <rect width="135" height="185" rx="4" fill="#ffffff" stroke="#7c3aed" stroke-width="1.4" stroke-dasharray="3,3"/>
+          <text x="8" y="14" fill="#6d28d9" font-size="7.5" font-family="monospace" font-weight="bold">OPCODE DECODER MATRIX</text>
+          ${svgAndGate(10, 20, "dec_and_r", "R-TYPE", false, [32, 193])}
+          ${svgAndGate(10, 75, "dec_and_i", "I-TYPE", false, [198])}
+          ${svgAndGate(10, 130, "dec_and_lw", "LOAD", false, [203])}
+          ${svgAndGate(75, 20, "dec_and_sw", "STORE", false, [208])}
+          ${svgAndGate(75, 75, "dec_and_br", "BRANCH", false, [218])}
+          ${svgOrGate(75, 130, "dec_or_regw", "REG_W", false, [230])}
+        </g>
+
+        <!-- Dual-Port 32x32 Register File -->
+        ${svgMemoryMacroBlock("pip_regfile", 760, 200, "u_regfile: 32x32 RF", "Dual-Read Single-Write", 155, 135, [
+          { text: "rs1[4:0]  → rdata1[31:0]", color: "#475569" },
+          { text: "rs2[4:0]  → rdata2[31:0]", color: "#475569" },
+          { text: "rd[4:0]   ← wb_rd[4:0]", color: "#d97706" },
+          { text: "wdata[31:0] ← wb_data", color: "#d97706" },
+          { text: "we ← wb_regwrite", color: "#16a34a" },
+          { text: "32 General Regs (x0=0)", color: "#94a3b8" }
+        ], [128, 129, 130, 131, 132, 133, 134, 135, 136, 137])}
+
+        <!-- Immediate Generator -->
+        ${svgAdderBlock("pip_imm_gen", 615, 290, "IMM_GEN", "Sign-Ext 32b", [38, 175])}
+
+        <!-- Load-Use Hazard Unit -->
+        <g id="elem-pip_hazard" class="comp-box" transform="translate(760, 105)" style="cursor: pointer;"
+           onclick="selectGate('pip_hazard')" onmouseenter="highlightCodeLines([109, 110, 268])" onmouseleave="clearCodeHighlight()">
+          <rect width="145" height="60" rx="4" fill="#fff1f2" stroke="#e11d48" stroke-width="1.4"/>
+          <text x="8" y="16" fill="#be123c" font-size="8.5" font-family="monospace" font-weight="bold">HAZARD DETECTION UNIT</text>
+          <text x="8" y="32" fill="#be123c" font-size="7.5" font-family="monospace">load_use_stall = 0</text>
+          <text x="8" y="48" fill="#64748b" font-size="7" font-family="monospace">Stalls IF/ID on MemRead Hazard</text>
+        </g>
+
+        <!-- ================= PIPELINE REGISTER 2: ID/EX ================= -->
+        ${svgDigitalJsDffBank("pip_idex_reg", 952, 95, "ID/EX REG", "idex_imm", 128, [51, 52, 53, 54, 55, 57, 58, 59])}
+        <path d="M 915 235 L 952 235" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 915 275 L 952 275" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 685 315 L 720 315 L 720 380 L 952 380" stroke="#334155" stroke-width="2" fill="none"/>
+
+        <!-- ================= STAGE 3: EXECUTE & ALU HOTSPOT (EX) ================= -->
+        <!-- Forwarding MUX A -->
+        ${svgDigitalJsMuxTrapezoid("pip_fwd_a", 1048, 170, "FWD_A", 32, 60, true, [74, 275])}
+        <!-- Forwarding MUX B -->
+        ${svgDigitalJsMuxTrapezoid("pip_fwd_b", 1048, 270, "FWD_B", 32, 60, true, [75, 287])}
+        <!-- ALUSrc MUX -->
+        ${svgDigitalJsMuxTrapezoid("pip_alusrc_mux", 1115, 285, "ALUSRC", 30, 55, false, [76, 295])}
+
+        <!-- Branch Target Adder -->
+        ${svgAdderBlock("pip_branch_adder", 1050, 95, "BR_ADD", "pc + imm", [80, 81])}
+
+        <!-- 32-Bit ALU Core Gate Hotspot (NanGate 45nm Library Cells) -->
+        <g id="elem-pip_alu_hotspot">
+          <rect x="1170" y="85" width="245" height="375" rx="6" fill="#ffffff" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3"/>
+          <rect x="1170" y="85" width="245" height="22" rx="6" fill="#fee2e2" stroke="#ef4444" stroke-width="1.2"/>
+          <text x="1178" y="100" fill="#991b1b" font-size="8.5" font-family="monospace" font-weight="bold">32-BIT ALU HOTSPOT (M2: 50.8% TRACKS)</text>
+
+          <!-- Carry Lookahead Full Adder Slice Cells -->
+          ${svgXorGate(1185, 120, "alu_xor1", "XOR1 (A⊕B)", true, [77, 322])}
+          ${svgXorGate(1265, 120, "alu_xor2", "XOR2 (Sum)", true, [77, 322])}
+          ${svgAndGate(1185, 190, "alu_and_cin", "AND1 (Gen)", true, [77, 316])}
+          ${svgOrGate(1265, 190, "alu_or_cout", "OR1 (Cout)", true, [77])}
+
+          <!-- Bitwise Logic Gate Array -->
+          ${svgAndGate(1185, 260, "alu_and_op", "AND32", false, [77, 338])}
+          ${svgOrGate(1265, 260, "alu_or_op", "OR32", false, [77, 341])}
+          ${svgXorGate(1185, 330, "alu_xor_op", "XOR32", false, [77, 344])}
+
+          <!-- ALU Control Decoder -->
+          ${svgAndGate(1265, 330, "alu_dec", "ALU_CTRL", false, [77, 305])}
+
+          <!-- ALU Output Selection 8:1 MUX -->
+          ${svgDigitalJsMuxTrapezoid("pip_alu_mux", 1350, 180, "ALU_MUX", 36, 120, true, [77, 350])}
+
+          <!-- Zero Flag NOR Gate -->
+          ${svgNorGate(1350, 330, "alu_nor_zero", "NOR32", false, [77, 355])}
+        </g>
+
+        <!-- Branch Decision AND Gate -->
+        ${svgAndGate(1355, 90, "pip_branch_and", "BR_DEC", false, [240])}
+
+        <!-- EX Interconnect Wires -->
+        <path d="M 1022 200 L 1048 200" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 1080 200 L 1170 200" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 1080 300 L 1115 300" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 1145 310 L 1170 310" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 1386 240 L 1495 240" stroke="#334155" stroke-width="2.5" fill="none"/>
+
+        <!-- ================= PIPELINE REGISTER 3: EX/MEM ================= -->
+        ${svgDigitalJsDffBank("pip_exmem_reg", 1495, 95, "EX/MEM REG", "exmem_alu", 64, [84, 85, 86, 87, 89, 90, 91, 92])}
+
+        <!-- ================= STAGE 4: MEMORY ACCESS (MEM) ================= -->
+        ${svgMemoryMacroBlock("pip_dmem", 1600, 175, "u_dmem: RAM", "Data Cache (256B)", 165, 125, [
+          { text: "addr[31:0] ← alu_result", color: "#475569" },
+          { text: "wdata[31:0] ← rs2_data", color: "#475569" },
+          { text: "MemRead / MemWrite", color: "#d97706" },
+          { text: "rdata[31:0] output", color: "#0284c7" },
+          { text: "Word aligned (addr[1:0]=0)", color: "#64748b" }
+        ], [95, 377, 378, 381])}
+        <path d="M 1565 240 L 1600 240" stroke="#334155" stroke-width="2.5" fill="none"/>
+
+        <!-- ================= PIPELINE REGISTER 4: MEM/WB ================= -->
+        ${svgDigitalJsDffBank("pip_memwb_reg", 1805, 95, "MEM/WB REG", "memwb_res", 64, [98, 99, 100, 101, 103, 104])}
+        <path d="M 1765 240 L 1805 240" stroke="#334155" stroke-width="2.5" fill="none"/>
+
+        <!-- ================= STAGE 5: WRITE-BACK (WB) ================= -->
+        ${svgDigitalJsMuxTrapezoid("pip_wb_mux", 1920, 195, "WB_MUX", 34, 75, false, [106, 140])}
+        <path d="M 1875 230 L 1920 230" stroke="#334155" stroke-width="2.5" fill="none"/>
+        <path d="M 1954 232 L 2020 232" stroke="#334155" stroke-width="2.5" fill="none"/>
+
+        <!-- ================= OUTPUT PORTS & PADS ================= -->
+        <!-- debug_pc -->
+        <g id="elem-pip_out_pc" class="comp-box" transform="translate(2115, 130)" style="cursor: pointer;"
+           onclick="selectGate('rv_out_pc')" onmouseenter="highlightCodeLines([14])" onmouseleave="clearCodeHighlight()">
+          <rect width="135" height="50" rx="4" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>
+          <text x="10" y="18" fill="#0284c7" font-size="8.5" font-family="monospace" font-weight="bold">debug_pc [31:0]</text>
+          <text x="10" y="38" fill="#0f172a" font-size="11" font-family="monospace" font-weight="bold">0x${pcHex}</text>
+        </g>
+
+        <!-- debug_alu_result -->
+        <g id="elem-pip_out_alu" class="comp-box" transform="translate(2115, 230)" style="cursor: pointer;"
+           onclick="selectGate('rv_out_alu')" onmouseenter="highlightCodeLines([15])" onmouseleave="clearCodeHighlight()">
+          <rect width="135" height="50" rx="4" fill="#fff5f5" stroke="#ef4444" stroke-width="1.8"/>
+          <text x="10" y="18" fill="#b91c1c" font-size="8.5" font-family="monospace" font-weight="bold">debug_alu_result</text>
+          <text x="10" y="38" fill="#b91c1c" font-size="11" font-family="monospace" font-weight="bold">0x${aluHex}</text>
+        </g>
+
+        <!-- Clock Signal Indicator Pad -->
+        <g transform="translate(2115, 330)">
+          <rect width="135" height="50" rx="4" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+          <text x="10" y="18" fill="#475569" font-size="8.5" font-family="monospace" font-weight="bold">CLOCK &amp; RESET STATE</text>
+          <circle cx="20" cy="35" r="5" fill="${clkLineColor}"/>
+          <text x="32" y="38" fill="#334155" font-size="8" font-family="monospace">clk: ${clkHigh ? 'HIGH (1)' : 'LOW (0)'}</text>
+        </g>
+
+        <!-- ================= LONG FEEDBACK BUSES ================= -->
+        <!-- 1. WB to RegFile Write Port feedback bus -->
+        <path d="M 1980 232 L 1980 550 L 780 550 L 780 335" stroke="#d97706" stroke-width="2" fill="none" stroke-dasharray="6,3"/>
+        <text x="1200" y="545" fill="#d97706" font-size="8" font-family="monospace" font-weight="bold">◀◀ WRITE-BACK BUS: wb_data[31:0] (Loops from WB stage back to Register File)</text>
+        <circle cx="1980" cy="232" r="3" fill="#d97706"/>
+
+        <!-- 2. Branch Target to PC MUX feedback bus -->
+        <path d="M 1120 120 L 1150 120 L 1150 50 L 50 50 L 50 235 L 55 235" stroke="#ef4444" stroke-width="2" fill="none" stroke-dasharray="5,3"/>
+        <text x="400" y="45" fill="#ef4444" font-size="8" font-family="monospace" font-weight="bold">◀◀ BRANCH TARGET BUS: branch_target[31:0] (Loops from EX Stage back to PC MUX)</text>
+
+        <!-- 3. Forwarding Bus from EX/MEM to EX stage MUXes -->
+        <path d="M 1520 250 L 1520 480 L 1030 480 L 1030 220 L 1048 220" stroke="#8b5cf6" stroke-width="1.8" fill="none" stroke-dasharray="4,2"/>
+        <text x="1100" y="475" fill="#8b5cf6" font-size="7.5" font-family="monospace" font-weight="bold">◀ FORWARDING BUS: EX/MEM &amp; MEM/WB → Forwarding MUX A/B</text>
+
+        <!-- 4. Global Clock Bus running across bottom -->
+        <path d="M 30 590 L 2200 590" stroke="${clkLineColor}" stroke-width="2" fill="none"/>
+        <text x="35" y="585" fill="${clkLineColor}" font-size="8" font-family="monospace" font-weight="bold">CLK BUS: posedge clk (Synchronizes all DFF pipeline stages &amp; RegFile)</text>
+      `;
+    }
+
 
     // Helper functions for SVG basic gates
     function svgNandGate(x, y, id, label, lineNums=[]) {
@@ -3601,7 +3589,7 @@ endmodule`
       const svgEl = document.getElementById("djsCircuitSvg");
 
       if (isPipelined) {
-        if (svgEl) svgEl.setAttribute("viewBox", "0 0 1680 720");
+        if (svgEl) svgEl.setAttribute("viewBox", "0 0 2280 740");
         container.innerHTML = renderPipelinedRV32ICircuit();
         if (badge) badge.textContent = "[5-STAGE PIPELINED RV32I SYNTHESIZED NETLIST]";
       } else if (isDff) {
@@ -4159,16 +4147,30 @@ endmodule`
     };
 
     function switchDjsEngineMode(mode) {
-      currentDjsEngineMode = 'congestion';
+      currentDjsEngineMode = mode;
       const liveWrapper = document.getElementById("djsLiveIframeWrapper");
       const canvasViewport = document.getElementById("djsCanvasViewport");
       const zoomControls = document.getElementById("djsZoomControls");
+      const btnCongestion = document.getElementById("djsModeCongestionBtn");
+      const btnLive = document.getElementById("djsModeLiveBtn");
 
-      if (liveWrapper) liveWrapper.style.display = "none";
-      if (canvasViewport) canvasViewport.style.display = "flex";
-      if (zoomControls) zoomControls.style.display = "inline-flex";
-
-      renderCurrentCircuit();
+      if (mode === 'live') {
+        if (liveWrapper) liveWrapper.style.display = "flex";
+        if (canvasViewport) canvasViewport.style.display = "none";
+        if (zoomControls) zoomControls.style.display = "none";
+        if (btnLive) { btnLive.style.background = "#0d6efd"; btnLive.style.color = "#ffffff"; }
+        if (btnCongestion) { btnCongestion.style.background = "#ffffff"; btnCongestion.style.color = "#495057"; }
+        if (typeof updateLiveDigitalJsFrame === 'function') {
+          updateLiveDigitalJsFrame(currentModule);
+        }
+      } else {
+        if (liveWrapper) liveWrapper.style.display = "none";
+        if (canvasViewport) canvasViewport.style.display = "flex";
+        if (zoomControls) zoomControls.style.display = "inline-flex";
+        if (btnCongestion) { btnCongestion.style.background = "#0d6efd"; btnCongestion.style.color = "#ffffff"; }
+        if (btnLive) { btnLive.style.background = "#ffffff"; btnLive.style.color = "#495057"; }
+        renderCurrentCircuit();
+      }
     }
 
     function updateLiveDigitalJsFrame(moduleFilename) {
@@ -4407,15 +4409,25 @@ endmodule`
       }
 
       isCircuitSynthesized = true;
-      const liveWrapper = document.getElementById("djsLiveIframeWrapper");
-      if (liveWrapper) liveWrapper.style.display = "none";
-      const canvasViewport = document.getElementById("djsCanvasViewport");
-      if (canvasViewport) canvasViewport.style.display = "flex";
-      const zoomControls = document.getElementById("djsZoomControls");
-      if (zoomControls) zoomControls.style.display = "inline-flex";
-
-      // Render the gate schematic
-      renderCurrentCircuit();
+      if (currentDjsEngineMode === 'live') {
+        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+        if (liveWrapper) liveWrapper.style.display = "flex";
+        const canvasViewport = document.getElementById("djsCanvasViewport");
+        if (canvasViewport) canvasViewport.style.display = "none";
+        const zoomControls = document.getElementById("djsZoomControls");
+        if (zoomControls) zoomControls.style.display = "none";
+        if (typeof updateLiveDigitalJsFrame === 'function') {
+          updateLiveDigitalJsFrame(filename);
+        }
+      } else {
+        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+        if (liveWrapper) liveWrapper.style.display = "none";
+        const canvasViewport = document.getElementById("djsCanvasViewport");
+        if (canvasViewport) canvasViewport.style.display = "flex";
+        const zoomControls = document.getElementById("djsZoomControls");
+        if (zoomControls) zoomControls.style.display = "inline-flex";
+        renderCurrentCircuit();
+      }
     }
 
     function onDjsCodeInput() {
@@ -5226,14 +5238,25 @@ endmodule`
       const tabLabel = document.getElementById("djsActiveFileTabName");
       if (tabLabel) tabLabel.textContent = currentModule;
 
-      const liveWrapper = document.getElementById("djsLiveIframeWrapper");
-      if (liveWrapper) liveWrapper.style.display = "none";
-      const canvasViewport = document.getElementById("djsCanvasViewport");
-      if (canvasViewport) canvasViewport.style.display = "flex";
-      const zoomControls = document.getElementById("djsZoomControls");
-      if (zoomControls) zoomControls.style.display = "inline-flex";
-
-      renderCurrentCircuit();
+      if (currentDjsEngineMode === 'live') {
+        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+        if (liveWrapper) liveWrapper.style.display = "flex";
+        const canvasViewport = document.getElementById("djsCanvasViewport");
+        if (canvasViewport) canvasViewport.style.display = "none";
+        const zoomControls = document.getElementById("djsZoomControls");
+        if (zoomControls) zoomControls.style.display = "none";
+        if (typeof updateLiveDigitalJsFrame === 'function') {
+          updateLiveDigitalJsFrame(currentModule);
+        }
+      } else {
+        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+        if (liveWrapper) liveWrapper.style.display = "none";
+        const canvasViewport = document.getElementById("djsCanvasViewport");
+        if (canvasViewport) canvasViewport.style.display = "flex";
+        const zoomControls = document.getElementById("djsZoomControls");
+        if (zoomControls) zoomControls.style.display = "inline-flex";
+        renderCurrentCircuit();
+      }
 
       // ── Step 4: Toggle timer ───────────────────────────────────────────────
       if (!isSimRunning) {
