@@ -14,6 +14,22 @@ def serve_layers_pictures(filename):
     docs_img_dir = os.path.abspath(os.path.join(BASE_DIR, '..', 'docs', 'layers_pictures'))
     return send_from_directory(docs_img_dir, filename)
 
+@app.route('/digitaljs_view.html')
+def serve_digitaljs_view():
+    return send_from_directory(os.path.join(BASE_DIR, 'static'), 'digitaljs_view.html')
+
+@app.route('/circuits_data.js')
+def serve_circuits_data():
+    return send_from_directory(os.path.join(BASE_DIR, 'static'), 'circuits_data.js')
+
+@app.route('/digitaljs_assets/<path:filename>')
+def serve_digitaljs_assets(filename):
+    return send_from_directory(os.path.join(BASE_DIR, 'static', 'digitaljs_assets'), filename)
+
+@app.route('/circuits/<path:filename>')
+def serve_circuits(filename):
+    return send_from_directory(os.path.join(BASE_DIR, 'static', 'circuits'), filename)
+
 # Model File Paths
 XGB_REG_PATH = os.path.join(BASE_DIR, "model", "xgboost_regressors.joblib")
 XGB_CLS_PATH = os.path.join(BASE_DIR, "model", "xgboost_classifier.joblib")

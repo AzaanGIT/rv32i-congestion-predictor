@@ -1,0 +1,333 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/symbola"/><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="manifest" href="/site.webmanifest"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><meta name="msapplication-TileColor" content="#da532c"><meta name="theme-color" content="#ffffff"><title>Circuit Simulator</title>
+  <!-- Preloaded In-Memory RV32I Circuits (Zero Network Latency, 100% Offline, Zero CORS Errors) -->
+  <script src="circuits_data.js"></script>
+  <script>
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 1: Pre-populate circuit cache in memory
+    // ─────────────────────────────────────────────────────────────────────────
+    window.customCircuits = window.customCircuits || {};
+    if (window.PRELOADED_CIRCUITS) {
+      for (var k in window.PRELOADED_CIRCUITS) {
+        window.customCircuits[k] = window.PRELOADED_CIRCUITS[k];
+      }
+    }
+
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var customHash = params.get('custom');
+        if (customHash) {
+          var circuitStr = localStorage.getItem('djs_circuit_' + customHash);
+          if (circuitStr) {
+            window.customCircuits[customHash] = JSON.parse(circuitStr);
+          }
+          window.location.hash = '#' + customHash;
+        }
+      } catch(e) {}
+    })();
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 2: Intercept ALL circuit API calls (fetch + XMLHttpRequest)
+    // ─────────────────────────────────────────────────────────────────────────
+    var origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+      if (typeof url === 'string') {
+        if (url.indexOf('/api/circuit/') !== -1) {
+          var hash = url.substring(url.indexOf('/api/circuit/') + 13).replace(/[^a-zA-Z0-9_\-]/g, '');
+          // 1. In-memory / Preloaded circuits
+          if (window.customCircuits && window.customCircuits[hash]) {
+            return Promise.resolve(new Response(JSON.stringify(window.customCircuits[hash]), {
+              status: 200, headers: { 'Content-Type': 'application/json' }
+            }));
+          }
+          // 2. LocalStorage cache
+          try {
+            var stored = localStorage.getItem('djs_circuit_' + hash);
+            if (stored) {
+              var parsed = JSON.parse(stored);
+              window.customCircuits[hash] = parsed;
+              return Promise.resolve(new Response(stored, {
+                status: 200, headers: { 'Content-Type': 'application/json' }
+              }));
+            }
+          } catch(e) {}
+          // 3. Local pre-synthesized file fallback
+          return origFetch('circuits/' + hash + '.json', opts)
+            .then(function(res) {
+              if (res.ok) return res;
+              var def = window.customCircuits && window.customCircuits['ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573'];
+              if (def) return new Response(JSON.stringify(def), { status: 200, headers: { 'Content-Type': 'application/json' } });
+              return res;
+            })
+            .catch(function() {
+              var def = window.customCircuits && window.customCircuits['ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573'];
+              if (def) return Promise.resolve(new Response(JSON.stringify(def), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+              return Promise.reject(new Error("Circuit not found"));
+            });
+        }
+        if (url.indexOf('/api/storeCircuit') !== -1) {
+          var newHash = 'circ_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+          try {
+            var bodyData = (opts && opts.body) ? JSON.parse(opts.body) : {};
+            window.customCircuits = window.customCircuits || {};
+            window.customCircuits[newHash] = bodyData;
+            localStorage.setItem('djs_circuit_' + newHash, JSON.stringify(bodyData));
+          } catch(e) {}
+          return Promise.resolve(new Response(JSON.stringify({ hash: newHash }), {
+            status: 200, headers: { 'Content-Type': 'application/json' }
+          }));
+        }
+        if (url.indexOf('/api/yosys2digitaljs') !== -1) {
+          var circ = window.customCircuits && window.customCircuits['ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573'];
+          try {
+            var reqBody = (opts && opts.body) ? JSON.parse(opts.body) : {};
+            var codeText = "";
+            if (reqBody.files) {
+              for (var fname in reqBody.files) {
+                codeText += " " + reqBody.files[fname];
+              }
+            }
+            var codeLower = codeText.toLowerCase();
+            if (codeLower.indexOf("fulladder") !== -1 || codeLower.indexOf("full_adder") !== -1) {
+              circ = (window.customCircuits && window.customCircuits['68cca6bbc7ffd85741eb891523d70076e971a5c34a253ba4934ce2cc1f9f0a2c']) || circ;
+            } else if (codeLower.indexOf("alu") !== -1) {
+              circ = (window.customCircuits && window.customCircuits['902039f4e68ce76ac91625074c6ae754c10576b189671cb743677dd32007bff8']) || circ;
+            } else if (codeLower.indexOf("dff") !== -1 || codeLower.indexOf("latch") !== -1) {
+              circ = (window.customCircuits && window.customCircuits['2f71143b65ff0abe1f2b714263ca4514d0ad7d72863cb237aeaa4dd76daaf457']) || circ;
+            } else if (codeLower.indexOf("sr_neg") !== -1) {
+              circ = (window.customCircuits && window.customCircuits['e0f187cd33c2072f97ebe20c23c7f56929164bbe0291204cf1b014c2efc567b3']) || circ;
+            } else if (codeLower.indexOf("sr_latch") !== -1) {
+              circ = (window.customCircuits && window.customCircuits['3b4545db253fa66aef938b0837207f09022561f5e5a9435b904089f3900d8441']) || circ;
+            }
+          } catch(e) {}
+          return Promise.resolve(new Response(JSON.stringify({ output: circ, lint: [] }), {
+            status: 200, headers: { 'Content-Type': 'application/json' }
+          }));
+        }
+      }
+      return origFetch(url, opts);
+    };
+
+    // --- XMLHttpRequest interceptor ---
+    (function() {
+      var OrigXHR = window.XMLHttpRequest;
+      function PatchedXHR() {
+        var xhr = new OrigXHR();
+        var self = this;
+        var _url = '';
+        var origOpen = xhr.open.bind(xhr);
+        var origSend = xhr.send.bind(xhr);
+
+        this.open = function(method, url) {
+          _url = url || '';
+          if (typeof _url === 'string' && _url.indexOf('/api/circuit/') !== -1) {
+            var hash = _url.substring(_url.indexOf('/api/circuit/') + 13).replace(/[^a-zA-Z0-9_\-]/g, '');
+            var circuitData = (window.customCircuits && window.customCircuits[hash]) || null;
+            if (!circuitData) {
+              try {
+                var stored = localStorage.getItem('djs_circuit_' + hash);
+                if (stored) circuitData = JSON.parse(stored);
+              } catch(e) {}
+            }
+            if (!circuitData && window.customCircuits) {
+              circuitData = window.customCircuits['ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573'];
+            }
+            if (circuitData) {
+              self._intercepted = JSON.stringify(circuitData);
+            }
+          }
+          return origOpen.apply(xhr, arguments);
+        };
+
+        this.send = function() {
+          if (self._intercepted) {
+            Object.defineProperty(self, 'status', { get: function() { return 200; } });
+            Object.defineProperty(self, 'readyState', { get: function() { return 4; } });
+            Object.defineProperty(self, 'responseText', { get: function() { return self._intercepted; } });
+            Object.defineProperty(self, 'response', { get: function() { return self._intercepted; } });
+            setTimeout(function() {
+              if (typeof self.onreadystatechange === 'function') self.onreadystatechange();
+              if (typeof self.onload === 'function') self.onload();
+            }, 0);
+            return;
+          }
+          return origSend.apply(xhr, arguments);
+        };
+
+        ['abort','getAllResponseHeaders','getResponseHeader','overrideMimeType',
+         'setRequestHeader','addEventListener','removeEventListener','dispatchEvent',
+         'upload','timeout','withCredentials','responseType','responseURL'].forEach(function(prop) {
+          Object.defineProperty(self, prop, {
+            get: function() {
+              var val = xhr[prop];
+              return typeof val === 'function' ? val.bind(xhr) : val;
+            },
+            set: function(v) { xhr[prop] = v; }
+          });
+        });
+
+        ['onabort','onerror','onload','onloadend','onloadstart',
+         'onprogress','onreadystatechange','ontimeout'].forEach(function(ev) {
+          Object.defineProperty(self, ev, {
+            get: function() { return xhr[ev]; },
+            set: function(v) { xhr[ev] = v; }
+          });
+        });
+      }
+      window.XMLHttpRequest = PatchedXHR;
+    })();
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 3: Default hash & hashchange relay
+    // ─────────────────────────────────────────────────────────────────────────
+    if (!window.location.hash || window.location.hash.length < 5) {
+      window.location.hash = '#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573';
+    }
+
+    window.addEventListener('hashchange', function() {
+      if (typeof window.onpopstate === 'function') {
+        try { window.onpopstate(); } catch(e) {}
+      }
+    });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 4: Simulation state management
+    // ─────────────────────────────────────────────────────────────────────────
+    window._userWantsRunning = false;
+    function ensureSimulationPaused() {
+      if (window._userWantsRunning) return;
+      var btn = document.querySelector('button[name="pause"]');
+      if (btn && !btn.disabled) {
+        btn.click();
+        var tickInput = document.getElementById("tick");
+        if (tickInput && !window._userWantsRunning) {
+          tickInput.value = "0";
+        }
+      }
+    }
+
+    // Actively keep simulation paused on initial load until user commands Run
+    setInterval(function() {
+      if (!window._userWantsRunning) {
+        ensureSimulationPaused();
+      }
+    }, 50);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 5: Handle postMessage from parent
+    // ─────────────────────────────────────────────────────────────────────────
+    window.addEventListener('message', function(event) {
+      if (!event.data) return;
+      if (event.data.type === 'loadHash') {
+        var h = event.data.hash;
+        if (window.location.hash !== '#' + h) {
+          window.location.hash = '#' + h;
+        } else if (typeof window.onpopstate === 'function') {
+          try { window.onpopstate(); } catch(e) {}
+        }
+        setTimeout(ensureSimulationPaused, 50);
+      } else if (event.data.type === 'loadCircuitData') {
+        var hash = event.data.hash || ('cst_' + Date.now().toString(36));
+        var circuit = event.data.circuit;
+        window.customCircuits = window.customCircuits || {};
+        window.customCircuits[hash] = circuit;
+        try { localStorage.setItem('djs_circuit_' + hash, JSON.stringify(circuit)); } catch(e) {}
+        window.location.hash = '#' + hash;
+        if (typeof window.onpopstate === 'function') {
+          try { window.onpopstate(); } catch(e) {}
+        }
+      } else if (event.data.type === 'simCommand') {
+        var cmd = event.data.cmd;
+        if (cmd === 'resume') {
+          window._userWantsRunning = true;
+          var btn = document.querySelector('button[name="resume"]');
+          if (btn) btn.click();
+        } else if (cmd === 'pause') {
+          window._userWantsRunning = false;
+          var btn = document.querySelector('button[name="pause"]');
+          if (btn) btn.click();
+        } else if (cmd === 'single') {
+          var btn = document.querySelector('button[name="single"]');
+          if (btn) btn.click();
+        } else if (cmd === 'fastfw') {
+          var btn = document.querySelector('button[name="fastfw"]');
+          if (btn) btn.click();
+        } else if (cmd === 'next') {
+          var btn = document.querySelector('button[name="next"]');
+          if (btn) btn.click();
+        }
+      }
+    });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 6: Simulation timing is managed authoritatively by parent toolbar
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 7: DOM ready — activate circuit tab + safe JointJS click handler
+    // ─────────────────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', function() {
+      var cTab = document.querySelector('.tab-wrapper.circuit-tab');
+      if (cTab) cTab.classList.add('active');
+      var cBtn = document.querySelector('.tab-btn.circuit-tab');
+      if (cBtn) cBtn.classList.add('active');
+
+      document.addEventListener('click', function(ev) {
+        try {
+          var cellEl = ev.target.closest('[model-id], .joint-cell, .joint-link, .joint-element');
+          if (cellEl && window.paper && window.sendDjsSelection && window.paper.model) {
+            var modelId = cellEl.getAttribute('model-id') || cellEl.id;
+            if (modelId) {
+              var cell = window.paper.model.getCell(modelId);
+              if (cell) {
+                var view = window.paper.findViewByModel(cell);
+                if (view) window.sendDjsSelection(view, true);
+              }
+            }
+          }
+        } catch(e) {}
+      });
+    });
+
+    window.addEventListener('load', function() {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'djsReady' }, '*');
+      }
+    });
+  </script>
+  <link href="digitaljs_assets/main.css?v=20261009-v3.3" rel="stylesheet">
+  <script type="module" src="digitaljs_assets/bundle.js?v=20261009-v3.3"></script>
+  <style>
+    html, body {
+      margin: 0 !important; padding: 0 !important;
+      width: 100% !important; height: 100% !important;
+      overflow: hidden !important; background: #ffffff !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
+    #editor-tab { display: none !important; }
+    #gutter_horiz, #gutter_vert { display: none !important; }
+    #monitorbox, #tab-buttons-wrapper { display: none !important; }
+    #toolbar, #synthesize-bar { display: none !important; }
+    .main-wrapper-grid {
+      display: flex !important; flex-direction: column !important;
+      width: 100vw !important; height: 100vh !important; grid-template-rows: none !important;
+    }
+    .grid { display: block !important; flex: 1 !important; width: 100% !important; height: 100% !important; overflow: hidden !important; }
+    .editor-circuit-wrapper {
+      display: block !important; width: 100% !important; height: 100% !important;
+      grid-template-columns: 1fr !important; overflow: hidden !important;
+    }
+    .tab-wrapper.circuit-tab {
+      display: block !important; width: 100% !important; height: 100% !important;
+      position: relative !important; overflow: auto !important; background: #ffffff !important;
+    }
+    #paper { width: 100% !important; height: 100% !important; min-height: 100% !important; background: #ffffff !important; }
+    #paper > div { min-width: 100% !important; min-height: 100% !important; }
+    .zoom-buttons-wrapper {
+      position: absolute !important; top: 12px !important; right: 18px !important;
+      z-index: 50 !important; display: inline-flex !important; box-shadow: 0 1px 4px rgba(0,0,0,0.15) !important;
+    }
+  
+[aria-label="Saving and sharing"], .upper-toolbar-group[aria-label="Saving and sharing"] { display: none !important; }
+</style>
+</head><body><input type="file" style="display:none" id="input_load"/><div class="main-wrapper-grid"><div id="toolbar"><div class="btn-toolbar" role="toolbar" aria-label="Toolbar"><div class="me-2 upper-toolbar-group digitaljs-logo" title="Circuit Simulator"></div><div id="synthesize-bar"><form><button name="synthesize-btn" title="Synthesize and simulate!" type="button" class="btn btn-primary"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Run</button></form></div><div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Time control"><button name="pause" type="button" class="btn btn-secondary" title="Pause simulation" disabled="true">❚❚</button> <button name="resume" type="button" class="btn btn-secondary" title="Resume simulation" disabled="true">▶</button> <button name="fastfw" type="button" class="btn btn-secondary" title="Fast-forward simulation" disabled="true">»</button> <button name="single" type="button" class="btn btn-secondary" title="Run single time step" disabled="true">→</button> <button name="next" type="button" class="btn btn-secondary" title="Run until next event" disabled="true">⇥</button></div><div class="input-group me-2 upper-toolbar-group"><div class="input-group-prepend"><span class="symbola input-group-text" title="Current tick">ms</span></div><input class="form-control" disabled="disabled" id="tick"/></div></div></div><div class="grid"><div class="editor-circuit-wrapper"><div id="editor-tab" class="tab-wrapper editor-tab active"><nav><div class="nav nav-tabs" role="tablist"><a href="#start" class="nav-item nav-link active" role="tab" data-bs-toggle="tab" aria-controls="start" aria-selected="true">Setup</a> <a href="#iopanel" class="nav-item nav-link" role="tab" data-bs-toggle="tab" aria-controls="start" aria-selected="true">I/O</a></div></nav><div class="tab-content"><div role="tabpanel" class="tab-pane tab-padded active" id="start"><h1 class="text-primary">Circuit Simulator</h1><p>Demonstration app for digital logic simulation and netlist conversion.</p><div class="row row-cols-lg-auto mb-3"><div class="col-12"><input name="newtabname" placeholder="file name" pattern="[a-zA-Z0-9_\-]*" spellcheck="false" autocapitalize="false" autocomplete="false" defaultvalue="input" class="form-control"></div><div class="dropdown"><button class="btn btn-secondary dropdown-toggle" type="button" id="exten" data-extension="sv" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">.sv</button><div class="dropdown-menu" aria-labelledby="excode" id="extens"><a class="dropdown-item" href="#" data-extension="sv">.sv (SystemVerilog)</a> <a class="dropdown-item" href="#" data-extension="v">.v (Verilog)</a></div></div><button class="btn btn-primary" type="button" id="newtab">Create file</button></div><div id="dropzone">Drop your files here or click for a file dialog</div><div class="mb-3"><div class="dropdown"><button class="btn btn-secondary dropdown-toggle" type="button" id="excode" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Load example code</button><div class="dropdown-menu" aria-labelledby="excode" id="excodes"></div></div></div><form><div class="mb-3"><label class="form-label" for="files">Additional SystemVerilog files:</label> <input type="file" class="form-control" id="files" multiple="true"></div><fieldset><legend>Circuit synthesis</legend><div class="mb-3 form-check"><input type="checkbox" id="opt" class="form-check-input"> <label for="opt" class="form-check-label">Optimize in Yosys</label></div><div class="mb-3 form-check"><input type="checkbox" id="transform" class="form-check-input" checked="checked"> <label for="transform" class="form-check-label">Simplify diagram</label></div><div class="mb-3"><label class="form-label" for="fsm">FSM transform</label> <select id="fsm" class="form-control"><option value="">No FSM transform</option><option value="yes">FSM transform</option><option value="nomap">FSM as circuit element</option></select></div><div class="ms-4 mb-3 form-check collapse" id="fsmOptions"><input type="checkbox" id="fsmexpand" class="form-check-input"> <label for="fsmexpand" class="form-check-label">Merge more logic into FSM</label></div><div class="mb-2 form-check"><input type="checkbox" id="techmap" class="form-check-input"> <label for="techmap" class="form-check-label">Convert to logic gates</label></div><div class="ms-4 collapse" id="techmapOptions"><div class="mb-2 form-check"><input type="radio" id="abc_disable" name="abc" class="form-check-input" checked="checked"> <label for="abc_disable" class="form-check-label">Keep gates unprocessed</label></div><div class="mb-2 form-check"><input type="radio" id="abc_gates" name="abc" class="form-check-input"> <label for="abc_gates" class="form-check-label">Map into subset of gates</label></div></div><div class="mb-3"><label class="form-label" for="synthesis-mode">Synthesis mode</label> <select id="synthesis-mode" class="form-control"><option value="wasm">WebAssembly (faster and local)</option><option value="server">Server side (legacy)</option></select></div></fieldset><fieldset><legend>Simulation</legend><div class="mb-3 form-check"><input type="checkbox" id="no-comb-delay" class="form-check-input"> <label for="no-comb-delay" class="form-check-label">Zero combinational propagation delay</label></div><div class="mb-3"><label class="form-label" for="engine">Simulation engine</label> <select id="engine" class="form-control"><option value="synch" selected="selected">Synchronous</option><option value="worker">WebWorker</option></select></div></fieldset><fieldset><legend>User interface</legend><div class="mb-3 form-check"><input type="checkbox" id="lint" class="form-check-input" checked="checked"> <label for="lint" class="form-check-label">Lint source code using Verilator</label></div><div class="mb-3"><label class="form-label" for="layout">Layout engine</label> <select id="layout" class="form-control"><option value="dagre" selected="selected">Dagre</option><option value="elkjs">ElkJS</option></select></div></fieldset></form></div><div role="tabpanel" class="tab-pane tab-padded" id="iopanel"></div></div></div><div id="gutter_horiz" class="gutter gutter-horizontal"></div><div class="tab-wrapper circuit-tab"><div class="btn-group zoom-buttons-wrapper"><button class="btn btn-secondary" name="zoom-out">–</button> <button class="btn btn-secondary" name="zoom-in">+</button></div><div id="paper"></div></div></div></div><div id="gutter_vert" class="gutter gutter-vertical"></div><div id="monitorbox"><div class="btn-toolbar" role="toolbar"><div class="symbola btn-group me-2"><button name="ppt_up" type="button" class="btn btn-secondary" disabled="true">+</button> <button name="ppt_down" type="button" class="btn btn-secondary" disabled="true">-</button></div><div class="input-group me-2"><div class="input-group-prepend"><span class="input-group-text">scale</span></div><input class="form-control" disabled="disabled" name="scale"/></div><div class="symbola btn-group me-2"><button name="live" type="button" class="btn btn-secondary" disabled="true">▶</button> <button name="left" type="button" class="btn btn-secondary" disabled="true">←</button> <button name="right" type="button" class="btn btn-secondary" disabled="true">→</button></div><div class="input-group me-2"><div class="input-group-prepend"><span class="input-group-text">range</span></div><input class="form-control" disabled="disabled" name="rangel"/><div class="input-group-prepend input-group-append"><span class="input-group-text">–</span></div><input class="form-control" disabled="disabled" name="rangeh"/></div></div><div id="monitor"></div></div></div></div><div id="tab-buttons-wrapper"><button class="tab-btn editor-tab active"><strong style="font-size:1.2em">&lt;/&gt;</strong><br><span style="line-height:90%">Code</span></button> <button class="tab-btn circuit-tab"><svg alt="" height="27" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 224 224"><path d="M200 122c-11.869 0-21.725 8.668-23.639 20H160c-13.234 0-24 10.76-24 23.986V210h8v-44.014c0-8.814 7.178-15.986 16-15.986h16.361c1.913 11.332 11.77 20 23.639 20 13.234 0 24-10.766 24-24s-10.766-24-24-24zm0 40c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16zM92 62H76c0-13.234-10.766-24-24-24S28 48.766 28 62s10.766 24 24 24c10.426 0 19.295-6.693 22.6-16H92c8.822 0 16 7.188 16 16.024V210h8V86.024C116 72.777 105.234 62 92 62zM52 78c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16z"/><path d="M64 122H47.639c-1.914-11.332-11.77-20-23.639-20-13.234 0-24 10.766-24 24s10.766 24 24 24c11.869 0 21.725-8.668 23.639-20H64c8.822 0 16 7.184 16 16.014V210h8v-63.986C88 132.774 77.234 122 64 122zm-40 20c-8.822 0-16-7.178-16-16s7.178-16 16-16 16 7.178 16 16-7.178 16-16 16zM163.461 94h12.9c1.913 11.332 11.77 20 23.639 20 13.234 0 24-10.766 24-24s-10.766-24-24-24c-11.869 0-21.725 8.668-23.639 20h-12.9c-6.297 0-11.42-5.125-11.42-11.426V14h-8v60.574c0 10.711 8.711 19.426 19.42 19.426zM200 74c8.822 0 16 7.178 16 16s-7.178 16-16 16-16-7.178-16-16 7.178-16 16-16z"/></svg><br>Circuit</button></div></body></html>

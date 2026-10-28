@@ -559,14 +559,11 @@
               </button>
             </div>
 
-            <!-- Schematic Engine Switcher (Gate Netlist vs DigitalJS Live) -->
-            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Engine mode" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #ced4da;">
-              <button type="button" id="djsModeCongestionBtn" onclick="switchDjsEngineMode('congestion')" title="Native SVG Gate-Level Netlist (NanGate 45nm Congestion View)" style="background: #0d6efd; color: #ffffff; border: none; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; border-right: 1px solid #ced4da; display: inline-flex; align-items: center; gap: 4px;">
-                <span>Gate Netlist</span>
-              </button>
-              <button type="button" id="djsModeLiveBtn" onclick="switchDjsEngineMode('live')" title="DigitalJS Live JointJS Simulator Engine" style="background: #ffffff; color: #495057; border: none; padding: 5px 12px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                <span>DigitalJS Live</span>
-              </button>
+            <!-- DigitalJS Simulator Indicator -->
+            <div class="symbola btn-group me-2 upper-toolbar-group" role="group" aria-label="Engine indicator" style="display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #0d6efd;">
+              <span style="background: #0d6efd; color: #ffffff; padding: 5px 12px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                <span>DigitalJS Simulator</span>
+              </span>
             </div>
 
 
@@ -655,19 +652,19 @@
           <!-- RIGHT COLUMN: GATE LEVEL CIRCUIT CANVAS (SIDE-BY-SIDE '||') -->
           <div id="djsCircuitContainer" class="tab-wrapper circuit-tab" style="position: relative; background: #ffffff; overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 0; max-height: 100%; width: 100%;">
 
-            <!-- LIVE DIGITALJS EMBEDDED ENGINE (CIRCUIT DESIGN ONLY - CLEAN FULL VIEW) -->
-            <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 0; position: relative; background: #ffffff; display: none; flex-direction: column; flex: 1; overflow: hidden;">
-              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261009-v3.2#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
+            <!-- LIVE DIGITALJS EMBEDDED ENGINE (EXCLUSIVE INTERACTIVE SIMULATOR) -->
+            <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 0; position: relative; background: #ffffff; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261028-v8.32#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
             </div>
 
-            <!-- Canvas Zoom Floating Controls (For Congestion View) -->
-            <div id="djsZoomControls" class="btn-group zoom-buttons-wrapper" style="position: absolute; top: 14px; right: 18px; z-index: 20; display: inline-flex; border-radius: 4px; overflow: hidden; border: 1px solid #6c757d; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+            <!-- Canvas Zoom Floating Controls (Hidden - DigitalJS has native JointJS zoom) -->
+            <div id="djsZoomControls" class="btn-group zoom-buttons-wrapper" style="display: none !important;">
               <button class="btn btn-secondary" onclick="djsZoomOut()" title="Zoom out" style="background: #6c757d; color: #ffffff; border: none; padding: 3px 10px; font-size: 14px; font-weight: bold; cursor: pointer; border-right: 1px solid #5a6268;">–</button>
               <button class="btn btn-secondary" onclick="djsZoomIn()" title="Zoom in" style="background: #6c757d; color: #ffffff; border: none; padding: 3px 10px; font-size: 14px; font-weight: bold; cursor: pointer;">+</button>
             </div>
 
-            <!-- SVG Circuit Viewport (For BEOL Congestion & Hotspots) -->
-            <div id="djsCanvasViewport" style="flex: 1; width: 100%; height: 100%; overflow: auto; display: flex; align-items: center; justify-content: center; background: #ffffff;">
+            <!-- SVG Circuit Viewport (Permanently Hidden - User wants only DigitalJS) -->
+            <div id="djsCanvasViewport" style="display: none !important;">
               <svg id="djsCircuitSvg" viewBox="0 0 960 560" onmousemove="djsSvgMouseMove(event)" onmouseup="djsSvgMouseUp(event)" onmouseleave="djsSvgMouseUp(event)" style="width: 100%; height: 100%; min-width: 650px; min-height: 520px; display: block; background: #ffffff; cursor: default;" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <pattern id="edaGridDjs" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -1412,12 +1409,11 @@
         if (typeof HDL_PRESETS !== 'undefined') {
           HDL_PRESETS[targetModule] = trimmed;
         }
-        isCircuitSynthesized = true;
         if (typeof djsSelectModule === 'function') {
           djsSelectModule(targetModule);
         }
-        if (typeof renderCurrentCircuit === 'function') {
-          renderCurrentCircuit();
+        if (typeof updateLiveDigitalJsFrame === 'function') {
+          updateLiveDigitalJsFrame(targetModule);
         }
       } else {
         // User inputted NO code: keep schematic workbench completely hidden
@@ -4147,42 +4143,52 @@ endmodule`
     };
 
     function switchDjsEngineMode(mode) {
-      currentDjsEngineMode = mode;
+      currentDjsEngineMode = 'live';
       const liveWrapper = document.getElementById("djsLiveIframeWrapper");
       const canvasViewport = document.getElementById("djsCanvasViewport");
       const zoomControls = document.getElementById("djsZoomControls");
-      const btnCongestion = document.getElementById("djsModeCongestionBtn");
-      const btnLive = document.getElementById("djsModeLiveBtn");
 
-      if (mode === 'live') {
-        if (liveWrapper) liveWrapper.style.display = "flex";
-        if (canvasViewport) canvasViewport.style.display = "none";
-        if (zoomControls) zoomControls.style.display = "none";
-        if (btnLive) { btnLive.style.background = "#0d6efd"; btnLive.style.color = "#ffffff"; }
-        if (btnCongestion) { btnCongestion.style.background = "#ffffff"; btnCongestion.style.color = "#495057"; }
-        if (typeof updateLiveDigitalJsFrame === 'function') {
-          updateLiveDigitalJsFrame(currentModule);
-        }
-      } else {
-        if (liveWrapper) liveWrapper.style.display = "none";
-        if (canvasViewport) canvasViewport.style.display = "flex";
-        if (zoomControls) zoomControls.style.display = "inline-flex";
-        if (btnCongestion) { btnCongestion.style.background = "#0d6efd"; btnCongestion.style.color = "#ffffff"; }
-        if (btnLive) { btnLive.style.background = "#ffffff"; btnLive.style.color = "#495057"; }
-        renderCurrentCircuit();
+      if (liveWrapper) liveWrapper.style.display = "flex";
+      if (canvasViewport) canvasViewport.style.display = "none";
+      if (zoomControls) zoomControls.style.display = "none";
+      if (typeof updateLiveDigitalJsFrame === 'function') {
+        updateLiveDigitalJsFrame(currentModule);
       }
     }
 
     function updateLiveDigitalJsFrame(moduleFilename) {
-      if (!DIGITALJS_LIVE_HASHES[moduleFilename]) {
-        return;
+      let hash = DIGITALJS_LIVE_HASHES[moduleFilename];
+      if (!hash) {
+        const lower = (moduleFilename || "").toLowerCase();
+        if (lower.includes("alu")) {
+          hash = DIGITALJS_LIVE_HASHES["rv32i_alu.sv"];
+        } else if (lower.includes("fulladder") || lower.includes("adder")) {
+          hash = DIGITALJS_LIVE_HASHES["fulladder.sv"];
+        } else if (lower.includes("dff") || lower.includes("latch")) {
+          hash = DIGITALJS_LIVE_HASHES["dff_master_slave.sv"];
+        } else if (lower.includes("sr_neg")) {
+          hash = DIGITALJS_LIVE_HASHES["sr_neg_gate.sv"];
+        } else if (lower.includes("sr_latch")) {
+          hash = DIGITALJS_LIVE_HASHES["sr_latch.sv"];
+        } else {
+          hash = DIGITALJS_LIVE_HASHES["rv32i_pipeline_top.sv"];
+        }
       }
-      const hash = DIGITALJS_LIVE_HASHES[moduleFilename];
-      const targetUrl = "digitaljs_view.html?v=20261012-v5.4#" + hash;
+      if (!hash) {
+        hash = "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
+      }
+      const targetUrl = "digitaljs_view.html?v=20261028-v8.32#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
       const badge = document.getElementById("djsLiveGateCountBadge");
+      const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+      const canvasViewport = document.getElementById("djsCanvasViewport");
+      const zoomControls = document.getElementById("djsZoomControls");
+
+      if (liveWrapper) liveWrapper.style.display = "flex";
+      if (canvasViewport) canvasViewport.style.display = "none";
+      if (zoomControls) zoomControls.style.display = "none";
 
       if (iframe) {
         if (!iframe.src || !iframe.src.includes(hash)) {
@@ -4190,20 +4196,27 @@ endmodule`
         } else if (iframe.contentWindow) {
           iframe.contentWindow.postMessage({ type: 'loadHash', hash: hash }, '*');
         }
+        iframe.onload = function() {
+          if (isSimRunning) {
+            setTimeout(() => sendDjsIframeCmd('resume'), 150);
+          } else {
+            sendDjsIframeCmd('pause');
+          }
+        };
       }
       if (extBtn) {
         extBtn.href = externalUrl;
       }
       if (badge) {
-        if (moduleFilename.includes("pipeline") || moduleFilename.includes("rv32i_pipeline") || moduleFilename.includes("rv32i_core")) {
+        if (moduleFilename && (moduleFilename.includes("pipeline") || moduleFilename.includes("rv32i_pipeline") || moduleFilename.includes("rv32i_core"))) {
           badge.textContent = "225 Gates / 441 Nets";
-        } else if (moduleFilename.includes("alu")) {
+        } else if (moduleFilename && moduleFilename.includes("alu")) {
           badge.textContent = "38 Gates / 74 Nets";
-        } else if (moduleFilename.includes("dff")) {
+        } else if (moduleFilename && moduleFilename.includes("dff")) {
           badge.textContent = "12 Gates / 16 Nets";
-        } else if (moduleFilename.includes("fulladder") || moduleFilename.includes("full_adder")) {
+        } else if (moduleFilename && (moduleFilename.includes("fulladder") || moduleFilename.includes("full_adder"))) {
           badge.textContent = "5 Gates / 8 Nets";
-        } else if (moduleFilename.includes("sr_latch") || moduleFilename.includes("sr_neg")) {
+        } else if (moduleFilename && (moduleFilename.includes("sr_latch") || moduleFilename.includes("sr_neg"))) {
           badge.textContent = "4 Gates / 8 Nets";
         } else {
           badge.textContent = "Gate Netlist Active";
@@ -4367,8 +4380,10 @@ endmodule`
         const banner = document.getElementById("djsSelectionBanner");
         if (banner) banner.style.display = "none";
 
-        switchDjsEngineMode('congestion');
-        renderEmptyCircuitState();
+        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+        if (liveWrapper) liveWrapper.style.display = "none";
+        const canvasViewport = document.getElementById("djsCanvasViewport");
+        if (canvasViewport) canvasViewport.style.display = "none";
         return;
       }
 
@@ -4409,24 +4424,14 @@ endmodule`
       }
 
       isCircuitSynthesized = true;
-      if (currentDjsEngineMode === 'live') {
-        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
-        if (liveWrapper) liveWrapper.style.display = "flex";
-        const canvasViewport = document.getElementById("djsCanvasViewport");
-        if (canvasViewport) canvasViewport.style.display = "none";
-        const zoomControls = document.getElementById("djsZoomControls");
-        if (zoomControls) zoomControls.style.display = "none";
-        if (typeof updateLiveDigitalJsFrame === 'function') {
-          updateLiveDigitalJsFrame(filename);
-        }
-      } else {
-        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
-        if (liveWrapper) liveWrapper.style.display = "none";
-        const canvasViewport = document.getElementById("djsCanvasViewport");
-        if (canvasViewport) canvasViewport.style.display = "flex";
-        const zoomControls = document.getElementById("djsZoomControls");
-        if (zoomControls) zoomControls.style.display = "inline-flex";
-        renderCurrentCircuit();
+      const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+      if (liveWrapper) liveWrapper.style.display = "flex";
+      const canvasViewport = document.getElementById("djsCanvasViewport");
+      if (canvasViewport) canvasViewport.style.display = "none";
+      const zoomControls = document.getElementById("djsZoomControls");
+      if (zoomControls) zoomControls.style.display = "none";
+      if (typeof updateLiveDigitalJsFrame === 'function') {
+        updateLiveDigitalJsFrame(filename);
       }
     }
 
@@ -5167,34 +5172,10 @@ endmodule`
     // ── Show error state in circuit canvas ──────────────────────────────────
     function renderErrorCircuitState(customMsg) {
       isCircuitSynthesized = false;
-      switchDjsEngineMode('congestion');
-      const container = document.getElementById("djsCircuitGroup");
-      const svgEl     = document.getElementById("djsCircuitSvg");
-      const badge      = document.getElementById("djsHudModeBadge");
-      const sigEl      = document.getElementById("djsSignalSummary");
-
-      const errorDetail = customMsg || "Only RV32I-related HDL code";
-
-      if (badge) badge.textContent = "[ERROR: CANNOT SYNTHESIZE]";
-      if (sigEl) {
-        sigEl.innerHTML = `<span style="color:#dc2626;font-weight:600;">✖ Code Error — Cannot Synthesize:</span> ${errorDetail}`;
-      }
-      if (svgEl) svgEl.setAttribute("viewBox", "0 0 680 340");
-      if (container) {
-        container.innerHTML = `
-          <g transform="translate(340,170)">
-            <rect x="-240" y="-65" width="480" height="130" rx="12"
-              fill="#fef2f2" stroke="#fca5a5" stroke-width="1.5"/>
-            <text x="0" y="-12" text-anchor="middle" font-size="18" font-weight="700"
-              fill="#dc2626" font-family="system-ui, -apple-system, sans-serif">
-              ✖ Code Error — Cannot Synthesize
-            </text>
-            <text x="0" y="24" text-anchor="middle" font-size="15" font-weight="600"
-              fill="#b91c1c" font-family="system-ui, -apple-system, sans-serif">
-              ${errorDetail}
-            </text>
-          </g>`;
-      }
+      const schematicPanel = document.getElementById('panelSchematic');
+      const schematicToggleBtn = document.getElementById('btnToggleSchematic');
+      if (schematicPanel) schematicPanel.style.display = 'none';
+      if (schematicToggleBtn) schematicToggleBtn.style.display = 'none';
       djsPauseSim();
     }
 
@@ -5238,24 +5219,14 @@ endmodule`
       const tabLabel = document.getElementById("djsActiveFileTabName");
       if (tabLabel) tabLabel.textContent = currentModule;
 
-      if (currentDjsEngineMode === 'live') {
-        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
-        if (liveWrapper) liveWrapper.style.display = "flex";
-        const canvasViewport = document.getElementById("djsCanvasViewport");
-        if (canvasViewport) canvasViewport.style.display = "none";
-        const zoomControls = document.getElementById("djsZoomControls");
-        if (zoomControls) zoomControls.style.display = "none";
-        if (typeof updateLiveDigitalJsFrame === 'function') {
-          updateLiveDigitalJsFrame(currentModule);
-        }
-      } else {
-        const liveWrapper = document.getElementById("djsLiveIframeWrapper");
-        if (liveWrapper) liveWrapper.style.display = "none";
-        const canvasViewport = document.getElementById("djsCanvasViewport");
-        if (canvasViewport) canvasViewport.style.display = "flex";
-        const zoomControls = document.getElementById("djsZoomControls");
-        if (zoomControls) zoomControls.style.display = "inline-flex";
-        renderCurrentCircuit();
+      const liveWrapper = document.getElementById("djsLiveIframeWrapper");
+      if (liveWrapper) liveWrapper.style.display = "flex";
+      const canvasViewport = document.getElementById("djsCanvasViewport");
+      if (canvasViewport) canvasViewport.style.display = "none";
+      const zoomControls = document.getElementById("djsZoomControls");
+      if (zoomControls) zoomControls.style.display = "none";
+      if (typeof updateLiveDigitalJsFrame === 'function') {
+        updateLiveDigitalJsFrame(currentModule);
       }
 
       // ── Step 4: Toggle timer ───────────────────────────────────────────────
@@ -5335,9 +5306,10 @@ endmodule`
       simClock = 0;
       pinState.dff_d = 1;
       pinState.dff_clk = 0;
-      pinState.pc_val = 0;
       updateTickDisplay();
-      renderCurrentCircuit();
+      if (typeof updateLiveDigitalJsFrame === 'function') {
+        updateLiveDigitalJsFrame(currentModule);
+      }
     }
 
     function advanceTick() {
@@ -5355,9 +5327,6 @@ endmodule`
         }
       }
       updateTickDisplay();
-      if (currentDjsEngineMode !== 'live') {
-        renderCurrentCircuit();
-      }
     }
 
     function updateTickDisplay() {
@@ -5679,7 +5648,9 @@ endmodule`
           HDL_PRESETS[moduleFileName] = userSubmittedCode;
           currentModule = moduleFileName;
           djsSelectModule(currentModule);
-          renderCurrentCircuit();
+          if (typeof updateLiveDigitalJsFrame === 'function') {
+            updateLiveDigitalJsFrame(currentModule);
+          }
         }
       } else {
         if (schematicPanel) schematicPanel.style.display = 'none';
