@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261028-v8.25';
+      const BUILD_VER = '20261028-v8.26';
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('v') !== BUILD_VER) {
         urlParams.set('v', BUILD_VER);
@@ -332,9 +332,9 @@
     <!-- Center: Processor Selector Slot (Docking destination for animation) -->
     <div id="headerCoreSlot" style="width: 290px; height: 38px; display: flex; align-items: center; justify-content: center; position: relative;">
       <!-- Moving Core Selector Unit (Starts centered on screen, smoothly glides up into header on selection) -->
-      <div id="coreSelectorUnit" class="in-center" style="display: flex; align-items: center; gap: 8px; background: #ffffff; border: 2px solid #7c3aed; border-radius: 10px; padding: 8px 14px; box-shadow: 0 16px 40px rgba(124, 58, 237, 0.22), 0 4px 12px rgba(0, 0, 0, 0.06); transform: translate(0px, calc(44vh - 25px)) scale(1.15); transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease, padding 0.45s ease, border-radius 0.45s ease; z-index: 999; will-change: transform;">
-        <span style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Core:</span>
-        <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="background: transparent; border: none; font-size: 12px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer;">
+      <div id="coreSelectorUnit" class="in-center" style="display: flex; align-items: center; gap: 10px; background: #ffffff; border: 2px solid #7c3aed; border-radius: 12px; padding: 10px 18px; box-shadow: 0 16px 40px rgba(124, 58, 237, 0.22), 0 4px 12px rgba(0, 0, 0, 0.06); transform: translate(0px, calc(50vh - 5px)) scale(1.25); transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease, padding 0.45s ease, border-radius 0.45s ease; z-index: 999; will-change: transform;">
+        <span style="font-size: 13.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Core:</span>
+        <select id="processorSelect" name="processor_core" onchange="handleProcessorSelection(this.value)" style="background: transparent; border: none; font-size: 13.5px; font-weight: 800; color: #1a202c; outline: none; cursor: pointer;">
           <option value="" selected>-- Select Processor Core --</option>
           <option value="RV32I">RV32I (RISC-V 32-bit Integer ISA Core)</option>
         </select>
@@ -352,9 +352,8 @@
   </div>
 
   <!-- CENTER WELCOME MESSAGE (DIRECTLY ABOVE CENTERED SELECTOR) -->
-  <div id="centerWelcome" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: 38vh; left: 50%; transform: translate(-50%, -100%); z-index: 90; text-align: center; pointer-events: none; transition: opacity 0.3s ease;">
-    
-    <div style="font-size: 17px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">
+  <div id="centerWelcome" style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: fixed; top: calc(50vh - 35px); left: 50%; transform: translate(-50%, -100%); z-index: 90; text-align: center; pointer-events: none; transition: opacity 0.3s ease;">
+    <div style="font-size: clamp(24px, 2.5vw, 32px); font-weight: 900; color: #1e1b4b; letter-spacing: -0.5px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); margin-bottom: 12px; text-align: center;">
       Select Target Processor Core
     </div>
   </div>
@@ -686,7 +685,7 @@
       if (isUnselected) {
         const slotRect = slot.getBoundingClientRect();
         const screenCenterX = window.innerWidth / 2;
-        const screenCenterY = window.innerHeight * 0.48;
+        const screenCenterY = window.innerHeight * 0.50 + 20;
         
         const slotCenterX = slotRect.left + slotRect.width / 2;
         const slotCenterY = slotRect.top + slotRect.height / 2;
@@ -694,11 +693,11 @@
         const deltaX = screenCenterX - slotCenterX;
         const deltaY = screenCenterY - slotCenterY;
 
-        unit.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.15)`;
-        unit.style.padding = '8px 14px';
+        unit.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(1.25)`;
+        unit.style.padding = '10px 18px';
         unit.style.boxShadow = '0 16px 40px rgba(124, 58, 237, 0.22), 0 4px 12px rgba(0, 0, 0, 0.06)';
         unit.style.border = '2px solid #7c3aed';
-        unit.style.borderRadius = '10px';
+        unit.style.borderRadius = '12px';
         unit.classList.add('in-center');
 
         if (welcome) {
