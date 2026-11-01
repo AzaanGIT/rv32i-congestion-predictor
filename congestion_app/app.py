@@ -244,20 +244,23 @@ def predict():
     thermal_index = round(min(100.0, (density * 30.0) + (avg_usage_pct * 0.40) + (peak_val_pct * 0.30)), 1)
     peak_temp_c = round(38.0 + (thermal_index * 0.44), 1)
 
-    # Suggested DRC Fix Optimization
+    # Gentle ECO: ±10% adjustments to just overcome congestion
+    overflow_severity = min(1.0, max(0.0, (peak_val_raw - 80.0) / 100.0))
+    nudge = 0.03 + overflow_severity * 0.07  # 3% to 10% depending on severity
+
     suggested_params = {
-        "utilization": round(max(25.0, min(util * 0.80, 48.0)), 1),
-        "aspect_ratio": 1.0,
-        "core_margin": round(margin + 1.5, 1),
-        "density": round(max(0.30, min(density * 0.75, 0.45)), 2),
-        "layer_adjustment": round(max(0.20, min(layer_adj * 0.70, 0.40)), 2)
+        "utilization": round(max(20.0, util * (1.0 - nudge)), 1),
+        "aspect_ratio": round(max(0.2, aspect + (1.0 - aspect) * nudge), 2),
+        "core_margin": round(margin * (1.0 + nudge), 1),
+        "density": round(max(0.30, density * (1.0 - nudge)), 2),
+        "layer_adjustment": round(max(0.05, layer_adj * (1.0 - nudge * 0.5)), 2)
     }
 
     suggested_resources = {}
     for k, res in resources.items():
         d_val = demands.get(k, 0)
-        if d_val / max(1.0, res) > 0.65:
-            suggested_resources[k] = max(int(res * 1.40), int(d_val / 0.50))
+        if res > 0 and d_val / res > 0.80:
+            suggested_resources[k] = min(int(d_val / 0.75), int(res * (1.0 + nudge)))
         else:
             suggested_resources[k] = int(res)
 

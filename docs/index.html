@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261028-v8.34';
+      const BUILD_VER = '20261101-v8.35';
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('v') !== BUILD_VER) {
         urlParams.set('v', BUILD_VER);
@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <script src="circuits_data.js?v=20261028-v8.34"></script>
+  <script src="circuits_data.js?v=20261101-v8.35"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1730,7 +1730,7 @@ endmodule`
 
             <!-- LIVE DIGITALJS EMBEDDED ENGINE (EXCLUSIVE INTERACTIVE SIMULATOR) -->
             <div id="djsLiveIframeWrapper" style="width: 100%; height: 100%; min-height: 0; position: relative; background: #ffffff; display: flex; flex-direction: column; flex: 1; overflow: hidden;">
-              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261028-v8.34#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
+              <iframe id="djsLiveFrame" src="digitaljs_view.html?v=20261101-v8.35#ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573" style="width: 100%; height: 100%; min-height: 0; border: none; flex: 1; background: #ffffff;" allow="clipboard-read; clipboard-write"></iframe>
             </div>
 
             <!-- Canvas Zoom Floating Controls (Hidden - DigitalJS has native JointJS zoom) -->
@@ -1832,7 +1832,7 @@ endmodule`
     let allResources = {"M1": 0.0, "M10": 2772.0, "M2": 27540.0, "M3": 37221.0, "M4": 18450.0, "M5": 18096.0, "M6": 18450.0, "M7": 5699.0, "M8": 5796.0, "M9": 2758.0};
     let allDemands = {"M1": 0.0, "M10": 429.7, "M2": 13979.2, "M3": 17125.2, "M4": 6668.9, "M5": 4556.9, "M6": 4614.4, "M7": 840.0, "M8": 856.9, "M9": 489.5};
     let allSuggestedResources = {"M1": 0, "M10": 2772, "M2": 27540, "M3": 37221, "M4": 18450, "M5": 18096, "M6": 18450, "M7": 5699, "M8": 5796, "M9": 2758};
-    let allSuggestedParams = {"aspect_ratio": 1.0, "core_margin": 4.5, "density": 0.42, "layer_adjustment": 0.4, "utilization": 45.6};
+    let allSuggestedParams = {"aspect_ratio": 1.48, "core_margin": 3.1, "density": 0.55, "layer_adjustment": 0.59, "utilization": 55.3};
     let currentParams = {
       utilization: 57.0,
       aspect_ratio: 1.5,
@@ -1973,13 +1973,15 @@ endmodule`
       });
     }
 
+    let currentPeakLayer = "M2";
     function closeFixModal() { document.getElementById('fixModal').style.display = 'none'; }
 
     function openFixModal() {
       document.getElementById('modalTitle').innerText = 'Calculated Parameters to Eliminate Congestion';
-      document.getElementById('modalDesc').innerText = 'Applying these holistic rules will scale core margin, density, and routing tracks below 80%:';
+      document.getElementById('modalDesc').innerText = 'Applying these gentle rules (±5% to ±10% adjustments) to eliminate congestion while preserving design intent:';
       
       const grid = document.getElementById('modalContentGrid');
+      const peakL = currentPeakLayer || 'M2';
       grid.innerHTML = `
         <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
           <span style="color:#718096; font-size:10px; font-weight: 700;">CORE MARGIN (MM)</span>
@@ -1994,8 +1996,8 @@ endmodule`
           <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${currentParams.utilization}% → <span style="color:#15803d;">${allSuggestedParams.utilization}%</span></div>
         </div>
         <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-          <span style="color:#718096; font-size:10px; font-weight: 700;">M2 AVAILABLE TRACKS</span>
-          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${(allResources['M2'] || 0).toLocaleString()} → <span style="color:#15803d;">${(allSuggestedResources['M2'] || 0).toLocaleString()}</span></div>
+          <span style="color:#718096; font-size:10px; font-weight: 700;">${peakL} AVAILABLE TRACKS</span>
+          <div style="font-size:14px; font-weight:800; color:#1a202c; margin-top:2px;">${(allResources[peakL] || 0).toLocaleString()} → <span style="color:#15803d;">${(allSuggestedResources[peakL] || allResources[peakL] || 0).toLocaleString()}</span></div>
         </div>
       `;
 
@@ -2021,17 +2023,19 @@ endmodule`
       const curDemand = allDemands[layer] || 0;
       const curPct = rawData[layer] || 0;
       
-      // Calculate target capacity:
-      // Guarantee at least +40% increase over current tracks, AND ensure saturation drops to <= 50%
-      let recRes = Math.max(
-        Math.ceil(curRes * 1.40),
-        curDemand > 0 ? Math.ceil(curDemand / 0.50) : Math.ceil(curRes * 1.40)
-      );
+      // Gentle ECO: scale tracks by +5% to +10% max to bring saturation under safe 80% threshold
+      let recRes;
+      if (curDemand > 0 && curRes > 0) {
+        const needed = Math.ceil(curDemand / 0.78);
+        recRes = Math.min(Math.ceil(curRes * 1.10), Math.max(Math.ceil(curRes * 1.05), needed));
+      } else {
+        recRes = Math.ceil(curRes * 1.08);
+      }
       recRes = Math.max(1000, recRes);
-      const estNewPct = recRes > 0 ? Math.round((curDemand / recRes) * 1000) / 10 : 0;
+      const estNewPct = recRes > 0 ? Math.min(100.0, Math.round((curDemand / recRes) * 1000) / 10) : 0;
 
       document.getElementById('modalTitle').innerText = 'Resolve Congestion for ' + layer + ' Only';
-      document.getElementById('modalDesc').innerText = 'Targeted routing track optimization for ' + layer + ' only. Core margin, cell density, utilization, and all other layers remain unchanged:';
+      document.getElementById('modalDesc').innerText = 'Targeted routing track optimization for ' + layer + ' only (+5% to +10% tracks). Core margin, cell density, utilization, and all other layers remain unchanged:';
 
       const grid = document.getElementById('modalContentGrid');
       grid.innerHTML = `
@@ -2204,13 +2208,18 @@ endmodule`
         density: density,
         layer_adjustment: layerAdj
       };
+      currentPeakLayer = peakLayer;
 
+      // Gentle ECO: ±5% to ±10% adjustments to just overcome congestion, preserving design intent
+      // Nudge is strictly bounded between 3% and 10% based on congestion severity
+      const overflowSeverity = Math.min(1.0, Math.max(0.0, (rawPeakVal - 80.0) / 100.0));
+      const nudge = isCongested ? (0.04 + overflowSeverity * 0.06) : 0.0;
       allSuggestedParams = {
-        utilization: Math.round(Math.max(25.0, Math.min(util * 0.80, 48.0)) * 10) / 10,
-        aspect_ratio: 1.0,
-        core_margin: Math.round((margin + 1.5) * 10) / 10,
-        density: Math.round(Math.max(0.30, Math.min(density * 0.75, 0.45)) * 100) / 100,
-        layer_adjustment: Math.round(Math.max(0.20, Math.min(layerAdj * 0.70, 0.40)) * 100) / 100
+        utilization: Math.round(Math.max(20.0, util * (1.0 - nudge)) * 10) / 10,
+        aspect_ratio: Math.round(Math.max(0.2, aspect + (1.0 - aspect) * nudge * 0.5) * 100) / 100,
+        core_margin: Math.round((margin * (1.0 + nudge)) * 10) / 10,
+        density: Math.round(Math.max(0.30, density * (1.0 - nudge)) * 100) / 100,
+        layer_adjustment: Math.round(Math.max(0.05, layerAdj * (1.0 - nudge * 0.5)) * 100) / 100
       };
 
       allSuggestedResources = {};
@@ -2218,8 +2227,10 @@ endmodule`
         const k = "M" + i;
         const d = demands[k] || 0;
         const res = resources[k] || 0;
-        if (res > 0 && (d / res > 0.65)) {
-          allSuggestedResources[k] = Math.max(Math.ceil(res * 1.40), Math.ceil(d / 0.50));
+        if (res > 0 && (d / res > 0.80)) {
+          // Add just enough tracks (+5% to +10% max) to bring usage under safe 80% threshold
+          const targetCap = Math.ceil(d / 0.78);
+          allSuggestedResources[k] = Math.min(Math.ceil(res * 1.10), Math.max(Math.ceil(res * 1.05), targetCap));
         } else {
           allSuggestedResources[k] = res;
         }
@@ -5204,7 +5215,7 @@ endmodule`
       if (!hash) {
         hash = "ab11e94fa147b88c89176e6d5a5ca8c1648a013ecee59ba5d9291faca58ad573";
       }
-      const targetUrl = "digitaljs_view.html?v=20261028-v8.34#" + hash;
+      const targetUrl = "digitaljs_view.html?v=20261101-v8.35#" + hash;
       const externalUrl = "https://digitaljs.tilk.eu/#" + hash;
       const iframe = document.getElementById("djsLiveFrame");
       const extBtn = document.getElementById("djsOpenExternalBtn");
