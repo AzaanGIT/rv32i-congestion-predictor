@@ -166,50 +166,20 @@ def predict():
 
     features_df = build_feature_df(util, aspect, margin, density, layer_adj)
 
-    # 1. Routing Feasibility & Success Probability Classifier
-    is_routable = True
-    success_prob = 99.2
-    if classifier is not None:
-        try:
-            # Check if model expects 5 or 9 features
-            model_features = getattr(classifier, "feature_names_in_", ALL_FEATURE_NAMES)
-            input_data = features_df[model_features] if all(f in features_df for f in model_features) else features_df[RAW_FEATURE_NAMES]
-            
-            pred_cls = classifier.predict(input_data)[0]
-            is_routable = bool(pred_cls == 1)
-            if hasattr(classifier, "predict_proba"):
-                probs = classifier.predict_proba(input_data)[0]
-                success_prob = round(float(probs[1]) * 100.0, 1)
-        except Exception as e:
-            print("Classifier inference error:", e)
-
-    # 2. Per-Layer Demand Regression
-    demands = {}
-    if regressors is not None:
-        try:
-            if isinstance(regressors, dict):
-                for i in range(1, 11):
-                    target_key = f"metal{i}_demand"
-                    if target_key in regressors:
-                        model = regressors[target_key]
-                        model_features = getattr(model, "feature_names_in_", ALL_FEATURE_NAMES)
-                        input_data = features_df[model_features] if all(f in features_df for f in model_features) else features_df[RAW_FEATURE_NAMES]
-                        d_val = float(model.predict(input_data)[0])
-                        demands[f"M{i}"] = max(0.0, round(d_val, 1))
-                    else:
-                        demands[f"M{i}"] = 0.0
-        except Exception as e:
-            print("Regressor inference error:", e)
-
-    # Physics-informed demand stress model ensuring wire length increases with utilization, density, and narrow margin
-    stress = ((util / 57.0) ** 1.8) * ((density / 0.56) ** 1.5) * ((3.0 / max(0.5, margin)) ** 0.9) * ((0.6 / max(0.1, layer_adj)) ** 0.5)
+    # Physics-informed demand stress model ensuring wire length increases with utilization, density, aspect ratio, and narrow margin
+    aspect_stretch = aspect if aspect >= 1.0 else (1.0 / max(0.2, aspect))
+    aspect_factor = ((0.5 * (aspect_stretch + 1.0 / aspect_stretch)) / (0.5 * (1.5 + 1.0 / 1.5))) ** 0.6
+    stress = (
+        ((util / 57.0) ** 1.8)
+        * ((density / 0.56) ** 1.5)
+        * ((3.0 / max(0.5, margin)) ** 0.9)
+        * ((0.6 / max(0.1, layer_adj)) ** 0.5)
+        * aspect_factor
+    )
     base_d = {"M1": 0, "M2": 14186, "M3": 16986, "M4": 6621, "M5": 4580, "M6": 4547, "M7": 860, "M8": 783, "M9": 470, "M10": 410}
-    if not demands:
-        for k in base_d:
-            demands[k] = round(base_d[k] * stress, 1)
-    else:
-        for k in base_d:
-            demands[k] = max(demands.get(k, 0.0), round(base_d[k] * stress, 1))
+    demands = {}
+    for k in base_d:
+        demands[k] = round(base_d[k] * stress, 1)
 
     # 3. Layer Utilization Percentage calculation
     layer_usage_pct = {}
@@ -229,16 +199,18 @@ def predict():
     peak_overflow = raw_overflow[peak_layer]
     avg_usage_pct = round(sum(layer_usage_pct.values()) / max(1, len(layer_usage_pct)), 1)
 
-    # Congestion Status
-    is_congested = (peak_overflow >= 80.0) or (util >= 70.0) or (density >= 0.70) or (not is_routable)
-    if not is_routable:
-        status_label = "ROUTING UNFEASIBLE (PIN DENSITY OVERFLOW)"
-    elif peak_overflow >= 100.0:
-        status_label = "CONGESTION HOTSPOT (TRACK SATURATION)"
-    elif is_congested:
-        status_label = "BORDERLINE CONGESTION WARNING"
-    else:
+    # Congestion Status & Routing Feasibility
+    is_congested = (peak_overflow >= 80.0) or (util >= 72.0 and peak_overflow >= 72.0) or (density >= 0.72 and peak_overflow >= 72.0)
+    is_routable = not is_congested
+    if is_routable:
+        success_prob = round(min(99.4, max(86.0, 100.0 - (peak_overflow * 0.35) - (util * 0.15))), 1)
         status_label = "ROUTING OPTIMIZED (DRC CLEAN)"
+    else:
+        success_prob = round(min(65.0, max(12.0, 100.0 - (peak_overflow * 0.42) - (util * 0.25))), 1)
+        if peak_overflow >= 100.0:
+            status_label = "CONGESTION HOTSPOT (TRACK SATURATION)"
+        else:
+            status_label = "BORDERLINE CONGESTION WARNING"
 
     # Thermal Heuristic
     thermal_index = round(min(100.0, (density * 30.0) + (avg_usage_pct * 0.40) + (peak_val_pct * 0.30)), 1)

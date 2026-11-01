@@ -1118,16 +1118,21 @@
       const resources = {};
       for (let i = 1; i <= 10; i++) {
         const k = "M" + i;
-        const inp = document.querySelector(`input[name="metal_${i}"]`);
-        resources[k] = inp ? (parseFloat(inp.value) || allResources[k] || 0) : (allResources[k] || 0);
+        const inp = document.getElementById(`inp_metal_${i}`) || document.querySelector(`input[name="metal_${i}"]`);
+        let val = inp ? parseFloat(inp.value) : NaN;
+        if (isNaN(val)) val = allResources[k] || 0;
+        resources[k] = Math.max(0, val);
       }
 
       // 3. Demand stress model (Matches backend XGBoost / analytical physics)
+      const aspectStretch = (aspect >= 1.0) ? aspect : (1.0 / Math.max(0.2, aspect));
+      const aspectFactor = Math.pow(0.5 * (aspectStretch + 1.0 / aspectStretch), 0.6);
+
       const utilFactor = Math.pow(util / 57.0, 1.8);
       const densityFactor = Math.pow(density / 0.56, 1.5);
       const marginFactor = Math.pow(3.0 / Math.max(0.5, margin), 0.9);
       const layerAdjFactor = Math.pow(0.6 / Math.max(0.1, layerAdj), 0.5);
-      const stress = utilFactor * densityFactor * marginFactor * layerAdjFactor;
+      const stress = utilFactor * densityFactor * marginFactor * layerAdjFactor * aspectFactor;
       const baseDemands = {
         M1: 0, M2: 14186, M3: 16986, M4: 6621, M5: 4580,
         M6: 4547, M7: 860, M8: 783, M9: 470, M10: 410
@@ -1143,13 +1148,8 @@
 
       for (let i = 1; i <= 10; i++) {
         const k = "M" + i;
-        let d;
-        if (isFix && targetFixedLayer && allDemands && allDemands[k] !== undefined && allDemands[k] > 0) {
-          // Single-layer fix: placement and floorplan are identical, so demands remain exactly the same
-          d = allDemands[k];
-        } else {
-          d = Math.round(baseDemands[k] * stress * 10) / 10;
-        }
+        // Always recompute demands from the current stress model
+        let d = Math.round(baseDemands[k] * stress * 10) / 10;
         demands[k] = d;
         const cap = resources[k] || 0;
         let pct = 0;
@@ -1313,7 +1313,7 @@
       const kpiTherm = document.getElementById('kpiThermalVal'); if (kpiTherm) kpiTherm.innerText = thermalIndex;
       const kpiTemp = document.getElementById('kpiPeakTemp'); if (kpiTemp) kpiTemp.innerText = peakTemp + ' °C';
       const kpiUtil = document.getElementById('kpiCoreUtil'); if (kpiUtil) kpiUtil.innerText = util + '%';
-      const kpiDense = document.getElementById('kpiCoreDensity'); if (kpiDense) kpiDense.innerHTML = `Placement Density: <b>${density}</b>`;
+      const kpiDense = document.getElementById('kpiCoreDensity'); if (kpiDense) kpiDense.innerText = density;
 
       const recP = document.getElementById('recDesc');
       if (recP) {
