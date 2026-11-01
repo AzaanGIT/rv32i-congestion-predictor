@@ -379,26 +379,6 @@
         </span>
       </div>
 
-      <!-- ESTIMATED CORE AREA, ROUTING BUDGET & RISK CLASS -->
-      <div class="summary-banner" style="margin-top: 0; margin-bottom: 20px;">
-        <div class="metric-group" style="display: flex; gap: 40px; flex-wrap: wrap;">
-          <div class="metric-item">
-            <span class="metric-label">Estimated Core Area</span>
-            <span class="metric-val" id="disp_area">{{ "%.2f"|format((utilization * 0.02) + (core_margin * 0.1) * aspect_ratio) }} mm²</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Total Routing Budget</span>
-            <span class="metric-val" id="disp_tracks">{{ "{:,}".format(resources.values()|sum|int) }} tracks</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Estimated Risk Class</span>
-            <span class="metric-val" id="disp_risk" style="color: {% if utilization > 70 %}#dc2626{% elif utilization > 60 %}#d97706{% else %}#15803d{% endif %};">
-              {% if utilization > 70 %}High Congestion Warning{% elif utilization > 60 %}Borderline Pressure{% else %}DRC Clean / Safe{% endif %}
-            </span>
-          </div>
-        </div>
-      </div>
-
       <!-- Overview Cards: 4 KPI Cards -->
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
         

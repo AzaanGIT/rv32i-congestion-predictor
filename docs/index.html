@@ -10,7 +10,7 @@
   <script>
     // Version check & cache-bust auto-updater
     (function() {
-      const BUILD_VER = '20261101-v8.37';
+      const BUILD_VER = '20261101-v8.38';
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('v') !== BUILD_VER) {
         urlParams.set('v', BUILD_VER);
@@ -18,7 +18,7 @@
       }
     })();
   </script>
-  <script src="circuits_data.js?v=20261101-v8.37"></script>
+  <script src="circuits_data.js?v=20261101-v8.38"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1393,24 +1393,6 @@ endmodule`
         <span id="congestionStatusPill" style="background: #15803d; color: #ffffff; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0;">
           NO CONGESTION
         </span>
-      </div>
-
-      <!-- ESTIMATED CORE AREA, ROUTING BUDGET & RISK CLASS -->
-      <div class="summary-banner" style="margin-top: 0; margin-bottom: 20px;">
-        <div class="metric-group" style="display: flex; gap: 40px; flex-wrap: wrap;">
-          <div class="metric-item">
-            <span class="metric-label">Estimated Core Area</span>
-            <span class="metric-val" id="disp_area">1.48 mm²</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Total Routing Budget</span>
-            <span class="metric-val" id="disp_tracks">136,783 tracks</span>
-          </div>
-          <div class="metric-item">
-            <span class="metric-label">Estimated Risk Class</span>
-            <span class="metric-val" id="disp_risk" style="color: #15803d;">DRC Clean / Safe</span>
-          </div>
-        </div>
       </div>
 
       <!-- Overview Cards: 4 KPI Cards -->
