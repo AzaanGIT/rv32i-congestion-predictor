@@ -244,23 +244,26 @@ def predict():
     thermal_index = round(min(100.0, (density * 30.0) + (avg_usage_pct * 0.40) + (peak_val_pct * 0.30)), 1)
     peak_temp_c = round(38.0 + (thermal_index * 0.44), 1)
 
-    # Gentle ECO: ±10% adjustments to just overcome congestion
-    overflow_severity = min(1.0, max(0.0, (peak_val_raw - 80.0) / 100.0))
-    nudge = 0.03 + overflow_severity * 0.07  # 3% to 10% depending on severity
+    # Parameters calculated to completely eliminate congestion
+    target_util = min(52.0, round(util * 0.60, 1)) if util > 60.0 else round(util * 0.88, 1)
+    target_density = min(0.46, round(density * 0.78, 2)) if density > 0.50 else round(density * 0.90, 2)
+    target_margin = max(3.8, round(margin * 1.35, 1)) if margin < 3.8 else round(margin * 1.15, 1)
+    target_aspect = round(aspect * 0.3 + 0.7, 2)
+    target_layer_adj = min(0.50, round(layer_adj * 0.85, 2))
 
     suggested_params = {
-        "utilization": round(max(20.0, util * (1.0 - nudge)), 1),
-        "aspect_ratio": round(max(0.2, aspect + (1.0 - aspect) * nudge), 2),
-        "core_margin": round(margin * (1.0 + nudge), 1),
-        "density": round(max(0.30, density * (1.0 - nudge)), 2),
-        "layer_adjustment": round(max(0.05, layer_adj * (1.0 - nudge * 0.5)), 2)
+        "utilization": max(25.0, target_util),
+        "aspect_ratio": target_aspect,
+        "core_margin": target_margin,
+        "density": max(0.30, target_density),
+        "layer_adjustment": max(0.05, target_layer_adj)
     }
 
     suggested_resources = {}
     for k, res in resources.items():
         d_val = demands.get(k, 0)
-        if res > 0 and d_val / res > 0.80:
-            suggested_resources[k] = min(int(d_val / 0.75), int(res * (1.0 + nudge)))
+        if res > 0 and (d_val / res > 0.65 or (k == peak_layer and is_congested)):
+            suggested_resources[k] = max(int(res * 1.50), int(d_val / 0.55))
         else:
             suggested_resources[k] = int(res)
 
